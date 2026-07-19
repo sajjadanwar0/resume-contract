@@ -1,0 +1,54 @@
+TLC2 Version 2026.04.09.014118 (rev: 389440f)
+Running breadth-first search Model-Checking with fp 36 and seed 7450935366821561942 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 88937] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/R7_StateRebuild.tla (file:/home/neo/RustroverProjects/resume-contract/formal/tla/independence/../R7_StateRebuild.tla)
+Parsing file /tmp/tlc-2810502363538734478/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-2810502363538734478/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-2810502363538734478/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-2810502363538734478/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-2810502363538734478/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-2810502363538734478/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-2810502363538734478/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module R7_StateRebuild
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module R7_StateRebuild
+Starting... (2026-07-18 19:41:14)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-07-18 19:41:14.
+Error: Invariant PrefixContinuation is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ effects = <<0, 0, 0>>
+/\ lineage = "log"
+/\ replaying = FALSE
+/\ frontier = 0
+/\ crashes = 0
+/\ pc = 1
+
+State 2: <ExecTask line 47, col 3 to line 51, col 48 of module R7_StateRebuild>
+/\ effects = <<1, 0, 0>>
+/\ lineage = "log"
+/\ replaying = FALSE
+/\ frontier = 1
+/\ crashes = 0
+/\ pc = 2
+
+State 3: <CrashRecover line 57, col 3 to line 63, col 38 of module R7_StateRebuild>
+/\ effects = <<1, 0, 0>>
+/\ lineage = "initial"
+/\ replaying = TRUE
+/\ frontier = 1
+/\ crashes = 1
+/\ pc = 1
+
+4 states generated, 4 distinct states found, 1 states left on queue.
+The depth of the complete state graph search is 3.
+Finished in 00s at (2026-07-18 19:41:14)
+Trace exploration spec path: ../R7_StateRebuild_TTrace_1784385673.tla

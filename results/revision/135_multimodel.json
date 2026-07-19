@@ -1,0 +1,164 @@
+{
+  "n_per_cell": 20,
+  "targets": [
+    "121",
+    "122",
+    "131"
+  ],
+  "models_requested": [
+    "claude-haiku-4-5",
+    "claude-sonnet-4-6"
+  ],
+  "cells": {
+    "121_p5_live_openai_agents_session.py::claude-haiku-4-5": {
+      "runs": 20,
+      "errors": 0,
+      "model_reported_by_probe": null,
+      "verdict_fields": {
+        "violation_EO_session_restore_reinvoked_tool": {
+          "true": 0,
+          "of": 20,
+          "proportion": 0.0,
+          "wilson95": [
+            0.0,
+            0.1611
+          ]
+        },
+        "run1_ok": {
+          "true": 20,
+          "of": 20,
+          "proportion": 1.0,
+          "wilson95": [
+            0.8389,
+            1.0
+          ]
+        },
+        "run2_ok": {
+          "true": 20,
+          "of": 20,
+          "proportion": 1.0,
+          "wilson95": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    "121_p5_live_openai_agents_session.py::claude-sonnet-4-6": {
+      "runs": 20,
+      "errors": 0,
+      "model_reported_by_probe": null,
+      "verdict_fields": {
+        "violation_EO_session_restore_reinvoked_tool": {
+          "true": 0,
+          "of": 20,
+          "proportion": 0.0,
+          "wilson95": [
+            0.0,
+            0.1611
+          ]
+        },
+        "run1_ok": {
+          "true": 20,
+          "of": 20,
+          "proportion": 1.0,
+          "wilson95": [
+            0.8389,
+            1.0
+          ]
+        },
+        "run2_ok": {
+          "true": 20,
+          "of": 20,
+          "proportion": 1.0,
+          "wilson95": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    "122_p5_live_langgraph_anthropic_interrupt.py::claude-haiku-4-5": {
+      "runs": 20,
+      "errors": 0,
+      "model_reported_by_probe": "claude-haiku-4-5",
+      "verdict_fields": {
+        "violation_EO_live_interrupt_resume": {
+          "true": 0,
+          "of": 20,
+          "proportion": 0.0,
+          "wilson95": [
+            0.0,
+            0.1611
+          ]
+        },
+        "violation_CO_live_stray_resume_refired": {
+          "true": 0,
+          "of": 20,
+          "proportion": 0.0,
+          "wilson95": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    "122_p5_live_langgraph_anthropic_interrupt.py::claude-sonnet-4-6": {
+      "runs": 20,
+      "errors": 0,
+      "model_reported_by_probe": "claude-haiku-4-5",
+      "verdict_fields": {
+        "violation_EO_live_interrupt_resume": {
+          "true": 0,
+          "of": 20,
+          "proportion": 0.0,
+          "wilson95": [
+            0.0,
+            0.1611
+          ]
+        },
+        "violation_CO_live_stray_resume_refired": {
+          "true": 0,
+          "of": 20,
+          "proportion": 0.0,
+          "wilson95": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    "131_p5_live_fd_violation.py::claude-haiku-4-5": {
+      "runs": 20,
+      "errors": 0,
+      "model_reported_by_probe": "claude-haiku-4-5",
+      "verdict_fields": {
+        "violation_second_decision_ignored": {
+          "true": 20,
+          "of": 20,
+          "proportion": 1.0,
+          "wilson95": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    "131_p5_live_fd_violation.py::claude-sonnet-4-6": {
+      "runs": 20,
+      "errors": 0,
+      "model_reported_by_probe": "claude-haiku-4-5",
+      "verdict_fields": {
+        "violation_second_decision_ignored": {
+          "true": 20,
+          "of": 20,
+          "proportion": 1.0,
+          "wilson95": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    }
+  }
+}

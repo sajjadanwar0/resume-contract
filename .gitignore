@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+envs/*/.venv/
+target/
+*.pdf
+formal/tla/states/
+formal/tla/tla2tools.jar
+.idea/

@@ -1,0 +1,26 @@
+{
+  "frame_repos": [
+    "langchain-ai/langgraph",
+    "crewAIInc/crewAI",
+    "run-llama/llama_index",
+    "pydantic/pydantic-ai",
+    "CopilotKit/CopilotKit"
+  ],
+  "keywords": [
+    "checkpoint resume",
+    "interrupt resume",
+    "resume duplicate",
+    "re-execute checkpoint",
+    "replay side effect",
+    "checkpointer state",
+    "persistence corrupt",
+    "resume ignored",
+    "fork checkpoint",
+    "human in the loop resume"
+  ],
+  "since": "2024-01-01",
+  "run_date": "2026-07-18",
+  "candidates": 265,
+  "query_failures": [],
+  "token_used": true
+}

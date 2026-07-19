@@ -1,0 +1,16 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "crash_mechanism": "os SIGKILL of victim process, barrier-synchronized",
+  "victim_exit": "SIGKILL",
+  "s1_ledger_rows_at_kill": 1,
+  "checkpoint_write_rows_at_kill": {
+    "writes": 1
+  },
+  "resume_process": "fresh interpreter, same durable DB",
+  "resume_result": 12,
+  "resume_stderr_tail": null,
+  "s1_ledger_rows_total": 2,
+  "s2_ledger_rows_total": 1,
+  "violation_completed_durable_task_reexecuted_after_real_kill": true
+}

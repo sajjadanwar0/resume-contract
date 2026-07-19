@@ -1,0 +1,66 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "t0_control_no_shim_bare": {
+    "shim": false,
+    "form": "bare",
+    "branch1_value": 1,
+    "branch2_value": 1,
+    "expected_branch2": 0,
+    "fd_holds": false,
+    "ledger": [
+      1,
+      1
+    ]
+  },
+  "t1_shim_bare_fork": {
+    "shim": true,
+    "form": "bare",
+    "branch1_value": 1,
+    "branch2_value": 0,
+    "expected_branch2": 0,
+    "fd_holds": true,
+    "ledger": [
+      1,
+      0
+    ]
+  },
+  "t1b_shim_map_fork": {
+    "shim": true,
+    "form": "map",
+    "branch1_value": 1,
+    "branch2_value": 0,
+    "expected_branch2": 0,
+    "fd_holds": true,
+    "ledger": [
+      1,
+      0
+    ]
+  },
+  "t2_shim_same_value_refork": {
+    "shim": true,
+    "form": "bare",
+    "branch1_value": 1,
+    "branch2_value": 1,
+    "expected_branch2": 1,
+    "fd_holds": true,
+    "ledger": [
+      1,
+      1
+    ]
+  },
+  "t3_shim_co_stray": {
+    "final_value_after_stray": 1,
+    "ledger": [
+      1
+    ],
+    "co_holds_stray_inert": true
+  },
+  "repair_summary": {
+    "control_violates": true,
+    "fd_repaired_bare": true,
+    "fd_repaired_map": true,
+    "same_value_deterministic": true,
+    "co_preserved": true
+  }
+}

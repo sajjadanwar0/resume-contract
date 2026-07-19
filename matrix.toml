@@ -1,0 +1,71 @@
+# Conformance matrix plan: probe -> env (one env = one framework@version cell).
+# Extend for scripts/117+: add an env under envs/ and a [[probe]] row here.
+[[probe]]
+id = "113"
+env = "langgraph"
+script = "probes/113_p1_langgraph_regressions.py"
+
+[[probe]]
+id = "114"
+env = "llamaindex"
+script = "probes/114_p2_conformance_llamaindex.py"
+
+[[probe]]
+id = "115"
+env = "crewai"
+script = "probes/115_p2_conformance_crewai.py"
+
+[[probe]]
+id = "115b"
+env = "crewai"
+script = "probes/115b_p2_crewai_checkpointconfig.py"
+
+[[probe]]
+id = "118"
+env = "langgraph"
+script = "probes/118_p3_langgraph_rd_interleavings.py"
+baseline = "results/matrix"
+
+[[probe]]
+id = "119"
+env = "pydantic-graph"
+script = "probes/119_p2_conformance_pydantic_graph.py"
+baseline = "results/matrix"
+
+[[probe]]
+id = "123"
+env = "langgraph"
+script = "probes/123_p4_shim_cv_langgraph.py"
+baseline = "results/matrix"
+
+[[probe]]
+id = "121"
+env = "openai-agents"
+script = "probes/121_p5_live_openai_agents_session.py"
+baseline = "results/live"
+requires_env = ["OPENAI_API_KEY"]
+
+[[probe]]
+id = "122"
+env = "langgraph-live"
+script = "probes/122_p5_live_langgraph_anthropic_interrupt.py"
+baseline = "results/live"
+requires_env = ["ANTHROPIC_API_KEY"]
+
+[[probe]]
+id = "124"
+env = "langgraph"
+script = "probes/124_p3_langgraph_rd_executor.py"
+baseline = "results/matrix"
+
+[[probe]]
+id = "125"
+env = "langgraph"
+script = "probes/125_p4_shim_fd_langgraph.py"
+baseline = "results/matrix"
+
+[[probe]]
+id = "113v11"
+env = "langgraph-1.1"
+script = "probes/113_p1_langgraph_regressions.py"
+baseline = "results/regression"

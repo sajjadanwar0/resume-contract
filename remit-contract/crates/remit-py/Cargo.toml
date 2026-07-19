@@ -1,0 +1,15 @@
+[package]
+name = "remit-py"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "PyO3 bindings for remit-core: the Rust production core of REMIT exposed to Python as remit._core. Every contract decision (EO/CO admission, PC/CV commit gate, FD/FI fork resolution, RD sequencing and recovery) is taken in Rust; this crate only translates types and exceptions."
+
+[lib]
+name = "remit_native"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+remit-core = { path = "../remit-core" }
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py39"] }

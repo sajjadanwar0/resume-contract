@@ -1,0 +1,36 @@
+{
+  "plan": "matrix.toml",
+  "probes": [
+    {
+      "id": "118",
+      "env": "langgraph",
+      "script": "probes/118_p3_langgraph_rd_interleavings.py",
+      "status": "run"
+    },
+    {
+      "id": "119",
+      "env": "pydantic-graph",
+      "script": "probes/119_p2_conformance_pydantic_graph.py",
+      "status": "run"
+    },
+    {
+      "id": "123",
+      "env": "langgraph",
+      "script": "probes/123_p4_shim_cv_langgraph.py",
+      "status": "run"
+    },
+    {
+      "id": "124",
+      "env": "langgraph",
+      "script": "probes/124_p3_langgraph_rd_executor.py",
+      "status": "run"
+    },
+    {
+      "id": "125",
+      "env": "langgraph",
+      "script": "probes/125_p4_shim_fd_langgraph.py",
+      "status": "run"
+    }
+  ],
+  "note": "stable_view fields only are audited; raw JSON may contain volatile ids/timestamps"
+}

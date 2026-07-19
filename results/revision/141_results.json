@@ -1,0 +1,70 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "cell_parallel_map_resume": {
+    "interrupts_surfaced_together": 2,
+    "outs_after_map_resume": [
+      [
+        "p1",
+        1
+      ],
+      [
+        "p2",
+        0
+      ]
+    ],
+    "ledger_after_map_resume": [
+      [
+        "p1",
+        1
+      ],
+      [
+        "p2",
+        0
+      ]
+    ],
+    "each_branch_fired_once_with_own_value": true,
+    "stray_map_resume_inert": true
+  },
+  "cell_crash_inside_parallel_superstep": {
+    "crash_raised": true,
+    "ledger_at_crash": [
+      [
+        "p1",
+        1
+      ],
+      [
+        "p2",
+        1
+      ]
+    ],
+    "ledger_final": [
+      [
+        "p1",
+        1
+      ],
+      [
+        "p2",
+        1
+      ],
+      [
+        "p2",
+        1
+      ]
+    ],
+    "final_outs": [
+      [
+        "p1",
+        1
+      ],
+      [
+        "p2",
+        1
+      ]
+    ],
+    "completed_parallel_branch_refired_on_retry": false,
+    "p1_count_at_crash": 1,
+    "p1_count_final": 1,
+    "p2_count_final": 2
+  }
+}

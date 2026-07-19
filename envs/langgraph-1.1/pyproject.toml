@@ -1,0 +1,12 @@
+[project]
+name = "rc-env-langgraph-1-1"
+version = "0.1.0"
+description = "Resume Contract regression-sweep cell: LangGraph 1.1.x (the release line issues #7361/#6792 report broken; 1.2.9 fixes both)."
+requires-python = ">=3.12"
+dependencies = [
+  "langgraph==1.1.10",
+  "pydantic>=2,<3",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,102 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "control": {
+    "shim": false,
+    "e1_before_restart": [
+      [
+        "e1",
+        1
+      ]
+    ],
+    "completed_state": {
+      "v1": 1,
+      "v2": 1
+    },
+    "e1_total_after_completion": [
+      [
+        "e1",
+        1
+      ]
+    ],
+    "e2_total_after_completion": [
+      [
+        "e2",
+        1
+      ]
+    ],
+    "eo_across_restart_between_gates": true,
+    "stray_state": {
+      "v1": 1,
+      "v2": 1
+    },
+    "co_stray_inert_after_completion": true,
+    "fork_state": {
+      "v1": 1,
+      "v2": 1
+    },
+    "e2_after_fork": [
+      [
+        "e2",
+        1
+      ],
+      [
+        "e2",
+        1
+      ]
+    ],
+    "fd_gate2_second_decision_honored": false
+  },
+  "with_fork_intent_shim": {
+    "shim": true,
+    "e1_before_restart": [
+      [
+        "e1",
+        1
+      ]
+    ],
+    "completed_state": {
+      "v1": 1,
+      "v2": 1
+    },
+    "e1_total_after_completion": [
+      [
+        "e1",
+        1
+      ]
+    ],
+    "e2_total_after_completion": [
+      [
+        "e2",
+        1
+      ]
+    ],
+    "eo_across_restart_between_gates": true,
+    "stray_state": {
+      "v1": 1,
+      "v2": 1
+    },
+    "co_stray_inert_after_completion": true,
+    "fork_state": {
+      "v1": 1,
+      "v2": 0
+    },
+    "e2_after_fork": [
+      [
+        "e2",
+        1
+      ],
+      [
+        "e2",
+        0
+      ]
+    ],
+    "fd_gate2_second_decision_honored": true
+  },
+  "summary": {
+    "eo_across_restart_both_cells": true,
+    "co_stray_inert_both_cells": true,
+    "fd_gate2_control_violates": true,
+    "fd_gate2_shim_repairs": true
+  }
+}

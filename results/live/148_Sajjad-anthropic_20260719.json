@@ -1,0 +1,118 @@
+{
+  "probe": 148,
+  "manifest": {
+    "host": "Sajjad-anthropic",
+    "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+    "python": "3.12.10",
+    "utc": "2026-07-19T06:19:29Z",
+    "versions": {
+      "langgraph": "1.2.9",
+      "langgraph-checkpoint": "4.1.1",
+      "anthropic": "0.117.0",
+      "openai": "2.46.0",
+      "openai-agents": "0.18.3",
+      "remit-contract": "0.1.0"
+    }
+  },
+  "n_per_cell": 20,
+  "models": [
+    "claude-haiku-4-5",
+    "claude-sonnet-4-6"
+  ],
+  "elapsed_s": 657.3,
+  "probe135": {
+    "n_per_cell": 20,
+    "targets": [
+      "122",
+      "131"
+    ],
+    "models_requested": [
+      "claude-haiku-4-5",
+      "claude-sonnet-4-6"
+    ],
+    "cells": {
+      "122_p5_live_langgraph_anthropic_interrupt.py::claude-haiku-4-5": {
+        "runs": 20,
+        "errors": 0,
+        "model_reported_by_probe": "claude-haiku-4-5",
+        "verdict_fields": {
+          "violation_EO_live_interrupt_resume": {
+            "true": 0,
+            "of": 20,
+            "proportion": 0.0,
+            "wilson95": [
+              0.0,
+              0.1611
+            ]
+          },
+          "violation_CO_live_stray_resume_refired": {
+            "true": 0,
+            "of": 20,
+            "proportion": 0.0,
+            "wilson95": [
+              0.0,
+              0.1611
+            ]
+          }
+        }
+      },
+      "122_p5_live_langgraph_anthropic_interrupt.py::claude-sonnet-4-6": {
+        "runs": 20,
+        "errors": 0,
+        "model_reported_by_probe": "claude-sonnet-4-6",
+        "verdict_fields": {
+          "violation_EO_live_interrupt_resume": {
+            "true": 0,
+            "of": 20,
+            "proportion": 0.0,
+            "wilson95": [
+              0.0,
+              0.1611
+            ]
+          },
+          "violation_CO_live_stray_resume_refired": {
+            "true": 0,
+            "of": 20,
+            "proportion": 0.0,
+            "wilson95": [
+              0.0,
+              0.1611
+            ]
+          }
+        }
+      },
+      "131_p5_live_fd_violation.py::claude-haiku-4-5": {
+        "runs": 20,
+        "errors": 0,
+        "model_reported_by_probe": "claude-haiku-4-5",
+        "verdict_fields": {
+          "violation_second_decision_ignored": {
+            "true": 20,
+            "of": 20,
+            "proportion": 1.0,
+            "wilson95": [
+              0.8389,
+              1.0
+            ]
+          }
+        }
+      },
+      "131_p5_live_fd_violation.py::claude-sonnet-4-6": {
+        "runs": 20,
+        "errors": 0,
+        "model_reported_by_probe": "claude-sonnet-4-6",
+        "verdict_fields": {
+          "violation_second_decision_ignored": {
+            "true": 20,
+            "of": 20,
+            "proportion": 1.0,
+            "wilson95": [
+              0.8389,
+              1.0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "checkpoints_written_documented_event": 2,
+  "counter_after_resume": 11,
+  "counter_at_crash": 1,
+  "crewai_version": "1.15.2",
+  "expected_counter_if_docs_hold": 11,
+  "first_run": "crashed as planned: RuntimeError",
+  "n_checkpoints": 6,
+  "resume_error": null,
+  "s1_execs_total": 2,
+  "s2_execs_total": 1,
+  "silent_noop_documented_event": false,
+  "violation_doc_vs_behavior_completed_work_rerun": true,
+  "violation_silent_noop_documented_event": false
+}

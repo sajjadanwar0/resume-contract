@@ -1,0 +1,14 @@
+{
+  "langgraph_version": "1.2.9",
+  "oracle": "separate OS process, own SQLite, HTTP interface",
+  "victim_exit": "SIGKILL",
+  "oracle_count_at_kill": 1,
+  "resume_result": 12,
+  "oracle_count_total": 3,
+  "oracle_tags": [
+    "s1",
+    "s1",
+    "s2"
+  ],
+  "violation_confirmed_by_independent_state_holder": true
+}

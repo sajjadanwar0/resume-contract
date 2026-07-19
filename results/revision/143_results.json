@@ -1,0 +1,91 @@
+{
+  "langgraph_version": "1.2.9",
+  "protocols": [
+    {
+      "protocol": "p1_stock_fork",
+      "shim": false,
+      "invocations": [
+        {
+          "address": "explicit",
+          "supplied": true,
+          "model_predicted_outcome": 1,
+          "measured_outcome": 1,
+          "conforms": true
+        },
+        {
+          "address": "explicit",
+          "supplied": false,
+          "model_predicted_outcome": 1,
+          "measured_outcome": 1,
+          "conforms": true
+        }
+      ],
+      "trace_events": 10
+    },
+    {
+      "protocol": "p2_shim_fork",
+      "shim": true,
+      "invocations": [
+        {
+          "address": "explicit",
+          "supplied": true,
+          "model_predicted_outcome": 1,
+          "measured_outcome": 1,
+          "conforms": true
+        },
+        {
+          "address": "explicit",
+          "supplied": false,
+          "model_predicted_outcome": 0,
+          "measured_outcome": 0,
+          "conforms": true
+        }
+      ],
+      "trace_events": 10
+    },
+    {
+      "protocol": "p3_shim_samevalue",
+      "shim": true,
+      "invocations": [
+        {
+          "address": "explicit",
+          "supplied": true,
+          "model_predicted_outcome": 1,
+          "measured_outcome": 1,
+          "conforms": true
+        },
+        {
+          "address": "explicit",
+          "supplied": true,
+          "model_predicted_outcome": 1,
+          "measured_outcome": 1,
+          "conforms": true
+        }
+      ],
+      "trace_events": 10
+    },
+    {
+      "protocol": "p4_stock_stray",
+      "shim": false,
+      "invocations": [
+        {
+          "address": "ordinary",
+          "supplied": true,
+          "model_predicted_outcome": 1,
+          "measured_outcome": 1,
+          "conforms": true
+        },
+        {
+          "address": "ordinary",
+          "supplied": false,
+          "model_predicted_outcome": 1,
+          "measured_outcome": 1,
+          "conforms": true
+        }
+      ],
+      "trace_events": 9
+    }
+  ],
+  "invocations_checked": 8,
+  "all_invocations_conform": true
+}

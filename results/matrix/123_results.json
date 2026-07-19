@@ -1,0 +1,8 @@
+{
+  "langgraph_version": "1.2.9",
+  "write_rejected_loudly": true,
+  "n_checkpoints": 2,
+  "invalid_state_persisted": false,
+  "history_error": null,
+  "violation_CV_through_shim": false
+}

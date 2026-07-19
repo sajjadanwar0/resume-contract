@@ -1,0 +1,123 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "reps_per_point": 3,
+  "points": {
+    "A": {
+      "reps": [
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 1,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 1
+        },
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 1,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 1
+        },
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 1,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 1
+        }
+      ],
+      "stable_across_reps": true
+    },
+    "B": {
+      "reps": [
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 4,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 2
+        },
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 4,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 2
+        },
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 4,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 2
+        }
+      ],
+      "stable_across_reps": true
+    },
+    "C": {
+      "reps": [
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 0,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 1
+        },
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 0,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 1
+        },
+        {
+          "victim_exit": "SIGKILL",
+          "db_at_kill": {
+            "writes_rows": 0,
+            "checkpoint_rows": 1
+          },
+          "s1_effects_at_kill": 1,
+          "resume_result": 12,
+          "s1_effects_total": 2,
+          "s2_effects_total": 1
+        }
+      ],
+      "stable_across_reps": true
+    }
+  },
+  "all_points_stable": true,
+  "completed_durable_task_reexecutes_at_A": true
+}

@@ -1,0 +1,58 @@
+{
+  "langgraph_version": "1.2.9",
+  "T1_resume_from_checkpoint_id_#7361": {
+    "a_execs": 1,
+    "b_post_execs": 1,
+    "final": {
+      "val": "human-answer"
+    },
+    "violation_resume_became_replay": false
+  },
+  "T1b_resume_thread_only_control": {
+    "a_execs": 1,
+    "b_post_execs": 1,
+    "final": {
+      "val": "ok"
+    },
+    "violation_resume_became_replay": false
+  },
+  "T2_fork_on_resume_values_#6663": {
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "violation_second_resume_ignored": true
+  },
+  "T3_functional_sync_#6792": {
+    "s1_execs": 1,
+    "s3_execs": 1,
+    "interrupts_on_first_run": 1,
+    "final": "foo bar HUMAN qux",
+    "violation_completed_task_reexecuted": false
+  },
+  "T3a_functional_async_#6792": {
+    "s1_execs": 1,
+    "s3_execs": 1,
+    "interrupts_on_first_run": 1,
+    "interrupts_on_resume": null,
+    "final": "foo bar HUMAN qux",
+    "violation_completed_task_reexecuted": false
+  },
+  "T4_interrupt_consume_once": {
+    "b_post_after_first_resume": 1,
+    "b_post_after_replay_attempt": 1,
+    "replay_result": {
+      "log": [
+        "a",
+        "b:YES"
+      ]
+    },
+    "replay_raised": null,
+    "violation_effect_refired": false
+  },
+  "T5_checkpoint_validity_#6491": {
+    "invoke_error": null,
+    "n_checkpoints": 3,
+    "invalid_state_persisted": true,
+    "history_error": null,
+    "violation_corrupt_checkpoint": true
+  }
+}

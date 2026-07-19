@@ -1,0 +1,118 @@
+TLC2 Version 2026.04.09.014118 (rev: 389440f)
+Running breadth-first search Model-Checking with fp 40 and seed -1352487531114043910 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 46865] (Linux 6.8.0-134-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/ResumeContract.tla
+Parsing file /tmp/tlc-16407000898622292320/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-16407000898622292320/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-16407000898622292320/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-16407000898622292320/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-16407000898622292320/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-16407000898622292320/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-16407000898622292320/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module ResumeContract
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module ResumeContract
+Starting... (2026-07-17 12:23:49)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-07-17 12:23:49.
+Error: Invariant ConsumeOnce is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+
+State 2: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 3: <EmitInterrupt line 116, col 3 to line 121, col 72 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = TRUE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 4: <Consume(va) line 126, col 3 to line 136, col 62 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 0>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 2
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<va>>
+/\ pc = 3
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 5: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 3
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<va>>
+/\ pc = 4
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 6: <ExtraResume line 176, col 3 to line 183, col 58 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 2, 1>>
+/\ consumedVal = va
+/\ extraResumes = 1
+/\ frontier = 3
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<va>>
+/\ pc = 4
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+20 states generated, 20 distinct states found, 11 states left on queue.
+The depth of the complete state graph search is 6.
+Finished in 00s at (2026-07-17 12:23:49)
+Trace exploration spec path: ./ResumeContract_TTrace_1784273029.tla

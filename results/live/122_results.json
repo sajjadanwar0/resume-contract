@@ -1,0 +1,10 @@
+{
+  "langgraph_version": "1.2.9",
+  "model": "claude-haiku-4-5",
+  "charges_at_interrupt": 0,
+  "charges_after_approval": 1,
+  "charges_after_stray_resume": 1,
+  "stray_resume_error": null,
+  "violation_EO_live_interrupt_resume": false,
+  "violation_CO_live_stray_resume_refired": false
+}

@@ -1,0 +1,44 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_version": "4.1.1",
+  "InMemorySaver_map": {
+    "form": "resume_map",
+    "interrupt_id": "186e7635ba1cbc43ff693edb5dd40fdf",
+    "interrupt_id_error": null,
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "error": null,
+    "violation_second_resume_ignored": true,
+    "backend": "InMemorySaver"
+  },
+  "InMemorySaver_bare": {
+    "form": "bare_value",
+    "interrupt_id": "032f6aadc7418af534fa037d2b9f0763",
+    "interrupt_id_error": null,
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "error": null,
+    "violation_second_resume_ignored": true,
+    "backend": "InMemorySaver"
+  },
+  "SqliteSaver_map": {
+    "form": "resume_map",
+    "interrupt_id": "61e0711b49ea976d5eefdc595ae1c735",
+    "interrupt_id_error": null,
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "error": null,
+    "violation_second_resume_ignored": true,
+    "backend": "SqliteSaver"
+  },
+  "SqliteSaver_bare": {
+    "form": "bare_value",
+    "interrupt_id": "2d014cf924ee88156075ab1b685d055c",
+    "interrupt_id_error": null,
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "error": null,
+    "violation_second_resume_ignored": true,
+    "backend": "SqliteSaver"
+  }
+}

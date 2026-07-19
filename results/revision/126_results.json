@@ -1,0 +1,42 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_version": "4.1.1",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "t1_fd_fork_sqlite": {
+    "backend": "SqliteSaver",
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "violation_second_resume_ignored": true,
+    "ledger_branch_decisions": 2
+  },
+  "t2_cv_invalid_persist_sqlite": {
+    "backend": "SqliteSaver",
+    "invoke_error": null,
+    "history_read_error": null,
+    "schema_invalid_value_persisted": true,
+    "checkpoint_records_containing_invalid": 1,
+    "raw_checkpoint_rows_in_db": 3,
+    "violation_silent_invalid_persistence": true
+  },
+  "t3_co_stray_resume_sqlite": {
+    "backend": "SqliteSaver",
+    "post_effect_counter": 1,
+    "post_effect_ledger": 1,
+    "oracles_agree": true,
+    "stray_resume_error": null,
+    "violation_stray_resume_refired_effect": false
+  },
+  "t4_eo_crash_split_sqlite": {
+    "backend": "SqliteSaver",
+    "crashed_as": "Crash",
+    "s1_execs_at_crash": 1,
+    "durable_writes_rows_at_crash": 3,
+    "s1_execs_after_resume": 2,
+    "s1_ledger_after_resume": 2,
+    "s2_execs_after_resume": 1,
+    "oracles_agree": true,
+    "result": 12,
+    "resume_error": null,
+    "violation_completed_task_reexecuted_on_crash_resume": true
+  }
+}

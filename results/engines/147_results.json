@@ -1,0 +1,97 @@
+{
+  "probe": 147,
+  "engine": "dbos",
+  "cells": {
+    "ledger_at_kill": [
+      "s1"
+    ],
+    "status_after_recovery_launch": "PENDING",
+    "recovery_path": "automatic",
+    "result_original": {
+      "value": 2
+    },
+    "ledger_after_complete": [
+      "s1",
+      "gated:True"
+    ],
+    "eo_crash_conform": true,
+    "pc_memoized_replay": true,
+    "steps": [
+      {
+        "function_id": 1,
+        "name": "worker_main.<locals>.s1"
+      },
+      {
+        "function_id": 2,
+        "name": "DBOS.recv"
+      },
+      {
+        "function_id": 3,
+        "name": "DBOS.sleep"
+      },
+      {
+        "function_id": 4,
+        "name": "worker_main.<locals>.gated"
+      }
+    ],
+    "fork_start_step": 2,
+    "fork_id": "26424565-0373-40b2-bd07-df0669776043",
+    "result_fork": {
+      "value": 1
+    },
+    "ledger_after_fork": [
+      "s1",
+      "gated:True",
+      "gated:False"
+    ],
+    "fd_fork_conform": true,
+    "stray": {
+      "raised": false,
+      "detail": null
+    },
+    "co_stray_conform": true,
+    "ledger_final": [
+      "s1",
+      "gated:True",
+      "gated:False"
+    ]
+  },
+  "bench": {
+    "dbos_sqlite_poll50ms": {
+      "n": 30,
+      "initial_p50_ms": 415.3,
+      "resume_p50_ms": 92.5,
+      "note": "initial = spawn+launch+start->s1 durable; resume = send->gated effect durable (ledger-observed, client result-poll excluded)"
+    },
+    "dbos_sqlite_poll1s_default": {
+      "n": 10,
+      "initial_p50_ms": 426.1,
+      "resume_p50_ms": 73.0,
+      "note": "initial = spawn+launch+start->s1 durable; resume = send->gated effect durable (ledger-observed, client result-poll excluded)"
+    },
+    "langgraph_stock_sqlite": {
+      "n": 30,
+      "initial_p50_ms": 29.1,
+      "resume_p50_ms": 32.0
+    },
+    "langgraph_remit_sqlite": {
+      "n": 30,
+      "initial_p50_ms": 27.2,
+      "resume_p50_ms": 30.4
+    }
+  },
+  "versions": {
+    "dbos": "2.27.0",
+    "python": "3.12.10",
+    "langgraph": "1.2.9"
+  },
+  "stable": {
+    "eo_crash": "conform",
+    "pc_memoized_replay": "conform",
+    "fd_fork": "conform",
+    "co_stray": "conform",
+    "stray_disposition": "silent-inert",
+    "recovery_path": "automatic",
+    "bench_note": "dbos initial includes worker spawn+launch; compare resume p50s and treat absolute numbers as environment-bound"
+  }
+}

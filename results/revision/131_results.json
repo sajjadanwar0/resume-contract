@@ -1,0 +1,19 @@
+{
+  "langgraph_version": "1.2.9",
+  "model": "claude-haiku-4-5",
+  "ledger_at_interrupt": [],
+  "interrupted_next": [
+    "tools"
+  ],
+  "ledger_after_resume1": [
+    10
+  ],
+  "resume1_last_msg": "Done! I've applied a 10% discount to your order.",
+  "resume2_mode": "command_edit",
+  "ledger_after_resume2": [
+    10,
+    10
+  ],
+  "resume2_last_msg": "Done! I've applied a 10% discount to your order.",
+  "violation_second_decision_ignored": true
+}

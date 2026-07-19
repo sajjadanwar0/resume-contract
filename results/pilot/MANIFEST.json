@@ -1,0 +1,30 @@
+{
+  "plan": "matrix.toml",
+  "probes": [
+    {
+      "id": "113",
+      "env": "langgraph",
+      "script": "probes/113_p1_langgraph_regressions.py",
+      "status": "run"
+    },
+    {
+      "id": "114",
+      "env": "llamaindex",
+      "script": "probes/114_p2_conformance_llamaindex.py",
+      "status": "run"
+    },
+    {
+      "id": "115",
+      "env": "crewai",
+      "script": "probes/115_p2_conformance_crewai.py",
+      "status": "run"
+    },
+    {
+      "id": "115b",
+      "env": "crewai",
+      "script": "probes/115b_p2_crewai_checkpointconfig.py",
+      "status": "run"
+    }
+  ],
+  "note": "stable_view fields only are audited; raw JSON may contain volatile ids/timestamps"
+}

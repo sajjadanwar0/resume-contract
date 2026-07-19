@@ -1,0 +1,11 @@
+[project]
+name = "rc-env-pydantic-graph"
+version = "0.1.0"
+description = "Resume Contract matrix cell: pydantic-graph (latest at lock time). Standalone pinned environment."
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic-graph==1.107.1",
+]
+
+[tool.uv]
+package = false

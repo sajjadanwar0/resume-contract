@@ -1,0 +1,42 @@
+{
+  "probe": "113 across langgraph version sweep",
+  "method": "probe 113 (deterministic) executed under uv --with pin per version",
+  "sweep": {
+    "1.0.5": {
+      "T1_#7361": "clean",
+      "T3_#6792": "clean",
+      "T2_#6663": "VIOLATION",
+      "T5_#6491": "VIOLATION"
+    },
+    "1.1.0": {
+      "T1_#7361": "clean",
+      "T3_#6792": "clean",
+      "T2_#6663": "VIOLATION",
+      "T5_#6491": "VIOLATION"
+    },
+    "1.1.3": {
+      "T1_#7361": "clean",
+      "T3_#6792": "clean",
+      "T2_#6663": "VIOLATION",
+      "T5_#6491": "VIOLATION"
+    },
+    "1.1.10": {
+      "T1_#7361": "clean",
+      "T3_#6792": "clean",
+      "T2_#6663": "VIOLATION",
+      "T5_#6491": "VIOLATION"
+    },
+    "1.2.9": {
+      "T1_#7361": "clean",
+      "T3_#6792": "clean",
+      "T2_#6663": "VIOLATION",
+      "T5_#6491": "VIOLATION"
+    }
+  },
+  "findings": {
+    "6663_FD": "STABLE violation across all 5 versions (not a regression) -- stronger than a regression claim",
+    "6491_CV": "STABLE violation across all 5 versions",
+    "7361_PC": "clean at every tested version incl. 1.0.5/1.1.x; the issue report's regression window is narrower than our sweep granularity -- we do NOT claim reproduction of the transient regression and say so",
+    "6792_EO_interrupt": "clean at every tested version; same caveat"
+  }
+}

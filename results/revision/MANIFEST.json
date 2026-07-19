@@ -1,0 +1,29 @@
+{
+  "campaign": "revision-durable-backends",
+  "date": "2026-07-17",
+  "host": "independent container (revision session)",
+  "python": "3.12.3",
+  "versions": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0",
+    "langgraph-checkpoint-postgres": "3.1.0",
+    "psycopg": "3.3.4"
+  },
+  "postgres_server": "PostgreSQL 16 (localhost)",
+  "probes": [
+    "126",
+    "127",
+    "128",
+    "129",
+    "130"
+  ],
+  "headline": {
+    "fd_6663": "violation on InMemory+Sqlite+Postgres, bare and resume-map forms",
+    "cv_6491class": "silent invalid persistence on Sqlite+Postgres",
+    "co": "holds on Sqlite+Postgres",
+    "eo_crash_split": "completed durably-recorded task re-executes on crash-resume on Sqlite+Postgres; durable ledger agrees with counter",
+    "rd_api_granularity": "both legal durable orders recover identically on SqliteSaver (probe 128)",
+    "mechanism": "second resume durably recorded under NULL_TASK_ID and shadowed by task-recorded resume precedence in pregel/_algo.py _scratchpad; saver guard exempts idx<0 channels"
+  }
+}

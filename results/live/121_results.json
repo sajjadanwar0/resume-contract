@@ -1,0 +1,8 @@
+{
+  "openai_agents_version": "0.18.2",
+  "charges_after_run1": 1,
+  "charges_after_restore_run": 1,
+  "violation_EO_session_restore_reinvoked_tool": false,
+  "run1_ok": true,
+  "run2_ok": true
+}

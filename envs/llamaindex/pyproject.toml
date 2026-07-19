@@ -1,0 +1,17 @@
+[project]
+name = "rc-env-llamaindex"
+version = "0.1.0"
+description = "Resume Contract matrix cell: llama-index-workflows 2.22.2. Standalone pinned environment; probes import only the framework, so this project has no local path dependencies by design."
+requires-python = ">=3.12"
+dependencies = [
+  "llama-index-workflows==2.22.2",
+]
+
+[tool.uv]
+# Environment container, not an installable package: nothing to build.
+package = false
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true

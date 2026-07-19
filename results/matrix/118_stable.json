@@ -1,0 +1,32 @@
+{
+  "langgraph_version": "1.2.9",
+  "order_C_checkpoint_durable": {
+    "crashed": "Crash",
+    "result": 12,
+    "resume_error": null,
+    "s1_execs_at_crash": 1,
+    "s1_execs_total": 2,
+    "s2_execs_total": 1
+  },
+  "order_N_control_nothing_dropped": {
+    "crashed": "Crash",
+    "result": 12,
+    "resume_error": null,
+    "s1_execs_at_crash": 1,
+    "s1_execs_total": 2,
+    "s2_execs_total": 1
+  },
+  "order_W_writes_durable": {
+    "crashed": "Crash",
+    "result": 12,
+    "resume_error": null,
+    "s1_execs_at_crash": 1,
+    "s1_execs_total": 2,
+    "s2_execs_total": 1
+  },
+  "s1_execs_order_C": 2,
+  "s1_execs_order_N": 2,
+  "s1_execs_order_W": 2,
+  "violation_EO_crash_resume_reexecutes_durable_task": true,
+  "violation_RD_recovery_depends_on_persistence_order": false
+}

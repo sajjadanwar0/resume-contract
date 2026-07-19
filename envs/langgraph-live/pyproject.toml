@@ -1,0 +1,14 @@
+[project]
+name = "rc-env-langgraph-live"
+version = "0.1.0"
+description = "Resume Contract matrix cell: LangGraph 1.2.9 with a live Anthropic model for ecological-validity probes (ANTHROPIC_API_KEY)."
+requires-python = ">=3.12"
+dependencies = [
+  "langgraph==1.2.9",
+  "langgraph-checkpoint==4.1.1",
+  "langchain-anthropic==1.4.8",
+  "langgraph-prebuilt",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,47 @@
+{
+  "version_langgraph-checkpoint": "4.1.1",
+  "version_langgraph-checkpoint-sqlite": "3.1.0",
+  "version_langgraph-checkpoint-postgres": "3.1.0",
+  "InMemorySaver": {
+    "module": "langgraph.checkpoint.memory",
+    "class": "InMemorySaver",
+    "source_file": "/home/neo/RustroverProjects/resume-contract/.venv/lib/python3.12/site-packages/langgraph/checkpoint/memory/__init__.py",
+    "put_writes_first_line": 473,
+    "dedup_idioms_found": {
+      "python_guard_continue": false,
+      "sql_insert_or_ignore": false,
+      "sql_on_conflict_do_nothing": false,
+      "conditional_on_writes_idx_map": true
+    },
+    "shares_dedup_semantics": false,
+    "put_writes_source": "    def put_writes(\n        self,\n        config: RunnableConfig,\n        writes: Sequence[tuple[str, Any]],\n        task_id: str,\n        task_path: str = \"\",\n    ) -> None:\n        \"\"\"Save a list of writes to the in-memory storage.\n\n        This method saves a list of writes to the in-memory storage. The writes are associated\n        with the provided config.\n\n        Args:\n            config: The config to associate with the writes.\n            writes: The writes to save.\n            task_id: Identifier for the task creating the writes.\n            task_path: Path of the task creating the writes.\n\n        Returns:\n            RunnableConfig: The updated config containing the saved writes' timestamp.\n        \"\"\"\n        thread_id = config[\"configurable\"][\"thread_id\"]\n        checkpoint_ns = config[\"configurable\"].get(\"checkpoint_ns\", \"\")\n        checkpoint_id = config[\"configurable\"][\"checkpoint_id\"]\n        outer_key = (thread_id, checkpoint_ns, checkpoint_id)\n        outer_writes_ = self.writes.get(outer_key)\n        for idx, (c, v) in enumerate(writes):\n            inner_key = (task_id, WRITES_IDX_MAP.get(c, idx))\n            if inner_key[1] >= 0 and outer_writes_ and inner_key in outer_writes_:\n                continue\n\n            self.writes[outer_key][inner_key] = (\n                task_id,\n                c,\n                self.serde.dumps_typed(v),\n                task_path,\n            )\n"
+  },
+  "SqliteSaver": {
+    "module": "langgraph.checkpoint.sqlite",
+    "class": "SqliteSaver",
+    "source_file": "/home/neo/RustroverProjects/resume-contract/.venv/lib/python3.12/site-packages/langgraph/checkpoint/sqlite/__init__.py",
+    "put_writes_first_line": 445,
+    "dedup_idioms_found": {
+      "python_guard_continue": false,
+      "sql_insert_or_ignore": true,
+      "sql_on_conflict_do_nothing": false,
+      "conditional_on_writes_idx_map": true
+    },
+    "shares_dedup_semantics": true,
+    "put_writes_source": "    def put_writes(\n        self,\n        config: RunnableConfig,\n        writes: Sequence[tuple[str, Any]],\n        task_id: str,\n        task_path: str = \"\",\n    ) -> None:\n        \"\"\"Store intermediate writes linked to a checkpoint.\n\n        This method saves intermediate writes associated with a checkpoint to the SQLite database.\n\n        Args:\n            config: Configuration of the related checkpoint.\n            writes: List of writes to store, each as (channel, value) pair.\n            task_id: Identifier for the task creating the writes.\n            task_path: Path of the task creating the writes.\n        \"\"\"\n        query = (\n            \"INSERT OR REPLACE INTO writes (thread_id, checkpoint_ns, checkpoint_id, task_id, idx, channel, type, value) VALUES (?, ?, ?, ?, ?, ?, ?, ?)\"\n            if all(w[0] in WRITES_IDX_MAP for w in writes)\n            else \"INSERT OR IGNORE INTO writes (thread_id, checkpoint_ns, checkpoint_id, task_id, idx, channel, type, value) VALUES (?, ?, ?, ?, ?, ?, ?, ?)\"\n        )\n        with self.cursor() as cur:\n            cur.executemany(\n                query,\n                [\n                    (\n                        str(config[\"configurable\"][\"thread_id\"]),\n                        str(config[\"configurable\"][\"checkpoint_ns\"]),\n                        str(config[\"configurable\"][\"checkpoint_id\"]),\n                        task_id,\n                        WRITES_IDX_MAP.get(channel, idx),\n                        channel,\n                        *self.serde.dumps_typed(value),\n                    )\n                    for idx, (channel, value) in enumerate(writes)\n                ],\n            )\n"
+  },
+  "PostgresSaver": {
+    "module": "langgraph.checkpoint.postgres",
+    "class": "PostgresSaver",
+    "source_file": "/home/neo/RustroverProjects/resume-contract/.venv/lib/python3.12/site-packages/langgraph/checkpoint/postgres/__init__.py",
+    "put_writes_first_line": 347,
+    "dedup_idioms_found": {
+      "python_guard_continue": false,
+      "sql_insert_or_ignore": false,
+      "sql_on_conflict_do_nothing": false,
+      "conditional_on_writes_idx_map": true
+    },
+    "shares_dedup_semantics": false,
+    "put_writes_source": "    def put_writes(\n        self,\n        config: RunnableConfig,\n        writes: Sequence[tuple[str, Any]],\n        task_id: str,\n        task_path: str = \"\",\n    ) -> None:\n        \"\"\"Store intermediate writes linked to a checkpoint.\n\n        This method saves intermediate writes associated with a checkpoint to the Postgres database.\n\n        Args:\n            config: Configuration of the related checkpoint.\n            writes: List of writes to store.\n            task_id: Identifier for the task creating the writes.\n        \"\"\"\n        query = (\n            self.UPSERT_CHECKPOINT_WRITES_SQL\n            if all(w[0] in WRITES_IDX_MAP for w in writes)\n            else self.INSERT_CHECKPOINT_WRITES_SQL\n        )\n        with self._cursor(pipeline=True) as cur:\n            cur.executemany(\n                query,\n                self._dump_writes(\n                    config[\"configurable\"][\"thread_id\"],\n                    config[\"configurable\"][\"checkpoint_ns\"],\n                    config[\"configurable\"][\"checkpoint_id\"],\n                    task_id,\n                    task_path,\n                    writes,\n                ),\n            )\n"
+  }
+}

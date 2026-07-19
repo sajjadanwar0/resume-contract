@@ -1,0 +1,113 @@
+{
+  "langgraph_version": "1.2.9",
+  "order_W_writes_durable": {
+    "crashed": "Crash",
+    "persistence_log": [
+      [
+        "put",
+        1
+      ],
+      [
+        "put_writes",
+        1,
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        2,
+        [
+          "__error__"
+        ]
+      ],
+      [
+        "put_writes",
+        3,
+        [
+          "__error__"
+        ]
+      ]
+    ],
+    "s1_execs_at_crash": 1,
+    "s1_execs_total": 2,
+    "s2_execs_total": 1,
+    "result": 12,
+    "resume_error": null
+  },
+  "order_C_checkpoint_durable": {
+    "crashed": "Crash",
+    "persistence_log": [
+      [
+        "put",
+        1
+      ],
+      [
+        "put_writes",
+        1,
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        2,
+        [
+          "__error__"
+        ]
+      ],
+      [
+        "put_writes",
+        3,
+        [
+          "__error__"
+        ]
+      ]
+    ],
+    "s1_execs_at_crash": 1,
+    "s1_execs_total": 2,
+    "s2_execs_total": 1,
+    "result": 12,
+    "resume_error": null
+  },
+  "order_N_control_nothing_dropped": {
+    "crashed": "Crash",
+    "persistence_log": [
+      [
+        "put",
+        1
+      ],
+      [
+        "put_writes",
+        1,
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        2,
+        [
+          "__error__"
+        ]
+      ],
+      [
+        "put_writes",
+        3,
+        [
+          "__error__"
+        ]
+      ]
+    ],
+    "s1_execs_at_crash": 1,
+    "s1_execs_total": 2,
+    "s2_execs_total": 1,
+    "result": 12,
+    "resume_error": null
+  },
+  "s1_execs_order_W": 2,
+  "s1_execs_order_C": 2,
+  "s1_execs_order_N": 2,
+  "violation_RD_recovery_depends_on_persistence_order": false,
+  "violation_EO_crash_resume_reexecutes_durable_task": true
+}

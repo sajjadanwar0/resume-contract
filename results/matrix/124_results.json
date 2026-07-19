@@ -1,0 +1,95 @@
+{
+  "langgraph_version": "1.2.9",
+  "observed_sync": {
+    "durability": "sync",
+    "result": 12,
+    "submission_order": [
+      "put",
+      [
+        "put_writes",
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        [
+          "__end__",
+          "__previous__"
+        ]
+      ],
+      "put"
+    ],
+    "s1_execs": 1,
+    "s2_execs": 1
+  },
+  "observed_async": {
+    "durability": "async",
+    "result": 12,
+    "submission_order": [
+      "put",
+      [
+        "put_writes",
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        [
+          "__end__",
+          "__previous__"
+        ]
+      ],
+      "put"
+    ],
+    "s1_execs": 1,
+    "s2_execs": 1
+  },
+  "observed_exit": {
+    "durability": "exit",
+    "result": 12,
+    "submission_order": [
+      "put"
+    ],
+    "s1_execs": 1,
+    "s2_execs": 1
+  },
+  "sync_order_summary": [
+    "put",
+    [
+      "put_writes",
+      [
+        "__return__"
+      ]
+    ],
+    [
+      "put_writes",
+      [
+        "__return__"
+      ]
+    ],
+    [
+      "put_writes",
+      [
+        "__end__",
+        "__previous__"
+      ]
+    ],
+    "put"
+  ],
+  "finding_puts_and_writes_both_present": true,
+  "note": "RD at executor layer requires forcing thread-pool submission order; InMemorySaver serializes puts, so the #8039 race is only observable with the SQLite/Postgres savers' real thread pool. This probe records the submission SEQUENCE as evidence the operations are adjacent and unbarriered; the forced-order replay is scheduled for the persistent savers where the pool is real."
+}

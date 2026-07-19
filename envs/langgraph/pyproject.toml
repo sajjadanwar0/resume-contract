@@ -1,0 +1,18 @@
+[project]
+name = "rc-env-langgraph"
+version = "0.1.0"
+description = "Resume Contract matrix cell: LangGraph 1.2.9 (+ langgraph-checkpoint 4.1.1). Standalone pinned environment; probes import only the framework, so this project has no local path dependencies by design."
+requires-python = ">=3.12"
+dependencies = [
+  "langgraph==1.2.9",
+  "langgraph-checkpoint==4.1.1",
+  "pydantic>=2,<3",
+]
+
+[tool.uv]
+# Environment container, not an installable package: nothing to build.
+package = false
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true

@@ -1,0 +1,8 @@
+{
+  "langgraph_version": "1.2.9",
+  "resume_true_value": 1,
+  "resume_false_value": 1,
+  "resume_true_again_value": 1,
+  "violation_FD_through_shim": true,
+  "replay_idempotence_same_value_holds": true
+}

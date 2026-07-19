@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "invocation": "tlc2.TLC -deadlock -config <cfg> -workers 1 <Module>.tla",
+    "constants": "R1-R5 rows use the artifact fault-config constants verbatim (nondetrec row: MaxCrashes=2); staterebuild rows use R7_staterebuild.cfg constants",
+    "semantics": "holds = invariant satisfied over the faulty model's entire reachable state space (TLC complete); violated = counterexample found"
+  },
+  "matrix": {
+    "doubleconsume": {
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "ConsumeOnce": {
+        "verdict": "violated",
+        "states": 20,
+        "depth": 6
+      },
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states": 20,
+        "depth": 6
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      }
+    },
+    "forkignore": {
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "ForkDeterminism": {
+        "verdict": "violated",
+        "states": 10,
+        "depth": 5
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      }
+    },
+    "invalidpersist": {
+      "CheckpointValidity": {
+        "verdict": "violated",
+        "states": 8,
+        "depth": 5
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states": 87,
+        "depth": 8
+      }
+    },
+    "nondetrec": {
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states": 620,
+        "depth": 11
+      },
+      "ConsumeOnce": {
+        "verdict": "violated",
+        "states": 43,
+        "depth": 6
+      },
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states": 11,
+        "depth": 4
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states": 620,
+        "depth": 11
+      },
+      "PrefixConsistency": {
+        "verdict": "violated",
+        "states": 11,
+        "depth": 4
+      },
+      "RecoveryDeterminism": {
+        "verdict": "violated",
+        "states": 10,
+        "depth": 4
+      }
+    },
+    "replay": {
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states": 108,
+        "depth": 10
+      },
+      "ConsumeOnce": {
+        "verdict": "violated",
+        "states": 45,
+        "depth": 7
+      },
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states": 7,
+        "depth": 4
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states": 108,
+        "depth": 10
+      },
+      "PrefixConsistency": {
+        "verdict": "violated",
+        "states": 7,
+        "depth": 4
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states": 108,
+        "depth": 10
+      }
+    },
+    "staterebuild": {
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states": 11,
+        "depth": 6
+      },
+      "PrefixContinuation": {
+        "verdict": "violated",
+        "states": 4,
+        "depth": 3
+      },
+      "TypeOK": {
+        "verdict": "holds",
+        "states": 11,
+        "depth": 6
+      }
+    }
+  }
+}

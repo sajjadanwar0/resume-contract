@@ -1,0 +1,8 @@
+[package]
+name = "remit"
+version = "0.1.0"
+edition = "2021"
+description = "Reference resume sequencer and append-only effect ledger for the Resume Contract (PC/EO/FD/CV/CO/RD). Verification target: Verus; protocol spec: formal/tla/ResumeContract.tla."
+license = "MIT"
+
+[dependencies]

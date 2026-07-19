@@ -1,0 +1,9 @@
+tracker,issue,property_class,note
+langchain-ai/langgraph,7361,PC,resume from checkpoint_id becomes replay (1.1.x regression; fixed 1.2.9)
+langchain-ai/langgraph,6663,FD,second resume value from same checkpoint silently ignored (live 1.2.9)
+langchain-ai/langgraph,6792,EO,completed functional-API tasks re-execute after subgraph interrupt (fixed 1.2.9)
+langchain-ai/langgraph,6491,CV,invalid node output persisted without validation (silent on 1.2.9)
+langchain-ai/langgraph,6791,CV,Topic.copy crash on None channel value from checkpoint (downstream of 6491)
+langchain-ai/langgraph,7714,CV,structurally corrupt checkpoint payloads accepted silently at serde boundary
+langchain-ai/langgraph,8039,RD,put_writes/put ordering unenforced in sync durability; recovery host-dependent
+CopilotKit/CopilotKit,2315,CO,extra null-state turn consumes interrupt before human response

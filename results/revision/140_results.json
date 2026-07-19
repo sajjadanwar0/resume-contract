@@ -1,0 +1,21 @@
+{
+  "autogen_agentchat_version": "0.7.5",
+  "documented_plane": "AssistantAgent.save_state/load_state",
+  "ledger_after_run1": [
+    "charge:10"
+  ],
+  "final_text_run1": "charged 10",
+  "ledger_after_restore_followup": [
+    "charge:10"
+  ],
+  "restore_EO_completed_tool_not_refired": true,
+  "ledger_after_double_restore": [
+    "charge:10"
+  ],
+  "double_restore_added_effects": 0,
+  "tamper": "llm_context.messages[0].type -> NoSuchMessageType",
+  "cv_on_tampered_state": {
+    "loud_rejection": true,
+    "error": "1 validation error for ChatCompletionContextState\nmessages.0\n  Input tag 'NoSuchMessageType' found using 'type' does not match any of the expected tags: 'System"
+  }
+}

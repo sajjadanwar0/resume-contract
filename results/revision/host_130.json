@@ -1,0 +1,44 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_postgres_version": "3.1.0",
+  "dsn_host": "localhost:5432/postgres",
+  "t1_fd_fork_bare": {
+    "backend": "PostgresSaver",
+    "form": "bare_value",
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "resume_writes_rows": 2,
+    "violation_second_resume_ignored": true
+  },
+  "t1b_fd_fork_resume_map": {
+    "backend": "PostgresSaver",
+    "form": "resume_map",
+    "resume_true_value": 1,
+    "resume_false_value": 1,
+    "resume_writes_rows": 1,
+    "violation_second_resume_ignored": true
+  },
+  "t2_cv_invalid_persist": {
+    "backend": "PostgresSaver",
+    "invoke_error": null,
+    "history_read_error": null,
+    "schema_invalid_value_persisted": true,
+    "violation_silent_invalid_persistence": true
+  },
+  "t3_co_stray_resume": {
+    "backend": "PostgresSaver",
+    "post_effect_counter": 1,
+    "violation_stray_resume_refired_effect": false
+  },
+  "t4_eo_crash_split": {
+    "backend": "PostgresSaver",
+    "crashed_as": "Crash",
+    "s1_execs_at_crash": 1,
+    "durable_writes_rows_at_crash": 3,
+    "s1_execs_after_resume": 2,
+    "s2_execs_after_resume": 1,
+    "result": 12,
+    "resume_error": null,
+    "violation_completed_task_reexecuted_on_crash_resume": true
+  }
+}

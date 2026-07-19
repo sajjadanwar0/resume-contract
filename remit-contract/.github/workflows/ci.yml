@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Core tests (default)
+        run: cargo test -p remit-core
+      - name: Model conformance (heavy, release)
+        run: REMIT_MODEL_CASES=20000 cargo test -p remit-core --release --test model_conformance
+      - name: Concurrency stress (release)
+        run: REMIT_STRESS_THREADS=64 REMIT_STRESS_OPS=500 cargo test -p remit-core --release --test concurrency
+
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build and install
+        run: |
+          pip install maturin pytest
+          maturin build --release -o dist
+          pip install dist/*.whl
+      - name: Binding tests
+        run: pytest tests/test_core_bindings.py -v
+      - name: LangGraph integration (paper pins)
+        if: matrix.python-version == '3.12'
+        run: |
+          pip install "langgraph==1.2.9" "langgraph-checkpoint==4.1.1" "langgraph-checkpoint-sqlite==3.1.0" || pip install langgraph langgraph-checkpoint-sqlite
+          pytest tests/test_langgraph_repair.py -v

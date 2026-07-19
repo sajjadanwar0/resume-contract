@@ -1,0 +1,103 @@
+{
+  "probe": 148,
+  "manifest": {
+    "host": "Sajjad-openai",
+    "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+    "python": "3.12.10",
+    "utc": "2026-07-19T06:26:03Z",
+    "versions": {
+      "langgraph": "1.2.9",
+      "langgraph-checkpoint": "4.1.1",
+      "anthropic": "0.117.0",
+      "openai": "2.46.0",
+      "openai-agents": "0.18.3",
+      "remit-contract": "0.1.0"
+    }
+  },
+  "n_per_cell": 20,
+  "models": [
+    "gpt-4o-mini",
+    "gpt-4.1-mini"
+  ],
+  "elapsed_s": 386.9,
+  "probe135": {
+    "n_per_cell": 20,
+    "targets": [
+      "121"
+    ],
+    "models_requested": [
+      "gpt-4o-mini",
+      "gpt-4.1-mini"
+    ],
+    "cells": {
+      "121_p5_live_openai_agents_session.py::gpt-4o-mini": {
+        "runs": 20,
+        "errors": 0,
+        "model_reported_by_probe": "gpt-4o-mini",
+        "verdict_fields": {
+          "violation_EO_session_restore_reinvoked_tool": {
+            "true": 0,
+            "of": 20,
+            "proportion": 0.0,
+            "wilson95": [
+              0.0,
+              0.1611
+            ]
+          },
+          "run1_ok": {
+            "true": 20,
+            "of": 20,
+            "proportion": 1.0,
+            "wilson95": [
+              0.8389,
+              1.0
+            ]
+          },
+          "run2_ok": {
+            "true": 20,
+            "of": 20,
+            "proportion": 1.0,
+            "wilson95": [
+              0.8389,
+              1.0
+            ]
+          }
+        }
+      },
+      "121_p5_live_openai_agents_session.py::gpt-4.1-mini": {
+        "runs": 20,
+        "errors": 0,
+        "model_reported_by_probe": "gpt-4.1-mini",
+        "verdict_fields": {
+          "violation_EO_session_restore_reinvoked_tool": {
+            "true": 0,
+            "of": 20,
+            "proportion": 0.0,
+            "wilson95": [
+              0.0,
+              0.1611
+            ]
+          },
+          "run1_ok": {
+            "true": 20,
+            "of": 20,
+            "proportion": 1.0,
+            "wilson95": [
+              0.8389,
+              1.0
+            ]
+          },
+          "run2_ok": {
+            "true": 20,
+            "of": 20,
+            "proportion": 1.0,
+            "wilson95": [
+              0.8389,
+              1.0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

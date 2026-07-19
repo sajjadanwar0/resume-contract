@@ -1,0 +1,34 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "cell_A_normal_order": {
+    "adversarial_order": false,
+    "writes_rows_at_crash": 3,
+    "checkpoint_rows_at_crash": 1,
+    "s1_effects_at_crash": 1,
+    "resume_result": 12,
+    "s1_effects_total": 2,
+    "s2_effects_total": 1,
+    "ledger": [
+      "s1",
+      "s1",
+      "s2"
+    ]
+  },
+  "cell_B_adversarial_order": {
+    "adversarial_order": true,
+    "writes_rows_at_crash": 0,
+    "checkpoint_rows_at_crash": 1,
+    "s1_effects_at_crash": 1,
+    "resume_result": 12,
+    "s1_effects_total": 2,
+    "s2_effects_total": 1,
+    "ledger": [
+      "s1",
+      "s1",
+      "s2"
+    ]
+  },
+  "durable_orders_differ_at_crash": true,
+  "rd_holds_recovery_agrees": true
+}
