@@ -1,0 +1,430 @@
+{
+  "probe": 148,
+  "mode": "merge",
+  "hosts": [
+    {
+      "host": "Sajjad-anthropic",
+      "file": "148_Sajjad-anthropic_20260719.json",
+      "manifest": {
+        "host": "Sajjad-anthropic",
+        "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+        "python": "3.12.10",
+        "utc": "2026-07-19T06:19:29Z",
+        "versions": {
+          "langgraph": "1.2.9",
+          "langgraph-checkpoint": "4.1.1",
+          "anthropic": "0.117.0",
+          "openai": "2.46.0",
+          "openai-agents": "0.18.3",
+          "remit-contract": "0.1.0"
+        }
+      },
+      "n_per_cell": 20
+    },
+    {
+      "host": "Sajjad-openai",
+      "file": "148_Sajjad-openai_20260719.json",
+      "manifest": {
+        "host": "Sajjad-openai",
+        "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+        "python": "3.12.10",
+        "utc": "2026-07-19T06:26:03Z",
+        "versions": {
+          "langgraph": "1.2.9",
+          "langgraph-checkpoint": "4.1.1",
+          "anthropic": "0.117.0",
+          "openai": "2.46.0",
+          "openai-agents": "0.18.3",
+          "remit-contract": "0.1.0"
+        }
+      },
+      "n_per_cell": 20
+    },
+    {
+      "host": "ip-172-26-8-201-anthropic",
+      "file": "148_ip-172-26-8-201-anthropic_20260719.json",
+      "manifest": {
+        "host": "ip-172-26-8-201-anthropic",
+        "platform": "Linux-6.5.0-1023-aws-x86_64-with-glibc2.35",
+        "python": "3.12.13",
+        "utc": "2026-07-19T07:57:36Z",
+        "versions": {
+          "langgraph": "1.2.9",
+          "langgraph-checkpoint": "4.1.1",
+          "anthropic": "0.117.0",
+          "openai": "2.46.0",
+          "openai-agents": "0.18.3"
+        }
+      },
+      "n_per_cell": 20
+    },
+    {
+      "host": "ip-172-26-8-201-openai",
+      "file": "148_ip-172-26-8-201-openai_20260719.json",
+      "manifest": {
+        "host": "ip-172-26-8-201-openai",
+        "platform": "Linux-6.5.0-1023-aws-x86_64-with-glibc2.35",
+        "python": "3.12.13",
+        "utc": "2026-07-19T08:03:10Z",
+        "versions": {
+          "langgraph": "1.2.9",
+          "langgraph-checkpoint": "4.1.1",
+          "anthropic": "0.117.0",
+          "openai": "2.46.0",
+          "openai-agents": "0.18.3"
+        }
+      },
+      "n_per_cell": 20
+    }
+  ],
+  "cells": [
+    {
+      "probe": "121_p5_live_openai_agents_session.py",
+      "model": "gpt-4.1-mini",
+      "field": "run1_ok",
+      "pooled_k": 40,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.9124,
+        1.0
+      ],
+      "per_host": {
+        "Sajjad-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        },
+        "ip-172-26-8-201-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "probe": "121_p5_live_openai_agents_session.py",
+      "model": "gpt-4.1-mini",
+      "field": "run2_ok",
+      "pooled_k": 40,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.9124,
+        1.0
+      ],
+      "per_host": {
+        "Sajjad-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        },
+        "ip-172-26-8-201-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "probe": "121_p5_live_openai_agents_session.py",
+      "model": "gpt-4.1-mini",
+      "field": "violation_EO_session_restore_reinvoked_tool",
+      "pooled_k": 0,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.0,
+        0.0876
+      ],
+      "per_host": {
+        "Sajjad-openai": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        },
+        "ip-172-26-8-201-openai": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    {
+      "probe": "121_p5_live_openai_agents_session.py",
+      "model": "gpt-4o-mini",
+      "field": "run1_ok",
+      "pooled_k": 40,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.9124,
+        1.0
+      ],
+      "per_host": {
+        "Sajjad-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        },
+        "ip-172-26-8-201-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "probe": "121_p5_live_openai_agents_session.py",
+      "model": "gpt-4o-mini",
+      "field": "run2_ok",
+      "pooled_k": 40,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.9124,
+        1.0
+      ],
+      "per_host": {
+        "Sajjad-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        },
+        "ip-172-26-8-201-openai": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "probe": "121_p5_live_openai_agents_session.py",
+      "model": "gpt-4o-mini",
+      "field": "violation_EO_session_restore_reinvoked_tool",
+      "pooled_k": 0,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.0,
+        0.0876
+      ],
+      "per_host": {
+        "Sajjad-openai": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        },
+        "ip-172-26-8-201-openai": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    {
+      "probe": "122_p5_live_langgraph_anthropic_interrupt.py",
+      "model": "claude-haiku-4-5",
+      "field": "violation_CO_live_stray_resume_refired",
+      "pooled_k": 0,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.0,
+        0.0876
+      ],
+      "per_host": {
+        "Sajjad-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        },
+        "ip-172-26-8-201-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    {
+      "probe": "122_p5_live_langgraph_anthropic_interrupt.py",
+      "model": "claude-haiku-4-5",
+      "field": "violation_EO_live_interrupt_resume",
+      "pooled_k": 0,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.0,
+        0.0876
+      ],
+      "per_host": {
+        "Sajjad-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        },
+        "ip-172-26-8-201-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    {
+      "probe": "122_p5_live_langgraph_anthropic_interrupt.py",
+      "model": "claude-sonnet-4-6",
+      "field": "violation_CO_live_stray_resume_refired",
+      "pooled_k": 0,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.0,
+        0.0876
+      ],
+      "per_host": {
+        "Sajjad-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        },
+        "ip-172-26-8-201-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    {
+      "probe": "122_p5_live_langgraph_anthropic_interrupt.py",
+      "model": "claude-sonnet-4-6",
+      "field": "violation_EO_live_interrupt_resume",
+      "pooled_k": 0,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.0,
+        0.0876
+      ],
+      "per_host": {
+        "Sajjad-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        },
+        "ip-172-26-8-201-anthropic": {
+          "k": 0,
+          "n": 20,
+          "wilson": [
+            0.0,
+            0.1611
+          ]
+        }
+      }
+    },
+    {
+      "probe": "131_p5_live_fd_violation.py",
+      "model": "claude-haiku-4-5",
+      "field": "violation_second_decision_ignored",
+      "pooled_k": 40,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.9124,
+        1.0
+      ],
+      "per_host": {
+        "Sajjad-anthropic": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        },
+        "ip-172-26-8-201-anthropic": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "probe": "131_p5_live_fd_violation.py",
+      "model": "claude-sonnet-4-6",
+      "field": "violation_second_decision_ignored",
+      "pooled_k": 40,
+      "pooled_n": 40,
+      "pooled_wilson": [
+        0.9124,
+        1.0
+      ],
+      "per_host": {
+        "Sajjad-anthropic": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        },
+        "ip-172-26-8-201-anthropic": {
+          "k": 20,
+          "n": 20,
+          "wilson": [
+            0.8389,
+            1.0
+          ]
+        }
+      }
+    }
+  ]
+}
