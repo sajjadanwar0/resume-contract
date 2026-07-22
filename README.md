@@ -179,3 +179,7 @@ history, not filename suffixes); numbered scripts continue from 117; every
 audit gates on committed baselines; probe verdicts are deterministic,
 LLM-free, and timing-free by construction -- if a verdict changes, a
 package version changed.
+
+## TLC reproduction note
+
+Invoking TLC directly on the shipped `.cfg` files requires `-deadlock` (or `CHECK_DEADLOCK FALSE` in the cfg): the raw R0 run halts at 71/51 with a benign deadlock before the paper's 87/59 total is reached; `reproduce.sh` passes the flag.

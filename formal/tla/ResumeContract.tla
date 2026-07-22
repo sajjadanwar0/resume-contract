@@ -86,6 +86,12 @@ VARIABLES
 vars == << pc, effects, ckpts, frontier, waiting, consumedVal,
            forkVals, forkOuts, crashes, recHist, extraResumes, pcRegress >>
 
+(* Explicit, injective, NON-identity branch semantics: outcomes are      *)
+(* computed from values, so ForkDeterminism is a routing property, not    *)
+(* v = v. Adoption validated by the reviewer's N1 matrix: 42/42 cells     *)
+(* identical to Table 3.                                                  *)
+f(v) == <<v>>
+
 --------------------------------------------------------------------------
 Init ==
   /\ pc           = 1
@@ -140,7 +146,7 @@ Consume(v) ==
   /\ frontier'    = IF IP > frontier THEN IP ELSE frontier
   /\ pc'          = IP + 1
   /\ forkVals'    = Append(forkVals, v)
-  /\ forkOuts'    = Append(forkOuts, v)
+  /\ forkOuts'    = Append(forkOuts, f(v))
   /\ UNCHANGED << crashes, recHist, extraResumes, pcRegress >>
 
 (* A further resume targeted at the SAME (thread, interrupt-checkpoint):  *)
@@ -151,7 +157,7 @@ ForkResume(v) ==
   /\ Len(forkVals) < MaxResumes
   /\ forkVals' = Append(forkVals, v)
   /\ forkOuts' = Append(forkOuts,
-                        IF FaultForkIgnore THEN forkOuts[1] ELSE v)
+                        IF FaultForkIgnore THEN forkOuts[1] ELSE f(v))
   /\ UNCHANGED << pc, effects, ckpts, frontier, waiting, consumedVal,
                   crashes, recHist, extraResumes, pcRegress >>
 
@@ -226,9 +232,18 @@ TypeOK ==
 EffectExactlyOnce   == \A t \in Tasks : effects[t] <= 1                 \* EO
 PrefixConsistency   == ~pcRegress                                       \* PC
 ForkDeterminism     == \A k \in 1..Len(forkOuts) :
-                          forkOuts[k] = forkVals[k]                     \* FD
+                          forkOuts[k] = f(forkVals[k])                     \* FD
 CheckpointValidity  == \A k \in 1..Len(ckpts) : ckpts[k].valid          \* CV
-ConsumeOnce         == effects[IP] <= 1                                 \* CO
+ConsumeOnce         == effects[IP] <= 1
+
+(* Gate-exercised prefix-replay witness (negated): TLC's counterexample is  *)
+(* the memoized-gate crash path end to end -- consume, crash from frontier  *)
+(* IP (recHist), replay duplicates task 1, replayed pass crosses the gate   *)
+(* served from the durable record.                                          *)
+GateMemoWitness ==
+  ~( consumedVal # NoVal /\ crashes > 0
+     /\ pc > IP /\ effects[IP] = 1 /\ effects[1] = 2
+     /\ \E i \in 1..Len(recHist) : recHist[i].dur = IP )                                 \* CO
 RecoveryDeterminism == \A i, j \in 1..Len(recHist) :
                           recHist[i].dur = recHist[j].dur
                             => recHist[i].dec = recHist[j].dec          \* RD

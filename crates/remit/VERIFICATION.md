@@ -54,7 +54,7 @@ verus crates/remit/proof/remit_verus_all.rs
 | EO/CO | `lemma_begin_effect_admits_once`, `lemma_eo_no_duplicate` | admitting a fresh (branch,task) yields count == 1 and preserves ledger-uniqueness for all pairs |
 | EO/CO (support) | `lemma_absent_count_zero`, `lemma_push_count` | count algebra: absent => 0; push increments only its own pair |
 | PC | `lemma_pc_strict_monotone`, `lemma_pc_no_prefix_reentry` | commit admissible => frontier strictly increases by one; committed task > frontier |
-| FD | `lemma_fd_ordinal_injective`, `lemma_fd_distinct_values_served_distinctly` | distinct ordinals key distinct branches; distinct supplied values served distinctly |
+| FD | `lemma_fd_ordinal_injective` (keying); theorem file `remit_verus_fd_machine.rs`; certificate `negative/fd_stock_certificate.rs` (EXPECTED 1 error) | distinct ordinals key distinct branches; every branch is served the value its own invocation recorded, proved by an inductive invariant over record/serve steps; the stock #6663 rule falsifies the same obligation |
 | wiring | `contract_smoke` | the lemmas compose on a concrete instance |
 
 ## Status (core)
@@ -76,15 +76,15 @@ are machine-checked; the proof is unbounded and structural.
 | Contract | Verus lemma | Statement discharged |
 |----------|-------------|----------------------|
 | CV | `lemma_cv_init`, `lemma_cv_gate_preserves` | the empty log is valid; the validity gate preserves log validity on every step (case split on `valid(rec)`; push-index unfolding) |
-| RD | `lemma_rd_functional`, `lemma_rd_order_independent` | recovery is a pure function of the durable log; recovery is invariant under reordering of same-superstep write sets |
+| RD | theorem file `remit_verus_rd_interp.rs` (interpreted skip decision; adjacent-swap #8039 window; equal write-set counts); certificate `negative/rd_ordersensitive_certificate.rs` (EXPECTED 1 error) | order-independence of the recovery decision is proved, not defined; the order-sensitive rule falsifies the same obligation |
 
 Lemma statements (names, `requires`, `ensures`) are verbatim from the
-original obligation file. Uninterpreted helpers in the discharged file:
+original obligation file. Uninterpreted helpers in the former file (deleted with the RD congruence pair):
 `valid(rec)` and `recover_of_writeset(ws)`; `same_superstep_writeset(a, b)`
 is now an open definition (multiset equality of the record sequences), and
 `recover(log)` is defined as `recover_of_writeset(log.records.to_multiset())`.
 
-**Modeling commitment (RD).** The RD pair is discharged under the
+**Historical modeling commitment (RD) --- retired with the deleted congruence pair; see the Post-adoption section.** The former RD pair was discharged under the
 refinement the original file's own TODO prescribed: recovery is defined to
 consult exactly the durable write-set of the sequenced log -- it factors
 through the record multiset. This mirrors the implemented sequencer, whose

@@ -8,3 +8,5 @@ formal/tla/states/
 formal/tla/tla2tools.jar
 .idea/
 crates/remit/proof/.pre_adoption_backup/
+crates/remit/proof/.pre_adoption_backup/
+formal/tla/*.pre_finalize.bak
