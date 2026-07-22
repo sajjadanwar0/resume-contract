@@ -1,13 +1,13 @@
 TLC2 Version 2026.04.09.014118 (rev: 389440f)
-Running breadth-first search Model-Checking with fp 106 and seed -4404226646495922251 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 23413] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 31 and seed 914374997862468804 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 78422] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/ResumeContract.tla
-Parsing file /tmp/tlc-11379071093836603156/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-11379071093836603156/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-11379071093836603156/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-11379071093836603156/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-11379071093836603156/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
-Parsing file /tmp/tlc-11379071093836603156/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-11379071093836603156/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-4770277886106381909/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-4770277886106381909/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-4770277886106381909/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-4770277886106381909/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-4770277886106381909/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-4770277886106381909/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-4770277886106381909/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
@@ -19,9 +19,9 @@ Semantic processing of module ResumeContract
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module ResumeContract
-Starting... (2026-07-22 10:57:02)
+Starting... (2026-07-22 22:42:55)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-07-22 10:57:03.
+Finished computing initial states: 1 distinct state generated at 2026-07-22 22:42:55.
 Error: Invariant ConsumeOnce is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -114,5 +114,5 @@ State 6: <ExtraResume line 193, col 3 to line 200, col 58 of module ResumeContra
 
 20 states generated, 20 distinct states found, 11 states left on queue.
 The depth of the complete state graph search is 6.
-Finished in 00s at (2026-07-22 10:57:03)
-Trace exploration spec path: ./ResumeContract_TTrace_1784699822.tla
+Finished in 00s at (2026-07-22 22:42:55)
+Trace exploration spec path: ./ResumeContract_TTrace_1784742175.tla
