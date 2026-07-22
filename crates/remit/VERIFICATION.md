@@ -2,17 +2,24 @@
 
 Protocol spec: `formal/tla/ResumeContract.tla` reference config `R0_reference`
 (TLC: all six invariants, no error). Implementation: `src/lib.rs`. Proofs:
-`proof/remit_verus.rs` (EO/CO, PC, FD), `proof/remit_verus_cv_rd.rs` (CV, RD),
-and the composed target `proof/remit_verus_all.rs` (all fifteen items, one
+`proof/remit_verus.rs` (EO/CO, PC, FD keying), `proof/remit_verus_cv.rs` (CV),
+the FD/RD theorem files `proof/remit_verus_fd_machine.rs` and
+`proof/remit_verus_rd_interp.rs` with their falsifying certificates under
+`proof/negative/` (EXPECTED 1 error each, by design), and the composed
+legacy target `proof/remit_verus_all.rs` (trimmed core + CV, one
 invocation). Toolchain: Verus 0.2026.05.03.8b81855.
 
 **Standing tallies (2026-07-21, developer host, pinned toolchain):**
 
 | Target | Tally | Code-level `assume` count† |
 |---|---|---:|
-| `proof/remit_verus.rs` | `verification results:: 11 verified, 0 errors` | 0 |
-| `proof/remit_verus_cv_rd.rs` | `verification results:: 4 verified, 0 errors` | 0 |
-| `proof/remit_verus_all.rs` | `verification results:: 15 verified, 0 errors` | 0 |
+| `proof/remit_verus.rs` | `verification results:: 10 verified, 0 errors` | 0 |
+| `proof/remit_verus_cv.rs` | `verification results:: 2 verified, 0 errors` | 0 |
+| `proof/remit_verus_all.rs` | `verification results:: 12 verified, 0 errors` | 0 |
+| `proof/remit_verus_fd_machine.rs` | `verification results:: 5 verified, 0 errors` | 0 |
+| `proof/remit_verus_rd_interp.rs` | `verification results:: 6 verified, 0 errors` | 0 |
+| `proof/negative/fd_stock_certificate.rs` | `2 verified, 1 errors` (EXPECTED -- the certificate) | 0 |
+| `proof/negative/rd_ordersensitive_certificate.rs` | `2 verified, 1 errors` (EXPECTED -- the certificate) | 0 |
 
 †**Certification rule.** A Verus tally is citable only alongside a zero
 comment-filtered `assume` count of the exact file verified, because a lemma
@@ -33,8 +40,13 @@ paper before submission.
 
 ```
 verus crates/remit/proof/remit_verus.rs
-verus crates/remit/proof/remit_verus_cv_rd.rs
+verus crates/remit/proof/remit_verus_cv.rs
 verus crates/remit/proof/remit_verus_all.rs
+verus crates/remit/proof/remit_verus_fd_machine.rs
+verus crates/remit/proof/remit_verus_rd_interp.rs
+# expected to FAIL (1 error each) -- the falsifying certificates:
+verus crates/remit/proof/negative/fd_stock_certificate.rs
+verus crates/remit/proof/negative/rd_ordersensitive_certificate.rs
 ```
 
 ## Obligation inventory (proof/remit_verus.rs)
@@ -71,7 +83,7 @@ host, confirmed: `verification results:: 11 verified, 0 errors`
 (Verus 0.2026.05.03.8b81855). All stated obligations for EO/CO, PC, and FD
 are machine-checked; the proof is unbounded and structural.
 
-## CV and RD lemma set (proof/remit_verus_cv_rd.rs) -- DISCHARGED
+## CV lemma set (proof/remit_verus_cv.rs) -- DISCHARGED (RD: see theorem files above)
 
 | Contract | Verus lemma | Statement discharged |
 |----------|-------------|----------------------|
@@ -148,7 +160,10 @@ verification results:: 15 verified, 0 errors
 Comment-filtered `assume` count across all three proof files: `0, 0, 0`
 (command and result recorded in the certification rule above). The
 certification rule is adopted from this date forward: no tally is citable
-without the accompanying grep.
+without the accompanying grep. **[2026-07-22 supersession note.]** The
+tallies attested above predate the adoption commit; the files and numbers
+current after it are those of the status table at the top and the
+Post-adoption verification status section below.
 ## Post-adoption verification status (2026-07-22)
 
 The definitional FD lemma (`lemma_fd_distinct_values_served_distinctly`,
@@ -163,7 +178,7 @@ on this date:
 ```
 verus crates/remit/proof/remit_verus.rs
 verification results:: 10 verified, 0 errors
-verus crates/remit/proof/remit_verus_cv_rd.rs
+verus crates/remit/proof/remit_verus_cv.rs
 verification results:: 2 verified, 0 errors
 verus crates/remit/proof/remit_verus_all.rs
 verification results:: 12 verified, 0 errors

@@ -1,5 +1,5 @@
-//! remit_verus_cv_rd.rs — CV lemmas for REMIT. DISCHARGED.
-//! (Historical filename retained pending `git mv` to remit_verus_cv.rs.
+//! remit_verus_cv.rs — CV lemmas for REMIT. DISCHARGED.
+//! (Renamed from remit_verus_cv_rd.rs after the RD pair's deletion.
 //! The RD congruence pair formerly in this file is DELETED: recover() was
 //! defined over the write-set multiset, so "order-independence" carried no
 //! proof content -- both lemmas verified with empty bodies. RD now lives as
@@ -8,7 +8,7 @@
 //! negative/rd_ordersensitive_certificate.rs.)
 //!
 //! STATUS: DISCHARGED in this file (no `assume` anywhere; grep to confirm).
-//! Verify:  verus crates/remit/proof/remit_verus_cv_rd.rs
+//! Verify:  verus crates/remit/proof/remit_verus_cv.rs
 //! Expect:  "verification results:: N verified, 0 errors" -- record the
 //! FRESH tally + date in VERIFICATION.md (the historical "4 verified" is
 //! retired with the deleted RD pair; trust the run, not this comment).

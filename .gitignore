@@ -10,3 +10,7 @@ formal/tla/tla2tools.jar
 crates/remit/proof/.pre_adoption_backup/
 crates/remit/proof/.pre_adoption_backup/
 formal/tla/*.pre_finalize.bak
+formal/tla/*_TTrace_*
+/remit_verus
+/remit_verus_*
+!*.rs

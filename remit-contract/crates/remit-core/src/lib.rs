@@ -13,7 +13,7 @@
 //! |-------|----------|--------|
 //! | Protocol spec | `formal/tla/ResumeContract.tla`, config `R0` | TLC: all six invariants, no error |
 //! | Abstract model proof | `crates/remit/proof/remit_verus.rs` | Verus: 11 verified, 0 errors |
-//! | CV/RD lemma set | `crates/remit/proof/remit_verus_cv_rd.rs` | Verus: 4 verified, 0 errors |
+//! | CV/RD lemma set | `crates/remit/proof/remit_verus_cv.rs` | Verus: 2 verified, 0 errors |
 //! | **Production core** | **this crate** | mirrors the verified model item-for-item; conformance exercised by a property-test harness that transliterates the TLA+ transition relation (`tests/model_conformance.rs`) and by a concurrent stress suite (`tests/concurrency.rs`) |
 //! | Language surface | `remit-py` (PyO3) | thin bindings; every semantic decision is a call into this crate |
 //! | Framework adapter | `python/remit/langgraph_shim.py` | decision-free veneer: strips/keeps, raises/delegates, exactly as this crate instructs |

@@ -10,7 +10,7 @@ can be audited rather than trusted.
 |---|---|---|---|
 | Protocol spec | `formal/tla/ResumeContract.tla` (paper artifact) | TLC | R0 reference run: all six invariants, 0 errors; R8 scaled run 14.7 M states, depth 24 |
 | Abstract model | `crates/remit/proof/remit_verus.rs` (paper artifact) | Verus 0.2026.05.03.8b81855 | 11 verified, 0 errors |
-| CV/RD lemmas | `crates/remit/proof/remit_verus_cv_rd.rs` (paper artifact) | Verus | 4 verified, 0 errors |
+| CV/RD lemmas | `crates/remit/proof/remit_verus_cv.rs` (paper artifact) | Verus | 2 verified, 0 errors |
 | Production core | `crates/remit-core` (this repo) | rustc + test suites below | mirrors the model item-for-item |
 | PyO3 surface | `crates/remit-py` | rustc | type/exception translation only |
 | Framework veneer | `python/remit/langgraph_shim.py` | pytest | applies core verdicts; no contract branch of its own |

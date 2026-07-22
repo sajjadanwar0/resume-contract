@@ -1,13 +1,13 @@
 TLC2 Version 2026.04.09.014118 (rev: 389440f)
-Running breadth-first search Model-Checking with fp 7 and seed 1241911836695214271 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 47165] (Linux 6.8.0-134-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 106 and seed -4404226646495922251 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 23413] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/ResumeContract.tla
-Parsing file /tmp/tlc-11398649264726745107/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-11398649264726745107/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-11398649264726745107/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-11398649264726745107/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-11398649264726745107/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
-Parsing file /tmp/tlc-11398649264726745107/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-11398649264726745107/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-11379071093836603156/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-11379071093836603156/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-11379071093836603156/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-11379071093836603156/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-11379071093836603156/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-11379071093836603156/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-11379071093836603156/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
@@ -19,9 +19,9 @@ Semantic processing of module ResumeContract
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module ResumeContract
-Starting... (2026-07-17 12:24:06)
+Starting... (2026-07-22 10:57:02)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-07-17 12:24:06.
+Finished computing initial states: 1 distinct state generated at 2026-07-22 10:57:03.
 Error: Invariant ConsumeOnce is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -38,7 +38,7 @@ State 1: <Initial predicate>
 /\ ckpts = <<>>
 /\ recHist = <<>>
 
-State 2: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
+State 2: <ExecTask line 114, col 3 to line 126, col 51 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -52,7 +52,7 @@ State 2: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 3: <EmitInterrupt line 116, col 3 to line 121, col 72 of module ResumeContract>
+State 3: <EmitInterrupt line 130, col 3 to line 135, col 72 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -66,7 +66,7 @@ State 3: <EmitInterrupt line 116, col 3 to line 121, col 72 of module ResumeCont
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 4: <Consume(va) line 126, col 3 to line 136, col 62 of module ResumeContract>
+State 4: <Consume(va) line 140, col 3 to line 150, col 62 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -75,12 +75,12 @@ State 4: <Consume(va) line 126, col 3 to line 136, col 62 of module ResumeContra
 /\ crashes = 0
 /\ waiting = FALSE
 /\ forkVals = <<va>>
-/\ forkOuts = <<va>>
+/\ forkOuts = <<<<va>>>>
 /\ pc = 3
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 5: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
+State 5: <ExecTask line 114, col 3 to line 126, col 51 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 1>>
 /\ consumedVal = va
@@ -89,14 +89,14 @@ State 5: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
 /\ crashes = 0
 /\ waiting = FALSE
 /\ forkVals = <<va>>
-/\ forkOuts = <<va>>
+/\ forkOuts = <<<<va>>>>
 /\ pc = 4
 /\ ckpts = << [idx |-> 1, valid |-> TRUE],
    [idx |-> 2, valid |-> TRUE],
    [idx |-> 3, valid |-> TRUE] >>
 /\ recHist = <<>>
 
-State 6: <ExtraResume line 176, col 3 to line 183, col 58 of module ResumeContract>
+State 6: <ExtraResume line 193, col 3 to line 200, col 58 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 2, 1>>
 /\ consumedVal = va
@@ -105,7 +105,7 @@ State 6: <ExtraResume line 176, col 3 to line 183, col 58 of module ResumeContra
 /\ crashes = 0
 /\ waiting = FALSE
 /\ forkVals = <<va>>
-/\ forkOuts = <<va>>
+/\ forkOuts = <<<<va>>>>
 /\ pc = 4
 /\ ckpts = << [idx |-> 1, valid |-> TRUE],
    [idx |-> 2, valid |-> TRUE],
@@ -114,5 +114,5 @@ State 6: <ExtraResume line 176, col 3 to line 183, col 58 of module ResumeContra
 
 20 states generated, 20 distinct states found, 11 states left on queue.
 The depth of the complete state graph search is 6.
-Finished in 00s at (2026-07-17 12:24:06)
-Trace exploration spec path: ./ResumeContract_TTrace_1784273045.tla
+Finished in 00s at (2026-07-22 10:57:03)
+Trace exploration spec path: ./ResumeContract_TTrace_1784699822.tla

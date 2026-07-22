@@ -1,11 +1,11 @@
 // remit_verus_all.rs — composed LEGACY verification target: the trimmed
 // contents of remit_verus.rs (EO/CO/PC/FD-keying core) and the CV lemmas of
-// remit_verus_cv_rd.rs, one Verus invocation, one tally.
+// remit_verus_cv.rs, one Verus invocation, one tally.
 //
 // The historical "all fifteen items / 15 verified" story is RETIRED: the
 // definitional FD lemma and the RD congruence pair are deleted from every
 // file (see the FD/RD notes below). The current formal surface is a SET of
-// standalone targets: this file, remit_verus.rs, remit_verus_cv_rd.rs,
+// standalone targets: this file, remit_verus.rs, remit_verus_cv.rs,
 // remit_verus_fd_machine.rs, remit_verus_rd_interp.rs, plus the two
 // documented expected-to-fail certificates under negative/ (kept out of
 // every verify-all glob). The new FD/RD machines stay standalone by design:
@@ -210,7 +210,7 @@ proof fn contract_smoke() {
     lemma_fd_ordinal_injective(7, 0, 1);
 }
 
-// ---- CV/RD (from remit_verus_cv_rd.rs, discharged) ----
+// ---- CV/RD (from remit_verus_cv.rs, discharged) ----
 
 // ---------------------------------------------------------------------------
 // Shared model fragments (duplicated from remit_verus.rs so this file stays
