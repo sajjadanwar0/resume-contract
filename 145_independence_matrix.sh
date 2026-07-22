@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # 145_independence_matrix.sh -- per-invariant TLC fault matrix (Table tab:ix)
 # ===========================================================================
-# Builds and runs the 33-cell independence matrix behind the paper's
+# Builds and runs the 39-cell independence matrix behind the paper's
 # Proposition "Partial independence, machine-checked":
-#   * 5 single-fault models on ResumeContract.tla x 6 invariants each,
-#     using the artifact's R1-R5 constants VERBATIM (the R4/nondetrec row
-#     keeps MaxCrashes=2, without which RD is vacuously clean);
+#   * 6 single-fault models on ResumeContract.tla x 6 invariants each,
+#     using the artifact's R1-R5/R9 constants VERBATIM (the R4/nondetrec
+#     and R9/prefixreplay rows keep MaxCrashes=2, without which RD is
+#     vacuously clean);
 #   * the R7_StateRebuild module x its 3 invariants.
 # Each cell is ONE TLC run checking ONE invariant, so a "holds" cell means
 # the invariant holds over the faulty model's ENTIRE reachable state space
@@ -13,7 +14,7 @@
 # "violated" cell reports the counterexample depth.
 #
 # The script then diffs the fresh verdicts against the expected matrix
-# (embedded below; container run 2026-07-18, OpenJDK 21, tla2tools latest)
+# (embedded below; container runs 2026-07-18 [33 cells] and 2026-07-21\n# [prefixreplay row + legacy re-verification], OpenJDK 21)
 # and exits nonzero on any mismatch, so a host replication is self-auditing.
 #
 # Usage:   bash 145_independence_matrix.sh [REPO_ROOT]   # default: .
@@ -48,7 +49,7 @@ resolve_tlc () {
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC"
 
-# ---- 1. generate the 33 configs (constants verbatim from R1-R5 / R7) ----
+# ---- 1. generate the 39 configs (constants verbatim from R1-R5/R9 / R7) ----
 python3 - "$IX_DIR" << 'PYGEN'
 import sys, os
 ix = sys.argv[1]
@@ -58,6 +59,7 @@ faults = {
     "invalidpersist": "FaultInvalidPersist",
     "nondetrec": "FaultNondetRecovery",
     "doubleconsume": "FaultDoubleConsume",
+    "prefixreplay": "FaultPrefixReplay",
 }
 invs = ["EffectExactlyOnce", "PrefixConsistency", "ForkDeterminism",
         "CheckpointValidity", "ConsumeOnce", "RecoveryDeterminism"]
@@ -75,6 +77,7 @@ CONSTANTS
   FaultInvalidPersist = {InvalidPersist}
   FaultNondetRecovery = {NondetRecovery}
   FaultDoubleConsume = {DoubleConsume}
+  FaultPrefixReplay = {PrefixReplay}
 INVARIANTS
   {inv}
 """
@@ -83,8 +86,9 @@ for ftag, fconst in faults.items():
              [("Replay", "FaultReplay"), ("ForkIgnore", "FaultForkIgnore"),
               ("InvalidPersist", "FaultInvalidPersist"),
               ("NondetRecovery", "FaultNondetRecovery"),
-              ("DoubleConsume", "FaultDoubleConsume")]}
-    crashes = 2 if ftag == "nondetrec" else 1   # R4 uses MaxCrashes = 2
+              ("DoubleConsume", "FaultDoubleConsume"),
+              ("PrefixReplay", "FaultPrefixReplay")]}
+    crashes = 2 if ftag in ("nondetrec", "prefixreplay") else 1   # R4/R9 use MaxCrashes = 2
     for inv in invs:
         with open(os.path.join(ix, f"IX_{ftag}__{inv}.cfg"), "w") as f:
             f.write(base.format(inv=inv, crashes=crashes, **flags))
@@ -99,7 +103,7 @@ INVARIANTS
 for inv in ["TypeOK", "EffectExactlyOnce", "PrefixContinuation"]:
     with open(os.path.join(ix, f"IX_staterebuild__{inv}.cfg"), "w") as f:
         f.write(r7.format(inv=inv))
-print("wrote 33 configs")
+print("wrote 39 configs")
 PYGEN
 
 # ---- 2. run TLC per cell ----
@@ -125,6 +129,7 @@ EXPECTED = {  # container run 2026-07-18; v=violated, h=holds
  "invalidpersist":{"EffectExactlyOnce":"h","PrefixConsistency":"h","ForkDeterminism":"h","CheckpointValidity":"v","ConsumeOnce":"h","RecoveryDeterminism":"h"},
  "nondetrec":     {"EffectExactlyOnce":"v","PrefixConsistency":"v","ForkDeterminism":"h","CheckpointValidity":"h","ConsumeOnce":"v","RecoveryDeterminism":"v"},
  "doubleconsume": {"EffectExactlyOnce":"v","PrefixConsistency":"h","ForkDeterminism":"h","CheckpointValidity":"h","ConsumeOnce":"v","RecoveryDeterminism":"h"},
+ "prefixreplay":  {"EffectExactlyOnce":"v","PrefixConsistency":"v","ForkDeterminism":"h","CheckpointValidity":"h","ConsumeOnce":"h","RecoveryDeterminism":"h"},
  "staterebuild":  {"TypeOK":"h","EffectExactlyOnce":"h","PrefixContinuation":"v"},
 }
 matrix, bad = {}, []
@@ -147,7 +152,7 @@ for out in sorted(glob.glob(os.path.join(ix, "IX_*.out"))):
         bad.append(f"{fault} x {inv}: got {verdict}, expected {exp}")
 meta = {
   "invocation": "tlc2.TLC -deadlock -config <cfg> -workers 1 <Module>.tla",
-  "constants": "R1-R5 rows use the artifact fault-config constants verbatim (nondetrec row: MaxCrashes=2); staterebuild rows use R7_staterebuild.cfg constants",
+  "constants": "R1-R5/R9 rows use the artifact fault-config constants verbatim (nondetrec and prefixreplay rows: MaxCrashes=2); staterebuild rows use R7_staterebuild.cfg constants",
   "semantics": "holds = invariant satisfied over the faulty model's entire reachable state space (TLC complete); violated = counterexample found",
 }
 json.dump({"meta": meta, "matrix": matrix},
@@ -155,7 +160,7 @@ json.dump({"meta": meta, "matrix": matrix},
 order = ["EffectExactlyOnce","PrefixConsistency","ForkDeterminism","CheckpointValidity","ConsumeOnce","RecoveryDeterminism"]
 lines = ["# Per-invariant fault matrix (Table tab:ix receipts)", "",
          "| Fault | EO | PC | FD | CV | CO | RD |", "|---|---|---|---|---|---|---|"]
-for f in ["replay","forkignore","invalidpersist","nondetrec","doubleconsume"]:
+for f in ["replay","forkignore","invalidpersist","nondetrec","doubleconsume","prefixreplay"]:
     row = [f]
     for inv in order:
         c = matrix[f][inv]
@@ -168,7 +173,7 @@ open(os.path.join(ix, "independence_matrix.md"), "w").write("\n".join(lines) + "
 print("\n".join(lines))
 if bad:
     print("\nMISMATCH vs expected verdicts:"); [print("  " + b) for b in bad]; sys.exit(1)
-print("\nAll 33 verdicts match the expected matrix. Receipts: formal/tla/independence/")
+print("\nAll 39 verdicts match the expected matrix. Receipts: formal/tla/independence/")
 PYCHK
 
 cp "$IX_DIR/independence_matrix.json" "$IX_DIR/independence_matrix.md" "$RES_DIR/"

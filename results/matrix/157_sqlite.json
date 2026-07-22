@@ -1,0 +1,54 @@
+stock k=1: p50=17.66ms p95=49.03ms thru=38.11/s eo_total=True
+stock k=4: p50=61.65ms p95=183.54ms thru=43.07/s eo_total=True
+stock k=16: p50=271.32ms p95=742.51ms thru=40.11/s eo_total=True
+stock k=64: p50=1169.32ms p95=2716.07ms thru=38.73/s eo_total=True
+{
+  "langgraph": "1.2.0",
+  "have_remit": false,
+  "stock": {
+    "1": {
+      "n": 200,
+      "p50_ms": 17.66,
+      "p95_ms": 49.03,
+      "p99_ms": 56.63,
+      "throughput_per_s": 38.11,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 61.65,
+      "p95_ms": 183.54,
+      "p99_ms": 199.38,
+      "throughput_per_s": 43.07,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 271.32,
+      "p95_ms": 742.51,
+      "p99_ms": 760.2,
+      "throughput_per_s": 40.11,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 1169.32,
+      "p95_ms": 2716.07,
+      "p99_ms": 2721.82,
+      "throughput_per_s": 38.73,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  }
+}

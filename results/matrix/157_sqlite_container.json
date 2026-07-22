@@ -1,0 +1,99 @@
+{
+  "langgraph": "1.2.9",
+  "pins_ok": true,
+  "interpreter": "/usr/bin/python3",
+  "host": "vm",
+  "have_remit": true,
+  "stock": {
+    "1": {
+      "n": 200,
+      "p50_ms": 8.64,
+      "p95_ms": 16.76,
+      "p99_ms": 51.06,
+      "throughput_per_s": 88.76,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 31.4,
+      "p95_ms": 42.67,
+      "p99_ms": 47.54,
+      "throughput_per_s": 121.99,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 143.66,
+      "p95_ms": 204.16,
+      "p99_ms": 248.16,
+      "throughput_per_s": 103.88,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 579.98,
+      "p95_ms": 741.08,
+      "p99_ms": 837.59,
+      "throughput_per_s": 102.62,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  },
+  "remit": {
+    "1": {
+      "n": 200,
+      "p50_ms": 8.38,
+      "p95_ms": 10.76,
+      "p99_ms": 26.41,
+      "throughput_per_s": 110.26,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 31.85,
+      "p95_ms": 38.64,
+      "p99_ms": 46.42,
+      "throughput_per_s": 123.77,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 124.44,
+      "p95_ms": 437.43,
+      "p99_ms": 580.06,
+      "throughput_per_s": 99.6,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 518.44,
+      "p95_ms": 653.41,
+      "p99_ms": 730.24,
+      "throughput_per_s": 114.31,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  }
+}

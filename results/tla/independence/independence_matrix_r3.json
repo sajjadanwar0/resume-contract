@@ -1,0 +1,40 @@
+{
+ "prefixreplay": {
+  "EffectExactlyOnce": {
+   "verdict": "violated",
+   "states": 7,
+   "depth": 4,
+   "matches_committed": true
+  },
+  "PrefixConsistency": {
+   "verdict": "violated",
+   "states": 7,
+   "depth": 4,
+   "matches_committed": true
+  },
+  "ForkDeterminism": {
+   "verdict": "holds",
+   "states": 287,
+   "depth": 13,
+   "matches_committed": true
+  },
+  "CheckpointValidity": {
+   "verdict": "holds",
+   "states": 287,
+   "depth": 13,
+   "matches_committed": true
+  },
+  "ConsumeOnce": {
+   "verdict": "holds",
+   "states": 287,
+   "depth": 13,
+   "matches_committed": true
+  },
+  "RecoveryDeterminism": {
+   "verdict": "holds",
+   "states": 287,
+   "depth": 13,
+   "matches_committed": true
+  }
+ }
+}

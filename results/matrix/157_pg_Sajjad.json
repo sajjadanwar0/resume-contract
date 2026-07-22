@@ -1,0 +1,192 @@
+{
+  "langgraph": "1.2.9",
+  "pins_ok": true,
+  "interpreter": "/home/neo/RustroverProjects/resume-contract/.venv/bin/python3",
+  "host": "Sajjad",
+  "have_remit": true,
+  "stock": {
+    "1": {
+      "n": 200,
+      "p50_ms": 17.78,
+      "p95_ms": 48.81,
+      "p99_ms": 59.82,
+      "throughput_per_s": 37.93,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 68.03,
+      "p95_ms": 189.5,
+      "p99_ms": 209.09,
+      "throughput_per_s": 39.94,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 269.86,
+      "p95_ms": 729.14,
+      "p99_ms": 774.95,
+      "throughput_per_s": 40.59,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 1153.63,
+      "p95_ms": 2702.93,
+      "p99_ms": 2743.07,
+      "throughput_per_s": 40.04,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  },
+  "remit": {
+    "1": {
+      "n": 200,
+      "p50_ms": 17.23,
+      "p95_ms": 45.29,
+      "p99_ms": 48.28,
+      "throughput_per_s": 40.33,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 67.6,
+      "p95_ms": 189.62,
+      "p99_ms": 209.64,
+      "throughput_per_s": 39.05,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 269.28,
+      "p95_ms": 727.64,
+      "p99_ms": 782.51,
+      "throughput_per_s": 40.11,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 1126.23,
+      "p95_ms": 2718.28,
+      "p99_ms": 2737.27,
+      "throughput_per_s": 39.42,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  },
+  "langgraph_checkpoint_postgres": "3.1.0",
+  "stock_pg": {
+    "1": {
+      "n": 200,
+      "p50_ms": 20.0,
+      "p95_ms": 23.93,
+      "p99_ms": 48.95,
+      "throughput_per_s": 48.74,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 75.48,
+      "p95_ms": 83.16,
+      "p99_ms": 89.24,
+      "throughput_per_s": 55.57,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 307.07,
+      "p95_ms": 369.72,
+      "p99_ms": 380.02,
+      "throughput_per_s": 50.86,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 1231.32,
+      "p95_ms": 1302.74,
+      "p99_ms": 1335.46,
+      "throughput_per_s": 49.66,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  },
+  "remit_pg": {
+    "1": {
+      "n": 200,
+      "p50_ms": 20.11,
+      "p95_ms": 22.11,
+      "p99_ms": 26.13,
+      "throughput_per_s": 49.29,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 77.93,
+      "p95_ms": 88.48,
+      "p99_ms": 164.32,
+      "throughput_per_s": 50.01,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 302.15,
+      "p95_ms": 319.83,
+      "p99_ms": 322.18,
+      "throughput_per_s": 54.91,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 1235.26,
+      "p95_ms": 1329.57,
+      "p99_ms": 1339.8,
+      "throughput_per_s": 48.99,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  }
+}

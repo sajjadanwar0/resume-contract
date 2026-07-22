@@ -1,0 +1,268 @@
+{
+  "IX_doubleconsume__CheckpointValidity": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_doubleconsume__ConsumeOnce": [
+    "violated",
+    "20",
+    "20",
+    6,
+    "6"
+  ],
+  "IX_doubleconsume__EffectExactlyOnce": [
+    "violated",
+    "20",
+    "20",
+    6,
+    "6"
+  ],
+  "IX_doubleconsume__ForkDeterminism": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_doubleconsume__PrefixConsistency": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_doubleconsume__RecoveryDeterminism": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_forkignore__CheckpointValidity": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_forkignore__ConsumeOnce": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_forkignore__EffectExactlyOnce": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_forkignore__ForkDeterminism": [
+    "violated",
+    "10",
+    "10",
+    5,
+    "5"
+  ],
+  "IX_forkignore__PrefixConsistency": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_forkignore__RecoveryDeterminism": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_invalidpersist__CheckpointValidity": [
+    "violated",
+    "8",
+    "8",
+    5,
+    "5"
+  ],
+  "IX_invalidpersist__ConsumeOnce": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_invalidpersist__EffectExactlyOnce": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_invalidpersist__ForkDeterminism": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_invalidpersist__PrefixConsistency": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_invalidpersist__RecoveryDeterminism": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "IX_nondetrec__CheckpointValidity": [
+    "holds",
+    "620",
+    "396",
+    0,
+    "11"
+  ],
+  "IX_nondetrec__ConsumeOnce": [
+    "violated",
+    "43",
+    "39",
+    6,
+    "6"
+  ],
+  "IX_nondetrec__EffectExactlyOnce": [
+    "violated",
+    "11",
+    "11",
+    4,
+    "4"
+  ],
+  "IX_nondetrec__ForkDeterminism": [
+    "holds",
+    "620",
+    "396",
+    0,
+    "11"
+  ],
+  "IX_nondetrec__PrefixConsistency": [
+    "violated",
+    "11",
+    "11",
+    4,
+    "4"
+  ],
+  "IX_nondetrec__RecoveryDeterminism": [
+    "violated",
+    "10",
+    "10",
+    4,
+    "4"
+  ],
+  "IX_prefixreplay__CheckpointValidity": [
+    "holds",
+    "287",
+    "183",
+    0,
+    "13"
+  ],
+  "IX_prefixreplay__ConsumeOnce": [
+    "holds",
+    "287",
+    "183",
+    0,
+    "13"
+  ],
+  "IX_prefixreplay__EffectExactlyOnce": [
+    "violated",
+    "7",
+    "7",
+    4,
+    "4"
+  ],
+  "IX_prefixreplay__ForkDeterminism": [
+    "holds",
+    "287",
+    "183",
+    0,
+    "13"
+  ],
+  "IX_prefixreplay__PrefixConsistency": [
+    "violated",
+    "7",
+    "7",
+    4,
+    "4"
+  ],
+  "IX_prefixreplay__RecoveryDeterminism": [
+    "holds",
+    "287",
+    "183",
+    0,
+    "13"
+  ],
+  "IX_replay__CheckpointValidity": [
+    "holds",
+    "108",
+    "72",
+    0,
+    "10"
+  ],
+  "IX_replay__ConsumeOnce": [
+    "violated",
+    "45",
+    "35",
+    7,
+    "7"
+  ],
+  "IX_replay__EffectExactlyOnce": [
+    "violated",
+    "7",
+    "7",
+    4,
+    "4"
+  ],
+  "IX_replay__ForkDeterminism": [
+    "holds",
+    "108",
+    "72",
+    0,
+    "10"
+  ],
+  "IX_replay__PrefixConsistency": [
+    "violated",
+    "7",
+    "7",
+    4,
+    "4"
+  ],
+  "IX_replay__RecoveryDeterminism": [
+    "holds",
+    "108",
+    "72",
+    0,
+    "10"
+  ],
+  "R0_reference": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ],
+  "R6_liveness": [
+    "holds",
+    "87",
+    "59",
+    0,
+    "8"
+  ]
+}

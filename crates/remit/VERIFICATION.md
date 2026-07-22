@@ -1,18 +1,43 @@
 # Remit verification (Verus)
 
 Protocol spec: `formal/tla/ResumeContract.tla` reference config `R0_reference`
-(TLC: all six invariants, no error). Implementation: `src/lib.rs`. Proof:
-`proof/remit_verus.rs`, targeting Verus 0.2026.05.03.8b81855.
+(TLC: all six invariants, no error). Implementation: `src/lib.rs`. Proofs:
+`proof/remit_verus.rs` (EO/CO, PC, FD), `proof/remit_verus_cv_rd.rs` (CV, RD),
+and the composed target `proof/remit_verus_all.rs` (all fifteen items, one
+invocation). Toolchain: Verus 0.2026.05.03.8b81855.
+
+**Standing tallies (2026-07-21, developer host, pinned toolchain):**
+
+| Target | Tally | Code-level `assume` count† |
+|---|---|---:|
+| `proof/remit_verus.rs` | `verification results:: 11 verified, 0 errors` | 0 |
+| `proof/remit_verus_cv_rd.rs` | `verification results:: 4 verified, 0 errors` | 0 |
+| `proof/remit_verus_all.rs` | `verification results:: 15 verified, 0 errors` | 0 |
+
+†**Certification rule.** A Verus tally is citable only alongside a zero
+comment-filtered `assume` count of the exact file verified, because a lemma
+body of `assume(false)` produces the identical "verified" tally vacuously:
+
+```bash
+for f in crates/remit/proof/remit_verus{,_cv_rd,_all}.rs; do
+  printf "%s: " "$f"; grep -v '^\s*//' "$f" | grep -c 'assume' || true
+done   # 2026-07-21 result: 0, 0, 0
+```
+
+These are the numbers the manuscript reports (abstract and Sec. 7.3 of
+revision r5). To re-attest, run the three commands below; any change in
+tally or grep count supersedes this entry and must be reflected in the
+paper before submission.
 
 ## Run
 
 ```
 verus crates/remit/proof/remit_verus.rs
+verus crates/remit/proof/remit_verus_cv_rd.rs
+verus crates/remit/proof/remit_verus_all.rs
 ```
 
-Expected: `verification results:: N verified, 0 errors`.
-
-## Obligation inventory (from proof/remit_verus.rs)
+## Obligation inventory (proof/remit_verus.rs)
 
 | Metric | Count |
 |--------|------:|
@@ -22,7 +47,7 @@ Expected: `verification results:: N verified, 0 errors`.
 | `ensures` clauses (obligations discharged) | 8 |
 | In-proof assertions | 17 |
 
-## Property to obligation map
+## Property to obligation map (core)
 
 | Contract | Verus lemma | Statement discharged |
 |----------|-------------|----------------------|
@@ -32,7 +57,7 @@ Expected: `verification results:: N verified, 0 errors`.
 | FD | `lemma_fd_ordinal_injective`, `lemma_fd_distinct_values_served_distinctly` | distinct ordinals key distinct branches; distinct supplied values served distinctly |
 | wiring | `contract_smoke` | the lemmas compose on a concrete instance |
 
-## Status
+## Status (core)
 
 First discharge on the developer host (Verus 0.2026.05.03.8b81855):
 `verification results:: 10 verified, 1 errors`. The single failure was the
@@ -46,30 +71,38 @@ host, confirmed: `verification results:: 11 verified, 0 errors`
 (Verus 0.2026.05.03.8b81855). All stated obligations for EO/CO, PC, and FD
 are machine-checked; the proof is unbounded and structural.
 
-## CV and RD lemma set (proof/remit_verus_cv_rd.rs)
-
-Run:
-
-```
-verus crates/remit/proof/remit_verus_cv_rd.rs
-```
-
-Expected: `verification results:: 4 verified, 0 errors`.
+## CV and RD lemma set (proof/remit_verus_cv_rd.rs) -- DISCHARGED
 
 | Contract | Verus lemma | Statement discharged |
 |----------|-------------|----------------------|
-| CV | `lemma_cv_init`, `lemma_cv_gate_preserves` | the empty log is valid; the guarded commit preserves log validity for every record it admits |
+| CV | `lemma_cv_init`, `lemma_cv_gate_preserves` | the empty log is valid; the validity gate preserves log validity on every step (case split on `valid(rec)`; push-index unfolding) |
 | RD | `lemma_rd_functional`, `lemma_rd_order_independent` | recovery is a pure function of the durable log; recovery is invariant under reordering of same-superstep write sets |
 
-Three spec helpers are declared `uninterp`: `valid(rec)`, `recover(log)`,
-and `same_superstep_writeset(a, b)`. The first discharge already passed
-but emitted three deprecation warnings (bodyless `spec` functions without
-the marker become hard errors in future Verus); the modernization and
-clean re-discharge are logged below. CV is additionally
-demonstrated live (probe 123, silent persistence converted to loud
-rejection); RD's executor-layer evidence is probes 124/128. This file
-completes the stated obligation set at the model level; it does not verify
-the shim implementations.
+Lemma statements (names, `requires`, `ensures`) are verbatim from the
+original obligation file. Uninterpreted helpers in the discharged file:
+`valid(rec)` and `recover_of_writeset(ws)`; `same_superstep_writeset(a, b)`
+is now an open definition (multiset equality of the record sequences), and
+`recover(log)` is defined as `recover_of_writeset(log.records.to_multiset())`.
+
+**Modeling commitment (RD).** The RD pair is discharged under the
+refinement the original file's own TODO prescribed: recovery is defined to
+consult exactly the durable write-set of the sequenced log -- it factors
+through the record multiset. This mirrors the implemented sequencer, whose
+recovery scan reads the journal's write-set; order-independence within a
+superstep window is therefore a theorem of the model under this commitment,
+not an assumption about it. CV is additionally demonstrated live (probe
+123, silent persistence converted to loud rejection); RD's executor-layer
+evidence is probes 124/128. This file completes the stated obligation set
+at the model level; it does not verify the shim implementations.
+
+## Composed target (proof/remit_verus_all.rs)
+
+`remit_verus_all.rs` merges the two lemma files over a shared definition
+set: `remit_verus.rs` verbatim plus the discharged CV/RD items, one
+`verus!` block, one `main`, the `use` set unified. A single invocation
+discharges all fifteen items -- `verification results:: 15 verified, 0
+errors` -- retiring the two-file composition caveat; Sec. 7.3 of manuscript
+revision r5 cites this target and this log.
 
 ## Verification log
 
@@ -92,9 +125,71 @@ Verus
   Toolchain: 1.95.0-x86_64-unknown-linux-gnu
 ```
 
-Standing tallies on this toolchain: `proof/remit_verus.rs` --- 11
-verified, 0 errors; `proof/remit_verus_cv_rd.rs` --- 4 verified, 0
-errors. These are the numbers the manuscript reports (abstract and
-Sec. 8.2). To re-attest, run both commands above; any change in tally
-supersedes this entry and must be reflected in the paper before
-submission.
+**[2026-07-21] Audit finding and supersession.** An external audit of the
+committed artifact found `proof/remit_verus_cv_rd.rs` carrying
+`assume(false)` placeholder bodies in all four lemmas (file header:
+"STATUS: UNDISCHARGED"), contradicting both the 2026-07-17 log entry above
+and the manuscript's tally. Under `assume(false)` the identical
+`4 verified, 0 errors` line is produced vacuously, so the 2026-07-17 entry
+cannot be distinguished, from the committed evidence, from a placeholder
+tally; it is **superseded** by this entry. Same day: the placeholder
+revision was withdrawn and replaced by the discharged file (real proof
+bodies; the RD pair under the factored-recovery modeling commitment above);
+the composed target `remit_verus_all.rs` was added. Re-attested on the
+pinned toolchain, developer host:
+
+```
+verus crates/remit/proof/remit_verus_cv_rd.rs
+verification results:: 4 verified, 0 errors
+verus crates/remit/proof/remit_verus_all.rs
+verification results:: 15 verified, 0 errors
+```
+
+Comment-filtered `assume` count across all three proof files: `0, 0, 0`
+(command and result recorded in the certification rule above). The
+certification rule is adopted from this date forward: no tally is citable
+without the accompanying grep.
+## Post-adoption verification status (2026-07-22)
+
+The definitional FD lemma (`lemma_fd_distinct_values_served_distinctly`,
+with its `served()` helper) and the RD congruence pair
+(`lemma_rd_functional`, `lemma_rd_order_independent`, with `recover`,
+`recover_of_writeset`, `same_superstep_writeset`) are **deleted**. The
+historical tallies (11 / 4 / 15) are **retired** and no longer citable.
+FD and RD are now theorems with inductive content, each paired with a
+machine-checked falsifying certificate. Fresh tallies, from actual runs
+on this date:
+
+```
+verus crates/remit/proof/remit_verus.rs
+verification results:: 10 verified, 0 errors
+verus crates/remit/proof/remit_verus_cv_rd.rs
+verification results:: 2 verified, 0 errors
+verus crates/remit/proof/remit_verus_all.rs
+verification results:: 12 verified, 0 errors
+verus crates/remit/proof/remit_verus_fd_machine.rs
+verification results:: 5 verified, 0 errors
+verus crates/remit/proof/remit_verus_rd_interp.rs
+verification results:: 6 verified, 0 errors
+verus crates/remit/proof/negative/fd_stock_certificate.rs
+verification results:: 2 verified, 1 errors
+verus crates/remit/proof/negative/rd_ordersensitive_certificate.rs
+verification results:: 2 verified, 1 errors
+```
+
+### Negative certificates (expected to FAIL -- by design)
+`negative/fd_stock_certificate.rs` and
+`negative/rd_ordersensitive_certificate.rs` MUST each report
+`1 errors` (`postcondition not satisfied`): the stock #6663 serving
+rule and the order-sensitive #8039 recovery rule falsify the same
+obligations the positive machines discharge. **That failure is the
+certificate** that the positive proofs have content. Keep `negative/`
+out of every verify-all glob, CI job, and `reproduce.sh` path; verify
+them only via the explicit commands above.
+
+### Composition note
+`remit_verus_fd_machine.rs` and `remit_verus_rd_interp.rs` are
+standalone by design (they re-declare model types such as
+`DurableLog`); merging them into `remit_verus_all.rs` requires a
+definition-sharing refactor and is deferred to the refinement work
+(N3). The composed file now covers the trimmed legacy core + CV only.

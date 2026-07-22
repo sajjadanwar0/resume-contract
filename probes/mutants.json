@@ -1,0 +1,58 @@
+[
+ {
+  "id": "M1",
+  "file": "langgraph/pregel/_algo.py",
+  "desc": "disable task-recorded resume precedence (the located #6663 binding site)",
+  "old": "            if w[0] == task_id and w[1] == RESUME:",
+  "new": "            if False and w[0] == task_id and w[1] == RESUME:"
+ },
+ {
+  "id": "M2",
+  "file": "langgraph/pregel/_algo.py",
+  "desc": "never find the null-task (incoming) resume write",
+  "old": "            if w[0] == NULL_TASK_ID and w[1] == RESUME:",
+  "new": "            if False and w[0] == NULL_TASK_ID and w[1] == RESUME:"
+ },
+ {
+  "id": "M3",
+  "file": "langgraph/pregel/_algo.py",
+  "desc": "resume-map value takes precedence over recorded list (append -> prepend)",
+  "old": "            task_resume_write.append(mapped_resume_write)",
+  "new": "            task_resume_write.insert(0, mapped_resume_write)"
+ },
+ {
+  "id": "M4",
+  "file": "langgraph/pregel/_algo.py",
+  "desc": "get_null_resume never consumes (double-consume hazard)",
+  "old": "        if consume:",
+  "new": "        if False:"
+ },
+ {
+  "id": "M7",
+  "file": "langgraph/pregel/_algo.py",
+  "desc": "non-consuming null-resume read returns nothing",
+  "old": "            except ValueError:\n                return None\n        return null_resume_write[2]",
+  "new": "            except ValueError:\n                return None\n        return None"
+ },
+ {
+  "id": "M8",
+  "file": "langgraph/pregel/_algo.py",
+  "desc": "sever parent-scratchpad resume fallback (subgraph path)",
+  "old": "                return parent_scratchpad.get_null_resume(consume)",
+  "new": "                return None"
+ },
+ {
+  "id": "M5",
+  "file": "langgraph/checkpoint/memory/__init__.py",
+  "desc": "drop the WRITES_IDX_MAP negative-slot mapping",
+  "old": "            inner_key = (task_id, WRITES_IDX_MAP.get(c, idx))",
+  "new": "            inner_key = (task_id, idx)"
+ },
+ {
+  "id": "M6",
+  "file": "langgraph/checkpoint/memory/__init__.py",
+  "desc": "remove the negative-index dedup exemption (the earlier draft's wrong mechanism)",
+  "old": "            if inner_key[1] >= 0 and outer_writes_ and inner_key in outer_writes_:",
+  "new": "            if outer_writes_ and inner_key in outer_writes_:"
+ }
+]

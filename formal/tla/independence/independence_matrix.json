@@ -1,7 +1,7 @@
 {
   "meta": {
     "invocation": "tlc2.TLC -deadlock -config <cfg> -workers 1 <Module>.tla",
-    "constants": "R1-R5 rows use the artifact fault-config constants verbatim (nondetrec row: MaxCrashes=2); staterebuild rows use R7_staterebuild.cfg constants",
+    "constants": "R1-R5/R9 rows use the artifact fault-config constants verbatim (nondetrec and prefixreplay rows: MaxCrashes=2); staterebuild rows use R7_staterebuild.cfg constants",
     "semantics": "holds = invariant satisfied over the faulty model's entire reachable state space (TLC complete); violated = counterexample found"
   },
   "matrix": {
@@ -131,6 +131,38 @@
         "verdict": "violated",
         "states": 10,
         "depth": 4
+      }
+    },
+    "prefixreplay": {
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states": 287,
+        "depth": 13
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states": 287,
+        "depth": 13
+      },
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states": 7,
+        "depth": 4
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states": 287,
+        "depth": 13
+      },
+      "PrefixConsistency": {
+        "verdict": "violated",
+        "states": 7,
+        "depth": 4
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states": 287,
+        "depth": 13
       }
     },
     "replay": {

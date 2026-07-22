@@ -19,8 +19,11 @@
 //   PC     commit advances the frontier by exactly one and never re-enters
 //          the durable prefix  (lemma_pc_strict_monotone,
 //          lemma_pc_no_prefix_reentry)
-//   FD     distinct resume ordinals key distinct branches, so distinct
-//          supplied values are served distinctly  (lemma_fd_ordinal_injective)
+//   FD     distinct resume ordinals key distinct branches
+//          (lemma_fd_ordinal_injective). The distinct-values-served-
+//          distinctly claim is now an INDUCTIVE theorem in
+//          remit_verus_fd_machine.rs (former definitional lemma deleted;
+//          falsifying certificate: negative/fd_stock_certificate.rs).
 
 use vstd::prelude::*;
 use vstd::seq::*;
@@ -177,34 +180,18 @@ proof fn lemma_pc_no_prefix_reentry(frontier: nat, task: nat)
 
 // ---- FD: resume ordinals key distinct branches -----------------------------
 // A branch is keyed by (checkpoint, resume ordinal). Within one checkpoint the
-// ordinal alone distinguishes branches; the served value is the value that
-// branch's invocation supplied (identity branch semantics), so distinct
-// ordinals with distinct supplied values are served distinctly.
+// ordinal alone distinguishes branches. The former "distinct values served
+// distinctly" lemma (definitional: served() WAS the keyed lookup) is DELETED;
+// the property now lives as an inductive theorem in
+// remit_verus_fd_machine.rs, with the #6663-rule falsifying certificate in
+// negative/fd_stock_certificate.rs.
 pub open spec fn branch_key(checkpoint: nat, ordinal: nat) -> (nat, nat) {
     (checkpoint, ordinal)
-}
-
-pub open spec fn served(supplied: Map<nat, nat>, ordinal: nat) -> nat
-    recommends supplied.dom().contains(ordinal)
-{
-    supplied[ordinal]
 }
 
 proof fn lemma_fd_ordinal_injective(checkpoint: nat, o1: nat, o2: nat)
     requires o1 != o2,
     ensures branch_key(checkpoint, o1) != branch_key(checkpoint, o2),
-{
-}
-
-proof fn lemma_fd_distinct_values_served_distinctly(
-    supplied: Map<nat, nat>, o1: nat, o2: nat,
-)
-    requires
-        supplied.dom().contains(o1),
-        supplied.dom().contains(o2),
-        supplied[o1] != supplied[o2],
-    ensures
-        served(supplied, o1) != served(supplied, o2),
 {
 }
 

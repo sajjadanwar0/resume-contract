@@ -1,13 +1,13 @@
 TLC2 Version 2026.04.09.014118 (rev: 389440f)
-Running breadth-first search Model-Checking with fp 46 and seed 8583881802675090140 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 88736] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 63 and seed -4503552106895652758 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 77080] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/ResumeContract.tla (file:/home/neo/RustroverProjects/resume-contract/formal/tla/independence/../ResumeContract.tla)
-Parsing file /tmp/tlc-3374860087096350431/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-3374860087096350431/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-3374860087096350431/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-3374860087096350431/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-3374860087096350431/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
-Parsing file /tmp/tlc-3374860087096350431/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-3374860087096350431/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-615444281627354135/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-615444281627354135/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-615444281627354135/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-615444281627354135/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-615444281627354135/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-615444281627354135/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-615444281627354135/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
@@ -19,9 +19,9 @@ Semantic processing of module ResumeContract
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module ResumeContract
-Starting... (2026-07-18 19:41:10)
+Starting... (2026-07-21 15:39:38)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-07-18 19:41:11.
+Finished computing initial states: 1 distinct state generated at 2026-07-21 15:39:38.
 Error: Invariant ConsumeOnce is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -38,7 +38,7 @@ State 1: <Initial predicate>
 /\ ckpts = <<>>
 /\ recHist = <<>>
 
-State 2: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
+State 2: <ExecTask line 108, col 3 to line 120, col 51 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -52,7 +52,7 @@ State 2: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 3: <EmitInterrupt line 116, col 3 to line 121, col 72 of module ResumeContract>
+State 3: <EmitInterrupt line 124, col 3 to line 129, col 72 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -66,7 +66,7 @@ State 3: <EmitInterrupt line 116, col 3 to line 121, col 72 of module ResumeCont
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 4: <Consume(va) line 126, col 3 to line 136, col 62 of module ResumeContract>
+State 4: <Consume(va) line 134, col 3 to line 144, col 62 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -80,7 +80,7 @@ State 4: <Consume(va) line 126, col 3 to line 136, col 62 of module ResumeContra
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 5: <CrashRecover line 156, col 3 to line 171, col 64 of module ResumeContract>
+State 5: <CrashRecover line 164, col 3 to line 182, col 64 of module ResumeContract>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -94,7 +94,7 @@ State 5: <CrashRecover line 156, col 3 to line 171, col 64 of module ResumeContr
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
 /\ recHist = <<[dur |-> 2, dec |-> "replay"]>>
 
-State 6: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
+State 6: <ExecTask line 108, col 3 to line 120, col 51 of module ResumeContract>
 /\ pcRegress = TRUE
 /\ effects = <<2, 1, 0>>
 /\ consumedVal = va
@@ -110,7 +110,7 @@ State 6: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
    [idx |-> 1, valid |-> TRUE] >>
 /\ recHist = <<[dur |-> 2, dec |-> "replay"]>>
 
-State 7: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
+State 7: <ExecTask line 108, col 3 to line 120, col 51 of module ResumeContract>
 /\ pcRegress = TRUE
 /\ effects = <<2, 2, 0>>
 /\ consumedVal = va
@@ -129,5 +129,5 @@ State 7: <ExecTask line 101, col 3 to line 112, col 51 of module ResumeContract>
 
 45 states generated, 35 distinct states found, 12 states left on queue.
 The depth of the complete state graph search is 7.
-Finished in 00s at (2026-07-18 19:41:11)
-Trace exploration spec path: ../ResumeContract_TTrace_1784385670.tla
+Finished in 00s at (2026-07-21 15:39:38)
+Trace exploration spec path: ../ResumeContract_TTrace_1784630377.tla

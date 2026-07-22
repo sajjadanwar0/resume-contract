@@ -1,0 +1,160 @@
+{
+  "pins": [
+    "langgraph==1.2.9",
+    "langgraph-checkpoint==4.1.1",
+    "langgraph-checkpoint-sqlite==3.1.0"
+  ],
+  "probes": [
+    "113_p1_langgraph_regressions.py",
+    "118_p3_langgraph_rd_interleavings.py",
+    "127_p6_langgraph_resume_map.py"
+  ],
+  "mutants": {
+    "M1": {
+      "description": "disable task-recorded resume precedence (the located #6663 binding site)",
+      "killed": true,
+      "killing_probes": {
+        "113_p1_langgraph_regressions.py": [
+          "T2_fork_on_resume_values_#6663.resume_false_value",
+          "T2_fork_on_resume_values_#6663.violation_second_resume_ignored"
+        ],
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_bare.resume_false_value",
+          "InMemorySaver_bare.violation_second_resume_ignored",
+          "InMemorySaver_map.interrupt_id",
+          "InMemorySaver_map.resume_false_value",
+          "InMemorySaver_map.violation_second_resume_ignored",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_bare.resume_false_value",
+          "SqliteSaver_bare.violation_second_resume_ignored",
+          "SqliteSaver_map.interrupt_id",
+          "SqliteSaver_map.resume_false_value",
+          "SqliteSaver_map.violation_second_resume_ignored"
+        ]
+      }
+    },
+    "M2": {
+      "description": "never find the null-task (incoming) resume write",
+      "killed": true,
+      "killing_probes": {
+        "113_p1_langgraph_regressions.py": [
+          "T1_resume_from_checkpoint_id_#7361.b_post_execs",
+          "T1_resume_from_checkpoint_id_#7361.final.__interrupt__",
+          "T1_resume_from_checkpoint_id_#7361.final.val",
+          "T1b_resume_thread_only_control.b_post_execs",
+          "T1b_resume_thread_only_control.final.__interrupt__",
+          "T1b_resume_thread_only_control.final.val",
+          "T2_fork_on_resume_values_#6663.resume_false_value",
+          "T2_fork_on_resume_values_#6663.resume_true_value",
+          "T3_functional_sync_#6792.final",
+          "T3_functional_sync_#6792.final.__interrupt__",
+          "T3_functional_sync_#6792.s3_execs",
+          "T3a_functional_async_#6792.final",
+          "T3a_functional_async_#6792.final.__interrupt__",
+          "T3a_functional_async_#6792.interrupts_on_resume",
+          "T3a_functional_async_#6792.s3_execs",
+          "T4_interrupt_consume_once.b_post_after_first_resume",
+          "T4_interrupt_consume_once.b_post_after_replay_attempt",
+          "T4_interrupt_consume_once.replay_result.__interrupt__",
+          "T4_interrupt_consume_once.replay_result.log"
+        ],
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_bare.resume_false_value",
+          "InMemorySaver_bare.resume_true_value",
+          "InMemorySaver_map.interrupt_id",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_bare.resume_false_value",
+          "SqliteSaver_bare.resume_true_value",
+          "SqliteSaver_map.interrupt_id"
+        ]
+      }
+    },
+    "M3": {
+      "description": "resume-map value takes precedence over recorded list (append -> prepend)",
+      "killed": true,
+      "killing_probes": {
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_map.interrupt_id",
+          "InMemorySaver_map.resume_false_value",
+          "InMemorySaver_map.violation_second_resume_ignored",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_map.interrupt_id",
+          "SqliteSaver_map.resume_false_value",
+          "SqliteSaver_map.violation_second_resume_ignored"
+        ]
+      }
+    },
+    "M4": {
+      "description": "get_null_resume never consumes (double-consume hazard)",
+      "killed": true,
+      "killing_probes": {
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_map.interrupt_id",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_map.interrupt_id"
+        ]
+      }
+    },
+    "M7": {
+      "description": "non-consuming null-resume read returns nothing",
+      "killed": true,
+      "killing_probes": {
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_map.interrupt_id",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_map.interrupt_id"
+        ]
+      }
+    },
+    "M8": {
+      "description": "sever parent-scratchpad resume fallback (subgraph path)",
+      "killed": true,
+      "killing_probes": {
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_map.interrupt_id",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_map.interrupt_id"
+        ]
+      }
+    },
+    "M5": {
+      "description": "drop the WRITES_IDX_MAP negative-slot mapping",
+      "killed": true,
+      "killing_probes": {
+        "113_p1_langgraph_regressions.py": [
+          "T2_fork_on_resume_values_#6663.resume_false_value",
+          "T2_fork_on_resume_values_#6663.violation_second_resume_ignored"
+        ],
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_bare.resume_false_value",
+          "InMemorySaver_bare.violation_second_resume_ignored",
+          "InMemorySaver_map.interrupt_id",
+          "InMemorySaver_map.resume_false_value",
+          "InMemorySaver_map.violation_second_resume_ignored",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_map.interrupt_id"
+        ]
+      }
+    },
+    "M6": {
+      "description": "remove the negative-index dedup exemption (the earlier draft's wrong mechanism)",
+      "killed": true,
+      "killing_probes": {
+        "127_p6_langgraph_resume_map.py": [
+          "InMemorySaver_bare.interrupt_id",
+          "InMemorySaver_map.interrupt_id",
+          "SqliteSaver_bare.interrupt_id",
+          "SqliteSaver_map.interrupt_id"
+        ]
+      }
+    }
+  },
+  "kill_rate": "8/8"
+}

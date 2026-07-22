@@ -1,0 +1,53 @@
+{
+  "langgraph_version": "1.2.9",
+  "pins_ok": true,
+  "interpreter": "/usr/bin/python3",
+  "PartA_address_demonstrator_under_subgraph": {
+    "interrupt_surfaced": true,
+    "resume_completed": true,
+    "sub_effect": 1,
+    "spurious_strips_during_normal_resume": 0,
+    "finding_address_heuristic_breaks_subgraph_resume": false
+  },
+  "PartB_inmemory": {
+    "B1_stock": {
+      "interrupt": true,
+      "resume_ok": true,
+      "resume_error": null,
+      "sub_effect": 1
+    },
+    "B1_shim": {
+      "interrupt": true,
+      "resume_ok": true,
+      "resume_error": null,
+      "sub_effect": 1
+    },
+    "B1_stock_identical": true,
+    "B2_first_resume_value": "A",
+    "B2_forked_resume_value": "B",
+    "B2_fork_honors_supplied_value": true,
+    "B2_effects_total": 2,
+    "B3_disposition": "silent",
+    "B3_effect_refired": false
+  },
+  "PartB_sqlite": {
+    "B1_stock": {
+      "interrupt": true,
+      "resume_ok": true,
+      "resume_error": null,
+      "sub_effect": 1
+    },
+    "B1_shim": {
+      "interrupt": true,
+      "resume_ok": true,
+      "resume_error": null,
+      "sub_effect": 1
+    },
+    "B1_stock_identical": true,
+    "B2_first_resume_value": "A",
+    "B2_forked_resume_value": "B",
+    "B2_fork_honors_supplied_value": true,
+    "B3_disposition": "silent",
+    "B3_effect_refired": false
+  }
+}

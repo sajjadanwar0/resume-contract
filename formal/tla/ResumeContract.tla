@@ -21,7 +21,7 @@
 (*   RD  RecoveryDeterminism  identical durable state yields identical     *)
 (*                            recovery decisions                           *)
 (*                                                                         *)
-(* Five fault switches model the violation classes observed live in the   *)
+(* Six fault switches model the violation classes observed live in the   *)
 (* pilot conformance study:                                                *)
 (*   FaultReplay          resume re-executes the completed prefix          *)
 (*                        (CrewAI @persist / from_checkpoint, probes       *)
@@ -34,6 +34,12 @@
 (*                        ally at equal durable state (LangGraph #8039)    *)
 (*   FaultDoubleConsume   a stray resume on a completed thread re-fires    *)
 (*                        the gated effect (CopilotKit #2315 class)        *)
+(*   FaultPrefixReplay    recovery restarts from task 1 but serves the     *)
+(*                        gated task's effect from the durable record --   *)
+(*                        memoized-gate prefix replay, the LangGraph       *)
+(*                        1.2.9 crash-path class (probes 118/133):         *)
+(*                        completed non-gated tasks re-execute while the   *)
+(*                        interrupt lifecycle stays exactly-once           *)
 (*                                                                         *)
 (* With all switches FALSE the module is the reference (gated) semantics;  *)
 (* TLC verifies all six invariants. With exactly one switch TRUE, TLC      *)
@@ -53,7 +59,8 @@ CONSTANTS
   FaultForkIgnore,
   FaultInvalidPersist,
   FaultNondetRecovery,
-  FaultDoubleConsume
+  FaultDoubleConsume,
+  FaultPrefixReplay
 
 ASSUME /\ NTasks \in Nat \ {0}
        /\ IP \in 2..NTasks
@@ -101,7 +108,8 @@ ExecTask ==
   /\ pc \in Tasks
   /\ ~waiting
   /\ (pc = IP) => (consumedVal # NoVal)   \* IP first executes via Consume
-  /\ effects'   = [effects EXCEPT ![pc] = @ + 1]
+  /\ effects'   = [effects EXCEPT ![pc] =
+                     IF FaultPrefixReplay /\ pc = IP THEN @ ELSE @ + 1]
   /\ ckpts'     = Append(ckpts,
                      [idx   |-> pc,
                       valid |-> ~(FaultInvalidPersist /\ pc = NTasks)])
@@ -157,12 +165,15 @@ CrashRecover ==
   /\ pc \in 2..NTasks
   /\ ~waiting
   /\ crashes' = crashes + 1
-  /\ \/ /\ ~FaultReplay /\ ~FaultNondetRecovery
+  /\ \/ /\ ~FaultReplay /\ ~FaultNondetRecovery /\ ~FaultPrefixReplay
         /\ pc'      = frontier + 1
         /\ recHist' = Append(recHist, [dur |-> frontier, dec |-> "skip"])
      \/ /\ FaultReplay
         /\ pc'      = 1
         /\ recHist' = Append(recHist, [dur |-> frontier, dec |-> "replay"])
+     \/ /\ FaultPrefixReplay
+        /\ pc'      = 1
+        /\ recHist' = Append(recHist, [dur |-> frontier, dec |-> "prefixreplay"])
      \/ /\ FaultNondetRecovery
         /\ \E d \in {"skip", "reexec"} :
              /\ pc' = IF d = "skip" THEN frontier + 1 ELSE frontier

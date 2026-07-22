@@ -1,0 +1,91 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_version": "4.1.1",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "python": "3.12.3",
+  "P1_same_run_downstream_consumer": {
+    "corrupting_write_raised": false,
+    "invoke_error_type": "ValidationError",
+    "consume_entered": 0,
+    "consume_completed": 0,
+    "failure_raised_in_user_consumer_frame": false,
+    "failure_raised_at_framework_input_mapping": true,
+    "get_state_error_after_failure": "ValidationError",
+    "history_profile": {
+      "history_read_error": "ValidationError",
+      "history_read_error_detail": "1 validation error for S\nitems.1\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_"
+    },
+    "raw_saver_profile": {
+      "n_checkpoints_raw": 3,
+      "none_per_checkpoint_raw_oldest_first": [
+        false,
+        false,
+        true
+      ],
+      "n_raw_checkpoints_containing_none": 1
+    },
+    "finding_failure_deferred_one_superstep_framework_frame": true,
+    "finding_corrupt_record_durable_before_failure": true,
+    "finding_6491_unreadable_thread_resurfaces_with_pending_task": true
+  },
+  "P2_readback_typing_and_model_validate": {
+    "invoke_error": null,
+    "get_state_succeeds": true,
+    "returned_items": [
+      "ok",
+      null
+    ],
+    "corrupt_element_runtime_type": "NoneType",
+    "schema_model_validate_raises": true,
+    "history_profile": {
+      "n_checkpoints": 3,
+      "none_per_checkpoint_oldest_first": [
+        false,
+        false,
+        true
+      ],
+      "first_index_with_none": 2,
+      "n_checkpoints_containing_none": 1
+    },
+    "finding_framework_returns_state_its_own_schema_rejects": true
+  },
+  "P3_second_run_on_corrupt_thread": {
+    "first_run_error": null,
+    "second_run_error": null,
+    "second_run_final_items": [
+      "fresh",
+      "clean-done"
+    ],
+    "raw_saver_profile": {
+      "n_checkpoints_raw": 6,
+      "none_per_checkpoint_raw_oldest_first": [
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "n_raw_checkpoints_containing_none": 2
+    },
+    "finding_corrupt_history_retained_alongside_new_run": true,
+    "finding_second_run_escapes_corruption_via_input_overwrite": true,
+    "finding_corruption_carries_into_second_run": false
+  },
+  "P4_fresh_process_deserialization_sqlite": {
+    "writer_rc": 0,
+    "reader_rc": 0,
+    "writer_invoke_error": null,
+    "fresh_process_get_state_succeeds": true,
+    "items": [
+      "ok",
+      null
+    ],
+    "corrupt_element_runtime_type": "NoneType",
+    "schema_model_validate_raises": true,
+    "fresh_process_history_read_succeeds": true,
+    "n_checkpoints": 3,
+    "none_in_any_checkpoint": true,
+    "finding_silence_survives_process_and_deser_boundary": true
+  }
+}

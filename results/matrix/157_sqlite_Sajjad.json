@@ -1,0 +1,99 @@
+{
+  "langgraph": "1.2.9",
+  "pins_ok": true,
+  "interpreter": "/home/neo/RustroverProjects/resume-contract/.venv/bin/python3",
+  "host": "Sajjad",
+  "have_remit": true,
+  "stock": {
+    "1": {
+      "n": 200,
+      "p50_ms": 17.59,
+      "p95_ms": 48.96,
+      "p99_ms": 62.69,
+      "throughput_per_s": 37.85,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 67.88,
+      "p95_ms": 188.25,
+      "p99_ms": 204.12,
+      "throughput_per_s": 40.61,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 269.07,
+      "p95_ms": 742.98,
+      "p99_ms": 779.39,
+      "throughput_per_s": 39.67,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 1146.78,
+      "p95_ms": 2681.33,
+      "p99_ms": 2719.06,
+      "throughput_per_s": 39.63,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  },
+  "remit": {
+    "1": {
+      "n": 200,
+      "p50_ms": 17.36,
+      "p95_ms": 47.74,
+      "p99_ms": 50.9,
+      "throughput_per_s": 38.67,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "4": {
+      "n": 200,
+      "p50_ms": 67.94,
+      "p95_ms": 183.18,
+      "p99_ms": 200.02,
+      "throughput_per_s": 40.77,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "16": {
+      "n": 200,
+      "p50_ms": 267.89,
+      "p95_ms": 743.09,
+      "p99_ms": 811.96,
+      "throughput_per_s": 39.2,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    },
+    "64": {
+      "n": 200,
+      "p50_ms": 1171.77,
+      "p95_ms": 2656.72,
+      "p99_ms": 2682.26,
+      "throughput_per_s": 39.89,
+      "total_gate_effects": 200,
+      "eo_total_matches_n": true,
+      "eo_per_protocol_exactly_once": true,
+      "protocols_with_duplicate_effect": []
+    }
+  }
+}
