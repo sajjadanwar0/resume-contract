@@ -208,3 +208,15 @@ standalone by design (they re-declare model types such as
 `DurableLog`); merging them into `remit_verus_all.rs` requires a
 definition-sharing refactor and is deferred to the refinement work
 (N3). The composed file now covers the trimmed legacy core + CV only.
+
+## N3: verified executable cores (2026-07-22)
+| target | tally | bridge to shipped code |
+|---|---|---|
+| `proof/remit_verus_recover_exec.rs` | `verification results:: 7 verified, 0 errors` | `recover_core` in `src/lib.rs` is line-identical outside proof-only blocks; CI gate: `n3_sync_check.sh` |
+| `proof/remit_verus_ledger_exec.rs` | `verification results:: 11 verified, 0 errors` | functional twins of `begin_effect`/`commit_checkpoint`; exhaustive differential bridge: `tests/n3_differential.rs` (~70k sequences, in CI) |
+
+The RD chain is closed end to end: the shipped `recover_core`'s contract is
+`result == spec_max(tasks) + 1`, with adjacent-transposition (#8039 window)
+invariance of `spec_max` proved in the same file. Exec tuple comparison is
+component-wise (this pin's vstd lacks exec `PartialEq` for tuples); no
+`assume_specification` is used anywhere -- the no-assume grep still holds.

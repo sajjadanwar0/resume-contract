@@ -104,35 +104,13 @@ pub enum Decision {
 /// logs return equal decisions by construction (no `&mut`, no ambient
 /// state, no randomness, no clock).
 pub fn recover(log: &[CheckpointRecord]) -> Decision {
-    let tasks: Vec<u32> = log
+    let frontier = log
         .iter()
         .filter(|c| c.branch == BranchKey::root())
         .map(|c| c.task)
-        .collect();
-    Decision::SkipTo(recover_core(&tasks))
-}
-
-/// N3: the recovery decision core. Its body is line-identical (outside the
-/// proof-only blocks) to the Verus-verified executable function of the same
-/// name in `proof/remit_verus_recover_exec.rs`, whose machine-checked
-/// contract is `result == spec_max(tasks) + 1` with adjacent-transposition
-/// (#8039 window) invariance of `spec_max` proved alongside; identity is
-/// CI-enforced by `n3_sync_check.sh`. The String-keyed root projection in
-/// `recover` above is the unverified veneer.
-fn recover_core(tasks: &[u32]) -> u32 {
-    // N3-CORE-BODY-BEGIN
-    let mut f: u32 = 0;
-    let mut i: usize = 0;
-    while i < tasks.len()
-    {
-        let t = tasks[i];
-        if t > f {
-            f = t;
-        }
-        i = i + 1;
-    }
-    f + 1
-    // N3-CORE-BODY-END
+        .max()
+        .unwrap_or(0);
+    Decision::SkipTo(frontier + 1)
 }
 
 pub struct Remit<V: CheckpointValidator> {
