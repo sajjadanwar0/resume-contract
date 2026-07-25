@@ -1,0 +1,20 @@
+# Drop at: envs/langgraph-durable/pyproject.toml   (then: uv lock --project envs/langgraph-durable)
+# Commits the revision-durable-backends campaign environment (results/revision/
+# MANIFEST.json pins) as a reproducible env, so probes 126-130, 128, and 139
+# stop depending on an ad hoc container venv or --with layering.
+[project]
+name = "env-langgraph-durable"
+version = "0.0.0"
+description = "Resume Contract revision cell: LangGraph 1.2.9 + durable checkpointers (sqlite, postgres) per results/revision/MANIFEST.json. Environment container, not a package."
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph==1.2.9",
+    "langgraph-checkpoint==4.1.1",
+    "langgraph-checkpoint-sqlite==3.1.0",
+    "langgraph-checkpoint-postgres==3.1.0",
+    "psycopg==3.3.4",
+    "pydantic>=2,<3",
+]
+
+[tool.uv]
+package = false
