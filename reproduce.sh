@@ -60,6 +60,8 @@ declare -A MODULE=(
   [R4_nondetrec]=ResumeContract [R5_doubleconsume]=ResumeContract
   [R6_liveness]=ResumeContract
   [LGF_AsImplemented]=LangGraphFork [LGF_ForkKeyed]=LangGraphFork
+  [SEP_reference]=R10_Separations [SEP_regate]=R10_Separations
+  [SEP_rebuild]=R10_Separations [SEP_redeliver]=R10_Separations
 )
 declare -A EXPECT=(
   [R0_reference]="Model checking completed. No error has been found."
@@ -71,10 +73,23 @@ declare -A EXPECT=(
   [R3_invalidpersist]="Invariant CheckpointValidity is violated"
   [R4_nondetrec]="Invariant RecoveryDeterminism is violated"
   [R5_doubleconsume]="Invariant ConsumeOnce is violated"
+  [SEP_reference]="Model checking completed. No error has been found."
+  [SEP_regate]="Invariant RecoveryDeterminism is violated"
+  [SEP_rebuild]="Invariant PrefixConsistency is violated"
+  [SEP_redeliver]="Invariant EffectExactlyOnce is violated"
 )
+# The four SEP_* headline cells are the conjunction-independence witnesses
+# (Proposition 2, clause (v)). Every SEP config checks ALL SEVEN invariants
+# (the R0_reference convention, not R1-R5's single-invariant one), so a fault
+# cell reporting its target property violated is also evidence that no other
+# invariant breaks first on the way there. What these four cells do NOT
+# establish is that the other five hold over the faulty model's entire
+# reachable state space -- that needs one complete run per (switch,
+# invariant) pair, which is 162_separations_matrix.sh (28 cells).
 for cfg in R0_reference R1_replay R2_forkignore R3_invalidpersist \
            R4_nondetrec R5_doubleconsume R6_liveness \
-           LGF_AsImplemented LGF_ForkKeyed; do
+           LGF_AsImplemented LGF_ForkKeyed \
+           SEP_reference SEP_regate SEP_rebuild SEP_redeliver; do
   $TLC -deadlock -config "$cfg.cfg" -workers 1 "${MODULE[$cfg]}.tla" \
        > "$cfg.audit.out" 2>&1 || true
   if grep -q "${EXPECT[$cfg]}" "$cfg.audit.out"; then

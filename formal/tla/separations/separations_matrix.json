@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "module": "R10_Separations.tla",
+    "bounds": "NTasks=3 IP=2 Values={va,vb} MaxResumes=2 MaxCrashes=2 MaxExtraResumes=1",
+    "claim": "each switch violates exactly one property while the other five hold over the entire reachable state space (TLC complete); the reference cell holds on all six, which is the module's sanity check",
+    "invocation": "tlc2.TLC -deadlock -config <cfg> -workers 1 R10_Separations.tla"
+  },
+  "matrix": {
+    "reference": {
+      "TypeOK": {
+        "verdict": "holds",
+        "states_generated": "175",
+        "states_distinct": "115",
+        "ce_depth": null
+      },
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states_generated": "175",
+        "states_distinct": "115",
+        "ce_depth": null
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states_generated": "175",
+        "states_distinct": "115",
+        "ce_depth": null
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "175",
+        "states_distinct": "115",
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "175",
+        "states_distinct": "115",
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states_generated": "175",
+        "states_distinct": "115",
+        "ce_depth": null
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "175",
+        "states_distinct": "115",
+        "ce_depth": null
+      }
+    },
+    "regate": {
+      "TypeOK": {
+        "verdict": "holds",
+        "states_generated": "257",
+        "states_distinct": "185",
+        "ce_depth": null
+      },
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states_generated": "257",
+        "states_distinct": "185",
+        "ce_depth": null
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states_generated": "257",
+        "states_distinct": "185",
+        "ce_depth": null
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "257",
+        "states_distinct": "185",
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "257",
+        "states_distinct": "185",
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states_generated": "257",
+        "states_distinct": "185",
+        "ce_depth": null
+      },
+      "RecoveryDeterminism": {
+        "verdict": "violated",
+        "states_generated": "35",
+        "states_distinct": "31",
+        "ce_depth": 6
+      }
+    },
+    "rebuild": {
+      "TypeOK": {
+        "verdict": "holds",
+        "states_generated": "213",
+        "states_distinct": "153",
+        "ce_depth": null
+      },
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states_generated": "213",
+        "states_distinct": "153",
+        "ce_depth": null
+      },
+      "PrefixConsistency": {
+        "verdict": "violated",
+        "states_generated": "4",
+        "states_distinct": "4",
+        "ce_depth": 3
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "213",
+        "states_distinct": "153",
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "213",
+        "states_distinct": "153",
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states_generated": "213",
+        "states_distinct": "153",
+        "ce_depth": null
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "213",
+        "states_distinct": "153",
+        "ce_depth": null
+      }
+    },
+    "redeliver": {
+      "TypeOK": {
+        "verdict": "holds",
+        "states_generated": "290",
+        "states_distinct": "193",
+        "ce_depth": null
+      },
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states_generated": "5",
+        "states_distinct": "5",
+        "ce_depth": 3
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states_generated": "290",
+        "states_distinct": "193",
+        "ce_depth": null
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "290",
+        "states_distinct": "193",
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "290",
+        "states_distinct": "193",
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states_generated": "290",
+        "states_distinct": "193",
+        "ce_depth": null
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "290",
+        "states_distinct": "193",
+        "ce_depth": null
+      }
+    }
+  },
+  "missing": []
+}
