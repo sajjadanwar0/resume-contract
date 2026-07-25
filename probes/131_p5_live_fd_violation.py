@@ -36,7 +36,7 @@ if not os.environ.get("ANTHROPIC_API_KEY"):
     print(json.dumps({"skipped": "ANTHROPIC_API_KEY not set"}))
     sys.exit(0)
 
-from langchain.chat_models import init_chat_model  # noqa: E402
+from langchain_anthropic import ChatAnthropic  # noqa: E402
 from langgraph.prebuilt import create_react_agent  # noqa: E402
 from langgraph.checkpoint.memory import InMemorySaver  # noqa: E402
 from langgraph.types import Command  # noqa: E402
@@ -50,8 +50,8 @@ def set_discount(percent: int) -> str:
     return f"discount of {percent}% applied"
 
 
-model = init_chat_model(
-    "anthropic:" + os.environ.get("PROBE_MODEL", "claude-haiku-4-5"),
+model = ChatAnthropic(
+    model=os.environ.get("PROBE_MODEL", "claude-haiku-4-5"),
     temperature=0)
 saver = InMemorySaver()
 agent = create_react_agent(

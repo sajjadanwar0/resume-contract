@@ -27,6 +27,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 STABLE_EXACT = {
+    "identical",
+    "copies_byte_identical",
+    "rd_reflexive_same_log_identical_all",
+    "pc_observable_holds",
+    "invalid_write_rejected_loudly",
+    "get_tuple_error_after_corrupt_write",
     "result",
     "outcome",
     "crashed",

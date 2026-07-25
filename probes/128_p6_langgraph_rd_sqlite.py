@@ -17,9 +17,21 @@ from identical crash points regardless of which of the two ops landed. If
 W and C resume to different s1 counts, the recovery decision is a function
 of persistence-op order -- the divergence #8039 predicts, demonstrated
 deterministically on the durable saver without racing the pool.
+
+REFLEXIVE ARM (same-log double recovery, byte-identical). Property 6 as
+stated is determinism proper: two recoveries from IDENTICAL durable logs
+make identical decisions. On the durable backend the identical-log premise
+is realized literally: per order, the crashed durable state is constructed
+once, the SQLite file is WAL-checkpointed, closed, and copied twice; each
+recovery runs against its own byte-identical copy (sha256 recorded) with a
+plain SqliteSaver (no drops), a freshly built workflow, and fresh effect
+counters. Verdict field: rd_reflexive_same_log_identical_all -- recovery
+decisions (effect counts, result, error) must match within every pair.
 """
+import hashlib
 import json
 import os
+import shutil
 import sqlite3
 import tempfile
 import traceback
@@ -58,8 +70,8 @@ class DroppingSqliteSaver(SqliteSaver):
         self._writes_count += 1
         self.log.append(("put_writes", self._writes_count, [w[0] for w in writes]))
         if (
-            self.drop_writes_after is not None
-            and self._writes_count > self.drop_writes_after
+                self.drop_writes_after is not None
+                and self._writes_count > self.drop_writes_after
         ):
             return
         return super().put_writes(config, writes, task_id, task_path)
@@ -136,6 +148,95 @@ def scenario(order: str):
     }
 
 
+def _sha256(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def scenario_same_log(order: str):
+    """Reflexive RD: construct one crashed durable file, recover twice from
+    byte-identical copies of it."""
+    db = os.path.join(WORKDIR, f"refl_{order}.sqlite")
+    conn = sqlite3.connect(db, check_same_thread=False)
+    saver = DroppingSqliteSaver(conn)
+    eff = {"s1": 0, "s2": 0}
+    crash = {"armed": True}
+    wf = build(saver, eff, crash)
+    cfg = {"configurable": {"thread_id": f"t-{order}"}}
+
+    if order == "W":
+        saver.drop_puts_after = 1
+    elif order == "C":
+        saver.drop_writes_after = 0
+
+    crashed = None
+    try:
+        wf.invoke(1, cfg, durability="sync")
+    except Crash:
+        crashed = "Crash"
+    except Exception as e:
+        crashed = type(e).__name__
+
+    construction = {
+        "crashed_as": crashed,
+        "s1_execs_at_crash": eff["s1"],
+        "persistence_log": list(saver.log),
+    }
+
+    # Flush and freeze the durable log: fold any WAL into the main file so a
+    # plain file copy is the complete durable state.
+    try:
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+    except Exception:
+        pass
+    conn.commit()
+    conn.close()
+    for side in ("-wal", "-shm"):
+        try:
+            os.remove(db + side)
+        except FileNotFoundError:
+            pass
+
+    src_sha = _sha256(db)
+    decisions = []
+    copy_shas = []
+    for k in (0, 1):
+        db_k = os.path.join(WORKDIR, f"refl_{order}_copy{k}.sqlite")
+        shutil.copyfile(db, db_k)
+        copy_shas.append(_sha256(db_k))
+        conn_k = sqlite3.connect(db_k, check_same_thread=False)
+        saver_k = SqliteSaver(conn_k)  # plain saver: recovery drops nothing
+        eff_k = {"s1": 0, "s2": 0}
+        crash_k = {"armed": False}
+        wf_k = build(saver_k, eff_k, crash_k)
+        result = resume_error = None
+        try:
+            result = wf_k.invoke(1, cfg, durability="sync")
+        except Exception as e:
+            resume_error = f"{type(e).__name__}: {e}"
+        conn_k.close()
+        decisions.append(
+            {
+                "s1_execs": eff_k["s1"],
+                "s2_execs": eff_k["s2"],
+                "result": result,
+                "resume_error": resume_error,
+            }
+        )
+
+    return {
+        "order": order,
+        "construction": construction,
+        "durable_log_sha256": src_sha,
+        "copies_byte_identical": copy_shas[0] == copy_shas[1] == src_sha,
+        "decisions": decisions,
+        "identical": decisions[0] == decisions[1],
+    }
+
+
 def main():
     for order in ("N", "W", "C"):
         try:
@@ -150,10 +251,20 @@ def main():
             "recovery_identical_across_orders": w == c,
             "violation_rd": w != c,
             "note": "RD at checkpointer-API granularity on the durable saver; "
-            "the executor pool itself is not raced.",
+                    "the executor pool itself is not raced.",
         }
     except Exception:
         RESULTS["verdict"] = {"probe_error": traceback.format_exc()}
+
+    # Reflexive arm: Property 6 as written, on byte-identical durable files.
+    try:
+        refl = {order: scenario_same_log(order) for order in ("N", "W", "C")}
+        RESULTS["rd_reflexive_same_log"] = refl
+        RESULTS["rd_reflexive_same_log_identical_all"] = all(
+            r["identical"] and r["copies_byte_identical"] for r in refl.values()
+        )
+    except Exception:
+        RESULTS["rd_reflexive_same_log"] = {"probe_error": traceback.format_exc()}
     print(json.dumps(RESULTS, indent=2, default=str))
 
 

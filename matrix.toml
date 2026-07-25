@@ -69,3 +69,10 @@ id = "113v11"
 env = "langgraph-1.1"
 script = "probes/113_p1_langgraph_regressions.py"
 baseline = "results/regression"
+
+[[probe]]
+id = "152"
+env = "langgraph-live"
+script = "probes/152_p13_live_pc_cv.py"
+baseline = "results/live"
+requires_env = ["ANTHROPIC_API_KEY"]
