@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "bounds": "reference",
+    "constants": "reference: 145_independence_matrix.sh constants verbatim",
+    "semantics": "holds = invariant satisfied over the faulty model's entire reachable state space at these constants (TLC complete); violated = BFS counterexample, ce_depth = states in trace (worker-stable)"
+  },
+  "matrix": {
+    "replay": {
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states_generated": "43",
+        "states_distinct": "35",
+        "graph_depth": 7,
+        "ce_depth": 4
+      },
+      "PrefixConsistency": {
+        "verdict": "violated",
+        "states_generated": "43",
+        "states_distinct": "35",
+        "graph_depth": 7,
+        "ce_depth": 4
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "108",
+        "states_distinct": "72",
+        "graph_depth": 10,
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "108",
+        "states_distinct": "72",
+        "graph_depth": 10,
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "violated",
+        "states_generated": "80",
+        "states_distinct": "60",
+        "graph_depth": 9,
+        "ce_depth": 7
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "108",
+        "states_distinct": "72",
+        "graph_depth": 10,
+        "ce_depth": null
+      }
+    },
+    "forkignore": {
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "ForkDeterminism": {
+        "verdict": "violated",
+        "states_generated": "32",
+        "states_distinct": "30",
+        "graph_depth": 8,
+        "ce_depth": 6
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      }
+    },
+    "invalidpersist": {
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "violated",
+        "states_generated": "13",
+        "states_distinct": "13",
+        "graph_depth": 6,
+        "ce_depth": 6
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      }
+    },
+    "nondetrec": {
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states_generated": "160",
+        "states_distinct": "127",
+        "graph_depth": 9,
+        "ce_depth": 4
+      },
+      "PrefixConsistency": {
+        "verdict": "violated",
+        "states_generated": "182",
+        "states_distinct": "138",
+        "graph_depth": 9,
+        "ce_depth": 4
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "620",
+        "states_distinct": "396",
+        "graph_depth": 11,
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "620",
+        "states_distinct": "396",
+        "graph_depth": 11,
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "violated",
+        "states_generated": "266",
+        "states_distinct": "205",
+        "graph_depth": 10,
+        "ce_depth": 7
+      },
+      "RecoveryDeterminism": {
+        "verdict": "violated",
+        "states_generated": "211",
+        "states_distinct": "162",
+        "graph_depth": 9,
+        "ce_depth": 4
+      }
+    },
+    "doubleconsume": {
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states_generated": "73",
+        "states_distinct": "57",
+        "graph_depth": 8,
+        "ce_depth": 7
+      },
+      "PrefixConsistency": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "violated",
+        "states_generated": "73",
+        "states_distinct": "57",
+        "graph_depth": 8,
+        "ce_depth": 8
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "87",
+        "states_distinct": "59",
+        "graph_depth": 8,
+        "ce_depth": null
+      }
+    },
+    "prefixreplay": {
+      "EffectExactlyOnce": {
+        "verdict": "violated",
+        "states_generated": "43",
+        "states_distinct": "35",
+        "graph_depth": 7,
+        "ce_depth": 4
+      },
+      "PrefixConsistency": {
+        "verdict": "violated",
+        "states_generated": "43",
+        "states_distinct": "35",
+        "graph_depth": 7,
+        "ce_depth": 4
+      },
+      "ForkDeterminism": {
+        "verdict": "holds",
+        "states_generated": "287",
+        "states_distinct": "183",
+        "graph_depth": 13,
+        "ce_depth": null
+      },
+      "CheckpointValidity": {
+        "verdict": "holds",
+        "states_generated": "287",
+        "states_distinct": "183",
+        "graph_depth": 13,
+        "ce_depth": null
+      },
+      "ConsumeOnce": {
+        "verdict": "holds",
+        "states_generated": "287",
+        "states_distinct": "183",
+        "graph_depth": 13,
+        "ce_depth": null
+      },
+      "RecoveryDeterminism": {
+        "verdict": "holds",
+        "states_generated": "287",
+        "states_distinct": "183",
+        "graph_depth": 13,
+        "ce_depth": null
+      }
+    },
+    "staterebuild": {
+      "TypeOK": {
+        "verdict": "holds",
+        "states_generated": "11",
+        "states_distinct": "10",
+        "graph_depth": 6,
+        "ce_depth": null
+      },
+      "EffectExactlyOnce": {
+        "verdict": "holds",
+        "states_generated": "11",
+        "states_distinct": "10",
+        "graph_depth": 6,
+        "ce_depth": null
+      },
+      "PrefixContinuation": {
+        "verdict": "violated",
+        "states_generated": "6",
+        "states_distinct": "6",
+        "graph_depth": 4,
+        "ce_depth": 4
+      }
+    }
+  },
+  "missing": []
+}

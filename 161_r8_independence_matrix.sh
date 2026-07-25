@@ -9,10 +9,16 @@
 # R8 constants (NTasks=10, IP=5, |Values|=4, MaxResumes=5, MaxCrashes=4,
 # MaxExtraResumes=4), plus the R7 StateRebuild module scaled to NTasks=10.
 #   * "holds" cells = full exploration of the faulty model's reachable space
-#     at the scaled constants (hours of compute total on a 16-core host);
-#   * "violated" cells = BFS counterexample (fast; depth recorded from the
-#     trace's State count -- depth is worker-count-stable, abort-time state
-#     counts are not, per the paper's R8-F note).
+#     at the scaled constants (hours of compute total on a 16-core host),
+#     run with all workers;
+#   * "violated" cells = BFS counterexample, re-run with -workers 1. This is
+#     NOT belt-and-braces: at R8 scale parallel search returns non-minimal
+#     witnesses. Measured 2026-07-25 on IX8_forkignore__ForkDeterminism --
+#     16 workers reported a 9-state trace carrying a CrashRecover step that
+#     the 8-state single-worker trace reaches the same violation without.
+#     Verdicts are worker-invariant; depths are not, once levels stop
+#     draining before workers race ahead. Violated cells are seconds, so
+#     serializing them costs nothing and makes the depth a receipt.
 # The verdict pattern is diffed against the reference-bound footprints
 # (145_independence_matrix.sh). ANY divergence exits nonzero with a
 # FOOTPRINT-DIVERGENCE banner: that is a *finding to bring back*, not a bug.
@@ -144,6 +150,14 @@ for cfg in IX8_*.cfg; do
   $TLC -deadlock -metadir "meta_$name" -config "$cfg" -workers "$WORKERS" \
     "../$mod.tla" > "$name.out" 2>&1 || true   # violation runs exit nonzero
   rm -rf "meta_$name"
+  # Violated cells: re-run serialized so the recorded depth is the minimal
+  # witness and reproduces across hosts (see header). Costs seconds.
+  if grep -qE "Invariant [A-Za-z]+ is violated" "$name.out" && [[ "$WORKERS" != "1" ]]; then
+    rm -rf "meta_${name}_w1"; mkdir -p "meta_${name}_w1"
+    $TLC -deadlock -metadir "meta_${name}_w1" -config "$cfg" -workers 1 \
+      "../$mod.tla" > "$name.out" 2>&1 || true
+    rm -rf "meta_${name}_w1"
+  fi
   t1=$(date +%s)
   v=$(grep -oE "No error has been found|Invariant [A-Za-z]+ is violated" "$name.out" | head -1)
   echo "$name :: ${v:-UNKNOWN} :: $((t1-t0))s"
@@ -193,8 +207,10 @@ meta = {
                 "R7 scaled NTasks=10 MaxCrashes=4" if bounds == "r8"
                 else "reference: 145_independence_matrix.sh constants verbatim"),
   "semantics": "holds = invariant satisfied over the faulty model's entire reachable "
-               "state space at these constants (TLC complete); violated = BFS "
-               "counterexample, ce_depth = states in trace (worker-stable)",
+               "state space at these constants (TLC complete, all workers); violated = BFS "
+               "counterexample re-run at -workers 1, so ce_depth is the minimal witness "
+               "and reproduces across hosts; parallel search returns non-minimal traces "
+               "at this scale",
 }
 json.dump({"meta": meta, "matrix": matrix, "missing": missing},
           open(os.path.join(ix, "r8_matrix.json"), "w"), indent=2)
