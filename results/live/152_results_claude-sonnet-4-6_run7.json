@@ -1,0 +1,23 @@
+{
+  "langgraph_version": "1.2.9",
+  "langchain_anthropic_version": "1.4.8",
+  "model": "claude-sonnet-4-6",
+  "live_pc": {
+    "checkpoints_at_gate": 3,
+    "checkpoints_done": 5,
+    "pre_gate_lineage_is_prefix": true,
+    "pre_gate_messages_not_rewritten": true,
+    "ledger_at_gate": 0,
+    "ledger_done": 1,
+    "pc_observable_holds": true
+  },
+  "live_cv": {
+    "latest_id_suffix": "181f",
+    "corrupt_id_sorts_latest": true,
+    "invalid_write_rejected_loudly": false,
+    "invalid_write_error": null,
+    "corrupt_record_served_as_latest": null,
+    "get_tuple_error_after_corrupt_write": "KeyError: 'channel_versions'",
+    "get_state_error_after_corrupt_write": "KeyError: 'channel_versions'"
+  }
+}

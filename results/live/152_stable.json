@@ -1,0 +1,11 @@
+{
+  "langchain_anthropic_version": "1.4.8",
+  "langgraph_version": "1.2.9",
+  "live_cv": {
+    "get_tuple_error_after_corrupt_write": "KeyError: 'channel_versions'",
+    "invalid_write_rejected_loudly": false
+  },
+  "live_pc": {
+    "pc_observable_holds": true
+  }
+}

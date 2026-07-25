@@ -24,6 +24,30 @@
     "s1_execs_total": 2,
     "s2_execs_total": 1
   },
+  "rd_reflexive_same_log": {
+    "C": {
+      "construction": {
+        "crashed": "Crash",
+        "s1_execs_at_crash": 1
+      },
+      "identical": true
+    },
+    "N": {
+      "construction": {
+        "crashed": "Crash",
+        "s1_execs_at_crash": 1
+      },
+      "identical": true
+    },
+    "W": {
+      "construction": {
+        "crashed": "Crash",
+        "s1_execs_at_crash": 1
+      },
+      "identical": true
+    }
+  },
+  "rd_reflexive_same_log_identical_all": true,
   "s1_execs_order_C": 2,
   "s1_execs_order_N": 2,
   "s1_execs_order_W": 2,
