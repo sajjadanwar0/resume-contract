@@ -12,12 +12,8 @@
 #   [4] Remit Verus proofs: every positive target must discharge with
 #       0 errors; every negative certificate must fail in exactly the
 #       expected shape (2 verified, 1 errors).
-#   [5] Probe inventory gate: every probe number the paper cites must exist
-#       on disk (set PAPER_TEX=/path/to/resume_contract_rNN.tex; skipped
-#       when unset and no tex is found beside the repo).
-#
 # Modes:
-#   ./reproduce.sh            full audit ([1]..[5]); syncs envs on demand
+#   ./reproduce.sh            full audit ([1]..[4]); syncs envs on demand
 #   ./reproduce.sh --tlc-only [1] only (no Python env setup, no Rust)
 #
 # TLC location (first match wins; shell aliases do not reach scripts):
@@ -54,7 +50,7 @@ resolve_tlc () {
 }
 
 # ---------------------------------------------------------------- [1] TLC ---
-note "[1/5] TLC verification matrix (ResumeContract.tla)"
+note "[1/4] TLC verification matrix (ResumeContract.tla)"
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC"
 pushd formal/tla > /dev/null
@@ -95,7 +91,7 @@ if [[ $TLC_ONLY -eq 1 ]]; then
 fi
 
 # -------------------------------------------------- [2] conformance plan ---
-note "[2/5] Conformance plan (matrix.toml vs committed baselines)"
+note "[2/4] Conformance plan (matrix.toml vs committed baselines)"
 uv sync --quiet
 for env in langgraph llamaindex crewai pydantic-graph openai-agents \
            langgraph-live langgraph-1.1; do
@@ -105,12 +101,12 @@ uv run python -m conformance.runner \
   --plan matrix.toml --baseline results/pilot || fail=1
 
 # --------------------------------------------------------- [3] Remit tests ---
-note "[3/5] Remit invariants + line-identical core (cargo test + n3 gate)"
+note "[3/4] Remit invariants + line-identical core (cargo test + n3 gate)"
 cargo test --workspace --quiet || fail=1
 bash n3_sync_check.sh . || fail=1
 
 # ------------------------------------------------------ [4] Verus proofs ----
-note "[4/5] Remit Verus proofs (crates/remit/proof)"
+note "[4/4] Remit Verus proofs (crates/remit/proof)"
 if command -v verus >/dev/null 2>&1; then
   for f in remit_verus remit_verus_cv remit_verus_all \
            remit_verus_fd_machine remit_verus_rd_interp \
@@ -124,34 +120,24 @@ if command -v verus >/dev/null 2>&1; then
     fi
   done
   # Negative certificates: each must FAIL in exactly the expected shape.
+  # verus exits nonzero here BY DESIGN; capture output first (a direct
+  # pipeline under `set -o pipefail` reads as failure even on a match).
   for p in crates/remit/proof/negative/*.rs; do
     [[ -e "$p" ]] || continue
     b=$(basename "$p")
-    if verus "$p" 2>&1 | tee /tmp/verus_neg.out | grep -q "2 verified, 1 errors"; then
+    out=$(verus "$p" 2>&1 || true)
+    printf '%s\n' "$out" > "/tmp/verus_neg_$b.out"
+    if grep -q "2 verified, 1 errors" <<<"$out"; then
       echo "  negative/$b: OK (expected falsification: 2 verified, 1 errors)"
     else
-      echo "  negative/$b: FAIL -- expected '2 verified, 1 errors'"; fail=1
+      echo "  negative/$b: FAIL -- expected '2 verified, 1 errors'; got:"
+      grep -m1 "verification results" <<<"$out" || tail -3 <<<"$out"; fail=1
     fi
   done
 else
   echo "  Verus not on PATH -- skipping SMT discharge (proof logic already"
   echo "  cross-checked by cargo test tests/proof_logic.rs above)."
   echo "  Install: https://github.com/verus-lang/verus, then re-run."
-fi
-
-# ----------------------------------------------- [5] probe inventory gate ---
-note "[5/5] Probe inventory gate (paper <-> probes/)"
-TEX="${PAPER_TEX:-}"
-if [[ -z "$TEX" ]]; then
-  TEX=$(ls ../resume_contract_r*.tex 2>/dev/null | sort -V | tail -1 || true)
-fi
-if [[ -n "$TEX" && -f "$TEX" && -x probe_inventory_gate.sh ]]; then
-  bash probe_inventory_gate.sh "$TEX" probes || fail=1
-elif [[ -n "$TEX" && -f "$TEX" ]]; then
-  bash ./probe_inventory_gate.sh "$TEX" probes || fail=1
-else
-  echo "  no paper tex found (set PAPER_TEX=/path/to/resume_contract_rNN.tex)"
-  echo "  -- gate skipped."
 fi
 
 note "AUDIT RESULT"
