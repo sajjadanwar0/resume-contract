@@ -32,7 +32,7 @@ fn raise(e: core::RemitError) -> PyErr {
 }
 
 fn branch_dict<'py>(py: Python<'py>, b: &core::BranchKey) -> PyResult<Bound<'py, PyDict>> {
-    let d = PyDict::new_bound(py);
+    let d = PyDict::new(py);
     d.set_item("checkpoint_id", &b.checkpoint_id)?;
     d.set_item("resume_index", b.resume_index)?;
     Ok(d)
@@ -165,7 +165,7 @@ impl PyCore {
         let d = self
             .inner
             .with_plane(thread, |p| p.resolve_resume(checkpoint_id, supplied, k));
-        let out = PyDict::new_bound(py);
+        let out = PyDict::new(py);
         match d {
             core::ResumeDecision::ServeSupplied { branch } => {
                 out.set_item("decision", "serve_supplied")?;
@@ -186,7 +186,7 @@ impl PyCore {
     /// value during recovery re-traversal.
     fn recovery_replay<'py>(&self, py: Python<'py>, thread: &str, checkpoint_id: &str) -> PyResult<Bound<'py, PyDict>> {
         let d = self.inner.with_plane(thread, |p| p.recovery_replay(checkpoint_id));
-        let out = PyDict::new_bound(py);
+        let out = PyDict::new(py);
         match d {
             core::ResumeDecision::ServeRecorded { value } => {
                 out.set_item("decision", "serve_recorded")?;
@@ -339,11 +339,11 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyCore>()?;
     m.add_function(wrap_pyfunction!(fork_view, m)?)?;
     m.add_function(wrap_pyfunction!(recover_from_log, m)?)?;
-    m.add("RemitError", m.py().get_type_bound::<RemitError>())?;
-    m.add("RemitDuplicateEffect", m.py().get_type_bound::<RemitDuplicateEffect>())?;
-    m.add("RemitPrefixViolation", m.py().get_type_bound::<RemitPrefixViolation>())?;
-    m.add("RemitValidityError", m.py().get_type_bound::<RemitValidityError>())?;
-    m.add("RemitOrderViolation", m.py().get_type_bound::<RemitOrderViolation>())?;
+    m.add("RemitError", m.py().get_type::<RemitError>())?;
+    m.add("RemitDuplicateEffect", m.py().get_type::<RemitDuplicateEffect>())?;
+    m.add("RemitPrefixViolation", m.py().get_type::<RemitPrefixViolation>())?;
+    m.add("RemitValidityError", m.py().get_type::<RemitValidityError>())?;
+    m.add("RemitOrderViolation", m.py().get_type::<RemitOrderViolation>())?;
     m.add("__core_language__", "rust")?;
     Ok(())
 }
