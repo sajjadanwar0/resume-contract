@@ -8,12 +8,17 @@ can be audited rather than trusted.
 
 | Layer | Artifact | Checker | Status |
 |---|---|---|---|
-| Protocol spec | `formal/tla/ResumeContract.tla` (paper artifact) | TLC | R0 reference run: all six invariants, 0 errors; R8 scaled run 14.7 M states, depth 24 |
-| Abstract model | `crates/remit/proof/remit_verus.rs` (paper artifact) | Verus 0.2026.05.03.8b81855 | 11 verified, 0 errors |
-| CV/RD lemmas | `crates/remit/proof/remit_verus_cv.rs` (paper artifact) | Verus | 2 verified, 0 errors |
+| Protocol spec | `formal/tla/ResumeContract.tla` (paper artifact) | TLC | R0 reference run: all six invariants, 0 errors; R8 scaled run 7.4 M distinct states (14.7 M generated), depth 24 |
+| Abstract model | `crates/remit/proof/remit_verus.rs` (paper artifact) | Verus 0.2026.05.03.8b81855 | 10 verified, 0 errors (post-2026-07-22 lemma audit; the historical 11-item tally is retired in the paper artifact's ledger) |
+| Companion lemma files | `remit_verus_cv.rs`, `remit_verus_all.rs`, `remit_verus_fd_machine.rs`, `remit_verus_rd_interp.rs` (paper artifact) | Verus | 2 + 12 + 5 + 6 verified, 0 errors |
+| Executable decision cores | `remit_verus_recover_exec.rs`, `remit_verus_ledger_exec.rs` (paper artifact) | Verus (exec mode) | 7 + 11 verified, 0 errors; the recover body is line-identical to `remit-core`'s (byte-level CI sync gate) |
 | Production core | `crates/remit-core` (this repo) | rustc + test suites below | mirrors the model item-for-item |
 | PyO3 surface | `crates/remit-py` | rustc | type/exception translation only |
 | Framework veneer | `python/remit/langgraph_shim.py` | pytest | applies core verdicts; no contract branch of its own |
+
+Negative certificates (paper artifact, `proof/negative/`) each fail in the
+expected shape — `2 verified, 1 errors` — witnessing that the lemma
+statements are falsifiable, not vacuous.
 
 **Claimed:** (i) an item-for-item structural mirror between the verified
 model and `remit-core`, tabulated below; (ii) executable conformance of
@@ -68,7 +73,7 @@ guards an optional dependency; none encodes a contract rule.
 ## Reproducing the evidence
 
 ```bash
-cargo test -p remit-core                                  # 16 tests
+cargo test -p remit-core                                  # 17 tests
 REMIT_MODEL_CASES=20000 cargo test -p remit-core --release
 REMIT_STRESS_THREADS=64 REMIT_STRESS_OPS=500 \
   cargo test -p remit-core --release --test concurrency

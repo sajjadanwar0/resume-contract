@@ -1,5 +1,9 @@
 # remit-contract
 
+[![PyPI](https://img.shields.io/pypi/v/remit-contract)](https://pypi.org/project/remit-contract/)
+[![Python](https://img.shields.io/pypi/pyversions/remit-contract)](https://pypi.org/project/remit-contract/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **REMIT** — Rust-core enforcement of the **Resume Contract** for LLM-agent
 checkpoint, interrupt, and resume machinery, with a decision-free
 [LangGraph](https://github.com/langchain-ai/langgraph) checkpointer shim.
@@ -11,6 +15,9 @@ for Checkpoint, Interrupt, and Resume Semantics in LLM-Agent Frameworks"*
 ```bash
 pip install remit-contract
 ```
+
+Wheels ship as `abi3` for CPython >= 3.9 on x86_64 manylinux2014; every
+other platform builds from the sdist (needs Rust >= 1.75, nothing else).
 
 ## What it enforces
 
@@ -35,7 +42,7 @@ unsatisfiable (Proposition 1 of the paper).
 ```
 ┌────────────────────────────────────────────────────────────┐
 │ TLA+ spec (ResumeContract.tla) · TLC R0–R8                 │  machine-checked
-│ Verus abstract model · 11 + 4 lemmas, 0 errors             │  machine-checked
+│ Verus suite · 35 spec + 18 exec items, 0 errors            │  machine-checked
 ├────────────────────────────────────────────────────────────┤
 │ remit-core (Rust)                                          │  this package
 │   effect ledger · commit gate · fork resolution ·          │  mirrors the model
@@ -117,13 +124,63 @@ core.recover("run-1")                                     # -> 2 (pure, RD)
 ```bash
 pip install maturin
 maturin build --release           # wheel in target/wheels/
-cargo test -p remit-core          # 16 Rust tests
+cargo test -p remit-core          # 17 Rust tests
 REMIT_MODEL_CASES=20000 cargo test -p remit-core --release
 pytest tests/                     # bindings + LangGraph integration
 ```
 
 The Rust workspace builds on rustc ≥ 1.75 (Ubuntu 24.04's distribution
 toolchain); the test suite has zero external Rust dependencies.
+
+## Verification status
+
+| What | Checker | Status |
+|---|---|---|
+| Abstract model (10 lemmas) + companion files (2 + 12 + 5 + 6) | Verus 0.2026.05.03.8b81855 | 35 items, 0 errors |
+| Executable decision cores (recover 7, ledger 11) | Verus, exec mode | 18 items, 0 errors; recover body **line-identical** to `remit-core` (byte-level CI sync gate) |
+| Negative certificates | Verus | each fails in the expected `2 verified, 1 errors` shape — the lemmas are falsifiable, not vacuous |
+| Core ↔ model transition conformance | seeded randomized harness | 20 000 sequences, six invariants re-checked after every action |
+| Rust core | `cargo test -p remit-core` | 17 tests, incl. 32-thread contention suites |
+| Bindings + LangGraph repair | `pytest tests/` | 15 + 8 tests at the pins below |
+
+No mechanized refinement between the Verus model and the compiled core is
+claimed; the PyO3 boundary and the Python veneer are tested, not proved.
+`VERIFICATION.md` tabulates the lemma-to-function correspondence so the
+mirror can be audited rather than trusted.
+
+## Tested pins
+
+| Package | Version |
+|---|---|
+| `langgraph` | 1.2.9 |
+| `langgraph-checkpoint` | 4.1.1 |
+| `langgraph-checkpoint-sqlite` | 3.1.0 |
+| Python | 3.9 – 3.12 (abi3), CI on 3.12 |
+| rustc (from-source builds) | ≥ 1.75 |
+
+## Citation
+
+```bibtex
+@software{remit_contract,
+  author  = {Khan, Sajjad},
+  title   = {remit-contract: Rust-core enforcement of the Resume Contract
+             for LLM-agent checkpoint, interrupt, and resume semantics},
+  year    = {2026},
+  url     = {https://github.com/sajjadanwar0/remit-contract},
+  version = {0.1.0}
+}
+```
+
+The companion paper (*"Resume Means Resume"*) is under submission; its
+artifact lives at
+[`resume-contract-paper`](https://github.com/sajjadanwar0/resume-contract-paper).
+
+## Changelog
+
+**0.1.0** — initial release: Rust core (effect ledger, commit gate, fork
+resolution, sequencer/journal, pure recovery), PyO3 bindings, decision-free
+LangGraph checkpointer shim (fork repair on the probe-134 protocol; loud CV
+via user validators), verification chain as tabulated above.
 
 ## License
 
