@@ -17,7 +17,8 @@ pip install remit-contract
 ```
 
 Wheels ship as `abi3` for CPython >= 3.9 on x86_64 manylinux2014; every
-other platform builds from the sdist (needs Rust >= 1.75, nothing else).
+other platform builds from the sdist (needs Rust >= 1.83; on Ubuntu 24.04
+that is still the distribution toolchain: `apt install rustc-1.83 cargo-1.83`).
 
 ## What it enforces
 
@@ -129,8 +130,10 @@ REMIT_MODEL_CASES=20000 cargo test -p remit-core --release
 pytest tests/                     # bindings + LangGraph integration
 ```
 
-The Rust workspace builds on rustc ≥ 1.75 (Ubuntu 24.04's distribution
-toolchain); the test suite has zero external Rust dependencies.
+The Rust workspace builds on rustc ≥ 1.83 (pyo3 0.29's MSRV; still the
+Ubuntu 24.04 distribution toolchain via the versioned packages
+`rustc-1.83`/`cargo-1.83` --- no rustup needed); the test suite has zero
+external Rust dependencies.
 
 ## Verification status
 
@@ -156,7 +159,7 @@ mirror can be audited rather than trusted.
 | `langgraph-checkpoint` | 4.1.1 |
 | `langgraph-checkpoint-sqlite` | 3.1.0 |
 | Python | 3.9 – 3.12 (abi3), CI on 3.12 |
-| rustc (from-source builds) | ≥ 1.75 |
+| rustc (from-source builds) | ≥ 1.83 (Ubuntu 24.04: `rustc-1.83` package) |
 
 ## Citation
 
