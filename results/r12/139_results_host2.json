@@ -1,0 +1,53 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "iterations_per_config": 200,
+  "configs": {
+    "stock": {
+      "initial_invoke": {
+        "p50_ms": 58.752,
+        "p95_ms": 63.84,
+        "p99_ms": 69.22,
+        "mean_ms": 59.506
+      },
+      "resume": {
+        "p50_ms": 20.532,
+        "p95_ms": 22.668,
+        "p99_ms": 24.544,
+        "mean_ms": 20.685
+      }
+    },
+    "fork_intent": {
+      "initial_invoke": {
+        "p50_ms": 59.547,
+        "p95_ms": 67.166,
+        "p99_ms": 74.342,
+        "mean_ms": 60.625,
+        "p50_overhead_vs_stock_pct": 1.35
+      },
+      "resume": {
+        "p50_ms": 20.869,
+        "p95_ms": 22.542,
+        "p99_ms": 23.534,
+        "mean_ms": 21.099,
+        "p50_overhead_vs_stock_pct": 1.64
+      }
+    },
+    "validating": {
+      "initial_invoke": {
+        "p50_ms": 58.985,
+        "p95_ms": 66.159,
+        "p99_ms": 70.1,
+        "mean_ms": 59.649,
+        "p50_overhead_vs_stock_pct": 0.4
+      },
+      "resume": {
+        "p50_ms": 20.728,
+        "p95_ms": 22.495,
+        "p99_ms": 26.135,
+        "mean_ms": 20.79,
+        "p50_overhead_vs_stock_pct": 0.95
+      }
+    }
+  }
+}

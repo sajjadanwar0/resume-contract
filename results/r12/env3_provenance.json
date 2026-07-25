@@ -1,0 +1,20 @@
+{
+  "environment_id": "env3",
+  "description": "Third replication environment: Claude session container (independent of the paper's pilot container and developer host).",
+  "date": "2026-07-23",
+  "os": "Ubuntu 24.04 (container)",
+  "python": "3.12.3",
+  "cpu_note": "shared multi-tenant VM; latency numbers are noise-floor bounded, verdict fields are the stable claims",
+  "pins": [
+    "langchain-core==1.5.0",
+    "langgraph==1.2.9",
+    "langgraph-checkpoint==4.1.1",
+    "langgraph-checkpoint-sqlite==3.1.0",
+    "langgraph-prebuilt==1.1.0"
+  ],
+  "receipts": {
+    "results/r12/118_results_env3.json": "probe 118 with reflexive same-log arm; original two-order keys byte-equal to baseline run of the committed probe",
+    "results/r12/128_results_env3.json": "probe 128 with byte-identical file-copy reflexive arm (sha256 in receipt)",
+    "results/r12/139_results_env3.json": "probe 139 interposition overhead, N=200 per config"
+  }
+}

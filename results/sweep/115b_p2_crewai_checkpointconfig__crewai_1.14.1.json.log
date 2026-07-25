@@ -1,0 +1,166 @@
+╭──────────────────────────────────────────────────────────────────────────────────── 🌊 Flow Execution ─────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Starting Flow Execution                                                                                                                                                                   │
+│  Name: F                                                                                                                                                                                   │
+│  ID: 8cfa39ec-d0c0-45da-b763-2129c2e24494                                                                                                                                                  │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────────────────────────────── ✨ Update Available ✨ ──────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  A new version of CrewAI is available!                                                                                                                                                     │
+│                                                                                                                                                                                            │
+│  Current version: 1.14.1                                                                                                                                                                   │
+│  Latest version:  1.15.5                                                                                                                                                                   │
+│                                                                                                                                                                                            │
+│  To update, run: uv sync --upgrade-package crewai                                                                                                                                          │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭───────────────────────────────────────────────────────────────────────────────────── 🌊 Flow Started ──────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Flow Started                                                                                                                                                                              │
+│  Name: F                                                                                                                                                                                   │
+│  ID: 8cfa39ec-d0c0-45da-b763-2129c2e24494                                                                                                                                                  │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Flow started with ID: 8cfa39ec-d0c0-45da-b763-2129c2e24494
+╭────────────────────────────────────────────────────────────────────────────────── 🔄 Flow Method Running ──────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s1                                                                                                                                                                                │
+│  Status: Running                                                                                                                                                                           │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭───────────────────────────────────────────────────────────────────────────────── ✅ Flow Method Completed ─────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s1                                                                                                                                                                                │
+│  Status: Completed                                                                                                                                                                         │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────────────────────────────── 🔄 Flow Method Running ──────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s2                                                                                                                                                                                │
+│  Status: Running                                                                                                                                                                           │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭───────────────────────────────────────────────────────────────────────────────── ✅ Flow Method Completed ─────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s2                                                                                                                                                                                │
+│  Status: Completed                                                                                                                                                                         │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────────────────────────────────────────────── ✅ Flow Completion ────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Flow Execution Completed                                                                                                                                                                  │
+│  Name: F                                                                                                                                                                                   │
+│  ID: 8cfa39ec-d0c0-45da-b763-2129c2e24494                                                                                                                                                  │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────────────────────────────────────────────── 🌊 Flow Execution ─────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Starting Flow Execution                                                                                                                                                                   │
+│  Name: F                                                                                                                                                                                   │
+│  ID: 707e14a9-85b7-42ec-a2c6-1a67c1969a4f                                                                                                                                                  │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────────────────────────────── ✨ Update Available ✨ ──────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  A new version of CrewAI is available!                                                                                                                                                     │
+│                                                                                                                                                                                            │
+│  Current version: 1.14.1                                                                                                                                                                   │
+│  Latest version:  1.15.5                                                                                                                                                                   │
+│                                                                                                                                                                                            │
+│  To update, run: uv sync --upgrade-package crewai                                                                                                                                          │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭───────────────────────────────────────────────────────────────────────────────────── 🌊 Flow Started ──────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Flow Started                                                                                                                                                                              │
+│  Name: F                                                                                                                                                                                   │
+│  ID: 707e14a9-85b7-42ec-a2c6-1a67c1969a4f                                                                                                                                                  │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Flow started with ID: 707e14a9-85b7-42ec-a2c6-1a67c1969a4f
+╭────────────────────────────────────────────────────────────────────────────────── 🔄 Flow Method Running ──────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s1                                                                                                                                                                                │
+│  Status: Running                                                                                                                                                                           │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Error executing listener s2: simulated crash in s2
+
+╭───────────────────────────────────────────────────────────────────────────────── ✅ Flow Method Completed ─────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s1                                                                                                                                                                                │
+│  Status: Completed                                                                                                                                                                         │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────────────────────────────────────── ❌ Flow Method Failed ───────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s2                                                                                                                                                                                │
+│  Status: Failed                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────────────────────────────────────── 🔄 Flow Method Running ──────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                            │
+│  Method: s2                                                                                                                                                                                │
+│  Status: Running                                                                                                                                                                           │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+
+Auto-checkpoint failed for event method_execution_finished
+Traceback (most recent call last):
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/checkpoint_listener.py", line 131, in _on_any_event
+    _do_checkpoint(state, cfg)
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/checkpoint_listener.py", line 108, in _do_checkpoint
+    data = state.model_dump_json()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/pydantic/main.py", line 519, in model_dump_json
+    return self.__pydantic_serializer__.to_json(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.PydanticSerializationError: Unable to serialize unknown type: <class 'RuntimeError'>
+Auto-checkpoint failed for event method_execution_failed
+Traceback (most recent call last):
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/checkpoint_listener.py", line 131, in _on_any_event
+    _do_checkpoint(state, cfg)
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/checkpoint_listener.py", line 108, in _do_checkpoint
+    data = state.model_dump_json()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/pydantic/main.py", line 519, in model_dump_json
+    return self.__pydantic_serializer__.to_json(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.PydanticSerializationError: Unable to serialize unknown type: <class 'RuntimeError'>
+{
+  "crewai_version": "1.14.1",
+  "checkpoints_written_documented_event": 2,
+  "silent_noop_documented_event": false,
+  "violation_silent_noop_documented_event": false,
+  "first_run": "crashed as planned: RuntimeError",
+  "counter_at_crash": 1,
+  "n_checkpoints": 4,
+  "probe_error": "Traceback (most recent call last):\n  File \"/home/neo/RustroverProjects/resume-contract/probes/115b_p2_crewai_checkpointconfig.py\", line 104, in <module>\n    f2 = F.from_checkpoint(CheckpointConfig(restore_from=str(cps[-1])))\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/flow/flow.py\", line 940, in from_checkpoint\n    state = RuntimeState.from_checkpoint(\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/runtime.py\", line 133, in from_checkpoint\n    raw = provider.from_checkpoint(location)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/provider/json_provider.py\", line 80, in from_checkpoint\n    return Path(location).read_text()\n           ^^^^^^^^^^^^^^\n  File \"/home/neo/.local/share/uv/python/cpython-3.12.10-linux-x86_64-gnu/lib/python3.12/pathlib.py\", line 1162, in __init__\n    super().__init__(*args)\n  File \"/home/neo/.local/share/uv/python/cpython-3.12.10-linux-x86_64-gnu/lib/python3.12/pathlib.py\", line 373, in __init__\n    raise TypeError(\nTypeError: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'CheckpointConfig'\n"
+}

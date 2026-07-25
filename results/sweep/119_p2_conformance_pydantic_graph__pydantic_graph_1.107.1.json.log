@@ -1,0 +1,26 @@
+/home/neo/RustroverProjects/resume-contract/probes/119_p2_conformance_pydantic_graph.py:26: PydanticGraphDeprecationWarning: Importing `Graph` from `pydantic_graph` is deprecated. The `BaseNode`-based `Graph` runner and its persistence machinery are deprecated and will be removed (or repurposed) in v2; use the builder-based `GraphBuilder` API instead, or pin to `pydantic_graph<2` to keep using them.
+  from pydantic_graph import BaseNode, End, Graph, GraphRunContext
+{
+  "pydantic_graph_version": "1.107.1",
+  "G1_crash_resume": {
+    "crashed": "RuntimeError",
+    "a_execs_at_crash": 1,
+    "a_execs_total": 1,
+    "b_execs_total": 0,
+    "outcome": null,
+    "resume_error": "GraphRuntimeError: Unable to restore snapshot from state persistence.",
+    "expected_outcome_if_exactly_once": 11,
+    "violation_PC_EO_completed_node_reexecuted": false
+  },
+  "G2_completed_run_resume": {
+    "a_execs_after_stray_resume": 1,
+    "b_execs_after_stray_resume": 1,
+    "stray_resume_error": "GraphRuntimeError",
+    "stray_next_result": null,
+    "violation_CO_effect_refired": false
+  },
+  "G3_corrupt_snapshot": {
+    "corrupt_load_error": "ValidationError",
+    "violation_CV_silent_acceptance": false
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "skipped": "API restructured at 2.x",
+  "package": "pydantic-graph",
+  "version": "2.18.0",
+  "error": "ModuleNotFoundError: No module named 'pydantic_graph.persistence'"
+}
