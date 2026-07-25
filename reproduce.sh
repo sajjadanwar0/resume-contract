@@ -105,8 +105,9 @@ uv run python -m conformance.runner \
   --plan matrix.toml --baseline results/pilot || fail=1
 
 # --------------------------------------------------------- [3] Remit tests ---
-note "[3/5] Remit invariants + proof-logic cross-check (cargo test)"
+note "[3/5] Remit invariants + line-identical core (cargo test + n3 gate)"
 cargo test --workspace --quiet || fail=1
+bash n3_sync_check.sh . || fail=1
 
 # ------------------------------------------------------ [4] Verus proofs ----
 note "[4/5] Remit Verus proofs (crates/remit/proof)"
