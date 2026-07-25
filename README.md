@@ -1,187 +1,185 @@
-# remit-contract
+# resume-contract
 
-[![PyPI](https://img.shields.io/pypi/v/remit-contract)](https://pypi.org/project/remit-contract/)
-[![Python](https://img.shields.io/pypi/pyversions/remit-contract)](https://pypi.org/project/remit-contract/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+**Resume Means Resume: a conformance contract for checkpoint / interrupt /
+resume semantics in LLM-agent frameworks.**
 
-**REMIT** — Rust-core enforcement of the **Resume Contract** for LLM-agent
-checkpoint, interrupt, and resume machinery, with a decision-free
-[LangGraph](https://github.com/langchain-ai/langgraph) checkpointer shim.
+Six properties over the framework resume plane -- PC prefix consistency,
+EO effect exactly-once, FD fork determinism, CV checkpoint validity,
+CO consume-once, RD recovery determinism -- with (i) a machine-checked
+TLA+ model (TLC: reference config clean on all six; five single-fault
+configs each yield the targeted counterexample), (ii) a deterministic,
+LLM-free, timing-free conformance harness with a pilot matrix over
+LangGraph 1.2.9, LlamaIndex Workflows 2.22.2, and CrewAI 1.15.2, and
+(iii) `remit`, the verified-reference resume sequencer / effect ledger
+(Rust; Verus verification planned, see `crates/remit/VERIFICATION.md`).
 
-Companion package of the paper *"Resume Means Resume: A Conformance Contract
-for Checkpoint, Interrupt, and Resume Semantics in LLM-Agent Frameworks"*
-(paper artifact: [`resume-contract-paper`](https://github.com/sajjadanwar0/resume-contract-paper)).
+Single-command audit: `./reproduce.sh` re-derives every headline number
+from committed data (TLC matrix, probe verdicts vs baselines, remit
+invariant tests).
+
+## Layout
+
+```
+Cargo.toml                 Rust workspace root (open this in RustRover)
+crates/
+  remit/                   reference sequencer + append-only effect ledger
+                           (six property-named tests; TLA module R0 is its
+                           protocol spec)
+pyproject.toml             root uv project: harness package `conformance`
+                           + dev tooling (open repo root in PyCharm)
+envs/                      ONE ENV = ONE MATRIX CELL (framework@version)
+  langgraph/               langgraph==1.2.9, langgraph-checkpoint==4.1.1
+  llamaindex/              llama-index-workflows==2.22.2
+  crewai/                  crewai==1.15.2
+harness/conformance/       runner.py: executes matrix.toml through the env
+                           projects, audits stable verdict fields vs
+                           committed baselines
+matrix.toml                probe -> env plan (extend here for 117+)
+probes/                    numbered pilot probes (verbatim receipts)
+  113_p1_langgraph_regressions.py     #7361 #6663 #6792 + CO + #6491-class CV
+  114_p2_conformance_llamaindex.py    snapshot/fork/dual-response/wait_for_event/CV
+  115_p2_conformance_crewai.py        @persist restore + crash-resume
+  115b_p2_crewai_checkpointconfig.py  documented-event silent no-op +
+                                      from_checkpoint completed-work re-execution
+formal/tla/
+  ResumeContract.tla       the contract (6 invariants, 5 fault switches)
+  R0..R5*.cfg              reference + single-fault TLC configurations
+  116_run_tlc.sh           verification matrix runner
+results/pilot/  committed baselines per campaign: probe JSON (raw + stable
+                           view) and TLC logs -- what reproduce.sh audits
+archaeology/               issue-archaeology protocol (CODEBOOK.md),
+                           seed set (seeds.csv), dedup tool (dup_check.py)
+docs/decisions/            GO decision + crash-validation autopsy record
+scripts/                   numbered helper scripts (next free number: 117)
+reproduce.sh               single-command audit
+Makefile                   setup / pilot / tlc / rust / audit
+```
+
+Design note -- why per-framework env projects instead of one lockfile: the
+study's Threats section requires results tied to exact framework versions,
+and the full matrix includes per-version regression sweeps (e.g., langgraph
+1.0.x / 1.1.x / 1.2.x are three cells). A uv *workspace* forces one shared
+resolution; independent env projects give one pinned resolution per cell.
+The cells are deliberately trivial (`[tool.uv] package = false`, framework
+pins only, no local path dependencies): probes import only their framework,
+and the harness always runs from the ROOT env, so nothing nonstandard can
+interfere with resolution on any uv version or host configuration.
+
+## Prerequisites
+
+* uv >= 0.4 (https://docs.astral.sh/uv/) -- manages Python 3.12 itself via
+  `.python-version`; no system Python setup needed
+* Rust stable via rustup (`rust-toolchain.toml` pins channel/components)
+* Java >= 11 (TLC; `reproduce.sh` fetches `tla2tools.jar` on first run)
+
+## Step-by-step setup
 
 ```bash
-pip install remit-contract
+git clone https://github.com/sajjadanwar0/resume-contract-paper resume-contract
+cd resume-contract
+
+# 1. Python: resolve + install the root project and every matrix cell
+make setup            # = uv sync; uv sync --project envs/{langgraph,llamaindex,crewai}
+
+# 2. Formal: run the TLC verification matrix. The scripts locate TLC
+#    automatically: $TLC_CMD | $TLA_TOOLS_JAR | formal/tla/tla2tools.jar |
+#    $HOME/tla2tools.jar | download to $HOME. An existing
+#    ~/tla2tools.jar (e.g. behind an `alias tlc=...`) is picked up as is.
+make tlc              # R0 clean; R1-R5 each violate exactly the target invariant
+
+# 3. Rust: build + run the remit invariant tests
+make rust             # 7 tests, one per property (+ the 11-not-12 arithmetic)
+
+# 4. Pilot: run the conformance matrix and diff vs committed baselines
+make pilot
+
+# Everything at once, gate-style:
+./reproduce.sh        # or: ./reproduce.sh --tlc-only
 ```
 
-Wheels ship as `abi3` for CPython >= 3.9 on x86_64 manylinux2014; every
-other platform builds from the sdist (needs Rust >= 1.75, nothing else).
-
-## What it enforces
-
-The Resume Contract fixes six framework-independent obligations, each named
-after the production failure it excludes:
-
-| Property | Obligation | Failure it excludes |
-|---|---|---|
-| **PC** | prefix continuation | re-running completed work after resume |
-| **EO** | effect exactly-once | double-charged tools across crash/resume |
-| **FD** | fork determinism | a fork served the *previous* resume's value (LangGraph **#6663**) |
-| **CV** | checkpoint validity | schema-invalid state persisted silently (**#6491** class) |
-| **CO** | consume-once | a stray duplicate resume re-firing gated effects |
-| **RD** | recovery determinism | recovery dependent on racy durable-write order (**#8039**) |
-
-plus **FI** (fork-intent expressibility): the wire carries a discriminator
-separating "retry" from "fork", without which FD and CO are jointly
-unsatisfiable (Proposition 1 of the paper).
-
-## Architecture — where decisions live
-
-```
-┌────────────────────────────────────────────────────────────┐
-│ TLA+ spec (ResumeContract.tla) · TLC R0–R8                 │  machine-checked
-│ Verus suite · 35 spec + 18 exec items, 0 errors            │  machine-checked
-├────────────────────────────────────────────────────────────┤
-│ remit-core (Rust)                                          │  this package
-│   effect ledger · commit gate · fork resolution ·          │  mirrors the model
-│   sequencer/journal · pure recovery                        │  item-for-item
-├────────────────────────────────────────────────────────────┤
-│ remit-py (PyO3) → remit._core                              │  type translation
-├────────────────────────────────────────────────────────────┤
-│ remit.langgraph_shim (Python)                              │  decision-free
-│   asks the core; strips/keeps, raises/delegates            │  veneer
-└────────────────────────────────────────────────────────────┘
-```
-
-Every contract decision — may this effect fire? is this state persistable?
-is this invocation a fork? what does recovery do? — is taken in Rust, in
-code that mirrors the Verus-verified abstract model function for function
-(`VERIFICATION.md` tabulates the correspondence). The Python layers
-translate types and apply verdicts; they contain no branch on contract
-semantics. No mechanized refinement between the Verus model and the Rust
-core is claimed; what is claimed, and checkable, is the structural mirror,
-executable conformance of the core to the model's transition relation under
-a seeded randomized harness (20 000 sequences in CI, six invariants
-re-checked after every action), and a concurrent stress suite.
-
-## LangGraph quick start
-
-```python
-from langgraph.checkpoint.memory import InMemorySaver
-import remit
-
-saver = remit.wrap(InMemorySaver)          # fork-safe checkpointer
-graph = builder.compile(checkpointer=saver)
-```
-
-The wrapped saver repairs the fork cell on the probe-134 protocol: a second
-`Command(resume=...)` addressed to the interrupt checkpoint is served **its
-own** value on a fresh branch, instead of silently receiving the first
-resume's recorded value. Ordinary-address resumes (retry, replay, stray
-re-delivery) are byte-identical to the stock saver — replay idempotence and
-consume-once are untouched.
-
-With a state validator, CV becomes loud:
-
-```python
-def validate(checkpoint: dict) -> None:
-    ...  # raise on schema violation
-
-saver = remit.wrap(SqliteSaver, conn, validator=validate)
-# an invalid state now raises remit.RemitValidityError *before* persistence
-```
-
-Deployments where subgraph plumbing puts `checkpoint_id` on the ordinary
-path should key fork intent on the explicit flag instead:
-
-```python
-saver = remit.wrap(InMemorySaver, fork_on_explicit_checkpoint=False)
-graph.invoke(Command(resume=v),
-             {"configurable": {"thread_id": t, "checkpoint_id": c,
-                               "remit_fork": True}})
-```
-
-## Using the core directly
-
-```python
-from remit import Core, RemitDuplicateEffect
-
-core = Core()
-core.begin_effect("run-1", task=1, effect_id="charge")   # admitted, seq 0
-try:
-    core.begin_effect("run-1", task=1, effect_id="charge")
-except RemitDuplicateEffect:
-    pass                                                  # EO: refused
-
-core.commit_checkpoint("run-1", task=1, state=b"...")     # PC + CV gate
-core.recover("run-1")                                     # -> 2 (pure, RD)
-```
-
-## Building from source
+Run a single probe in its pinned cell:
 
 ```bash
-pip install maturin
-maturin build --release           # wheel in target/wheels/
-cargo test -p remit-core          # 17 Rust tests
-REMIT_MODEL_CASES=20000 cargo test -p remit-core --release
-pytest tests/                     # bindings + LangGraph integration
+uv run --project envs/langgraph python probes/113_p1_langgraph_regressions.py
 ```
 
-The Rust workspace builds on rustc ≥ 1.75 (Ubuntu 24.04's distribution
-toolchain); the test suite has zero external Rust dependencies.
+## PyCharm setup
 
-## Verification status
+1. **Open** the repo root as the project.
+2. **Interpreters** (Settings > Project > Python Interpreter > Add
+   Interpreter > *Add Local Interpreter* > **uv**): add FOUR interpreters,
+   one per uv project -- repo root, `envs/langgraph`, `envs/llamaindex`,
+   `envs/crewai`. (If your PyCharm predates native uv support, run
+   `make setup` first and add each `*/.venv/bin/python` as an *Existing*
+   environment.) Keep the **root** env as the project default; it owns the
+   harness and dev tooling.
+3. **Sources**: mark `harness/` as a *Sources Root* so `import conformance`
+   resolves in the editor (probes import only their framework; the
+   harness always runs on the root interpreter).
+4. **Run configurations**: for each probe create a Python config with
+   *Script* = the probe file, *Working directory* = repo root, and
+   *Interpreter* = that probe's env (per `matrix.toml`). Add one config
+   `pilot` running module `conformance.runner` with parameters
+   `--plan matrix.toml --baseline results/pilot` on the root
+   interpreter.
+5. Exclude `envs/*/.venv`, `.venv`, and `target/` from indexing
+   (right-click > Mark Directory as > Excluded) to keep search fast.
 
-| What | Checker | Status |
-|---|---|---|
-| Abstract model (10 lemmas) + companion files (2 + 12 + 5 + 6) | Verus 0.2026.05.03.8b81855 | 35 items, 0 errors |
-| Executable decision cores (recover 7, ledger 11) | Verus, exec mode | 18 items, 0 errors; recover body **line-identical** to `remit-core` (byte-level CI sync gate) |
-| Negative certificates | Verus | each fails in the expected `2 verified, 1 errors` shape — the lemmas are falsifiable, not vacuous |
-| Core ↔ model transition conformance | seeded randomized harness | 20 000 sequences, six invariants re-checked after every action |
-| Rust core | `cargo test -p remit-core` | 17 tests, incl. 32-thread contention suites |
-| Bindings + LangGraph repair | `pytest tests/` | 15 + 8 tests at the pins below |
+## RustRover setup
 
-No mechanized refinement between the Verus model and the compiled core is
-claimed; the PyO3 boundary and the Python veneer are tested, not proved.
-`VERIFICATION.md` tabulates the lemma-to-function correspondence so the
-mirror can be audited rather than trusted.
+1. **Open** the repo root; RustRover attaches the Cargo workspace from
+   `./Cargo.toml` automatically (`crates/remit` appears as the member).
+2. Toolchain is taken from `rust-toolchain.toml` (stable + rustfmt +
+   clippy); no manual selection needed.
+3. **Run**: use the gutter runners on the tests in
+   `crates/remit/src/lib.rs`, or a Cargo run configuration with command
+   `test --workspace`. Enable *Run rustfmt on save* and the clippy
+   external linter in Settings > Rust.
+4. The Python side is invisible to RustRover by design; the repo carries no paper
+   sources by design.
 
-## Tested pins
+## Workflows
 
-| Package | Version |
-|---|---|
-| `langgraph` | 1.2.9 |
-| `langgraph-checkpoint` | 4.1.1 |
-| `langgraph-checkpoint-sqlite` | 3.1.0 |
-| Python | 3.9 – 3.12 (abi3), CI on 3.12 |
-| rustc (from-source builds) | ≥ 1.75 |
+**Extend the matrix (scripts/117 onward).** One new cell = one directory:
 
-## Citation
-
-```bibtex
-@software{remit_contract,
-  author  = {Khan, Sajjad},
-  title   = {remit-contract: Rust-core enforcement of the Resume Contract
-             for LLM-agent checkpoint, interrupt, and resume semantics},
-  year    = {2026},
-  url     = {https://github.com/sajjadanwar0/remit-contract},
-  version = {0.1.0}
-}
+```bash
+cp -r envs/langgraph envs/autogen        # then edit envs/autogen/pyproject.toml:
+#   name = "rc-env-autogen"; dependencies = ["ag2==X.Y.Z"]
+uv sync --project envs/autogen
+# add the probe under probes/117_*.py, register it in matrix.toml,
+# generate its baseline once:
+uv run python -m conformance.runner --plan matrix.toml \
+    --baseline results/pilot --update
 ```
 
-The companion paper (*"Resume Means Resume"*) is under submission; its
-artifact lives at
-[`resume-contract-paper`](https://github.com/sajjadanwar0/resume-contract-paper).
+Per-version regression sweeps are the same recipe with version-suffixed
+cells (`envs/langgraph-1.1.4/`), which is precisely why envs are projects.
 
-## Changelog
+**Refresh baselines deliberately** (never implicitly): re-run the runner
+with `--update`, review the diff, and commit -- git history holds every
+prior baseline, so paths stay date-free by convention. Baselines are
+receipts; the audit exists to catch upstream drift (e.g., a framework
+fixing #6663), which is a finding, not noise.
 
-**0.1.0** — initial release: Rust core (effect ledger, commit gate, fork
-resolution, sequencer/journal, pure recovery), PyO3 bindings, decision-free
-LangGraph checkpointer shim (fork repair on the probe-134 protocol; loud CV
-via user validators), verification chain as tabulated above.
+**Archaeology.** Retrieval per `archaeology/CODEBOOK.md`; dedup candidates
+with `uv run python archaeology/dup_check.py` before coding; coded corpus
+and Cohen's kappa land under `results/archaeology/` (nothing is claimed
+until they do).
 
-## License
+**Remit -> framework shim (next milestone).** The first integration target
+is a LangGraph `BaseCheckpointSaver` shim routing `put`/`put_writes`
+through `remit::commit_checkpoint` and effect admission through
+`remit::begin_effect`; acceptance = probes 113-115b through the shim with
+zero violations. Verus obligations per `crates/remit/VERIFICATION.md`.
 
-MIT © 2026 Sajjad Khan
+## Conventions
+
+American English; ASCII-only in artifacts; complete files (git holds
+history, not filename suffixes); numbered scripts continue from 117; every
+audit gates on committed baselines; probe verdicts are deterministic,
+LLM-free, and timing-free by construction -- if a verdict changes, a
+package version changed.
+
+## TLC reproduction note
+
+Invoking TLC directly on the shipped `.cfg` files requires `-deadlock` (or `CHECK_DEADLOCK FALSE` in the cfg): the raw R0 run halts at 71/51 with a benign deadlock before the paper's 87/59 total is reached; `reproduce.sh` passes the flag.
