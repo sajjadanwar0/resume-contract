@@ -1,0 +1,187 @@
+{
+  "probe": "160_p14_kill_point_sweep",
+  "host": "Sajjad",
+  "utc": "2026-07-25T14:15:28+00:00",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0"
+  },
+  "protocol": "probe-133 two-task functional API, durability='sync'",
+  "dry_run": {
+    "result": {
+      "completed": true,
+      "result": 12
+    },
+    "ops_sequence": [
+      "put",
+      "put_writes",
+      "put_writes",
+      "put_writes",
+      "put"
+    ],
+    "ops_total": 5
+  },
+  "per_kill_point": [
+    {
+      "K": 1,
+      "op_at_kill": "put",
+      "ops_completed_at_kill": [
+        "put"
+      ],
+      "durable_prefix_frozen_at_exactly_K": true,
+      "ledger_at_kill": {
+        "s1": 1,
+        "s2": 1
+      },
+      "next_before_resume": [
+        "wf"
+      ],
+      "run_complete_at_kill": false,
+      "resume_error": null,
+      "resume_result": 12,
+      "ledger_final": {
+        "s1": 2,
+        "s2": 2
+      },
+      "dup_s1": true,
+      "dup_s2": true,
+      "any_duplicate": true,
+      "recoverable": true
+    },
+    {
+      "K": 2,
+      "op_at_kill": "put_writes",
+      "ops_completed_at_kill": [
+        "put",
+        "put_writes"
+      ],
+      "durable_prefix_frozen_at_exactly_K": true,
+      "ledger_at_kill": {
+        "s1": 1,
+        "s2": 1
+      },
+      "next_before_resume": [
+        "wf"
+      ],
+      "run_complete_at_kill": false,
+      "resume_error": null,
+      "resume_result": 12,
+      "ledger_final": {
+        "s1": 2,
+        "s2": 2
+      },
+      "dup_s1": true,
+      "dup_s2": true,
+      "any_duplicate": true,
+      "recoverable": true
+    },
+    {
+      "K": 3,
+      "op_at_kill": "put_writes",
+      "ops_completed_at_kill": [
+        "put",
+        "put_writes",
+        "put_writes"
+      ],
+      "durable_prefix_frozen_at_exactly_K": true,
+      "ledger_at_kill": {
+        "s1": 1,
+        "s2": 1
+      },
+      "next_before_resume": [
+        "wf"
+      ],
+      "run_complete_at_kill": false,
+      "resume_error": null,
+      "resume_result": 12,
+      "ledger_final": {
+        "s1": 2,
+        "s2": 2
+      },
+      "dup_s1": true,
+      "dup_s2": true,
+      "any_duplicate": true,
+      "recoverable": true
+    },
+    {
+      "K": 4,
+      "op_at_kill": "put_writes",
+      "ops_completed_at_kill": [
+        "put",
+        "put_writes",
+        "put_writes",
+        "put_writes"
+      ],
+      "durable_prefix_frozen_at_exactly_K": true,
+      "ledger_at_kill": {
+        "s1": 1,
+        "s2": 1
+      },
+      "next_before_resume": [],
+      "run_complete_at_kill": false,
+      "resume_error": null,
+      "resume_result": 12,
+      "ledger_final": {
+        "s1": 2,
+        "s2": 2
+      },
+      "dup_s1": true,
+      "dup_s2": true,
+      "any_duplicate": true,
+      "recoverable": true
+    },
+    {
+      "K": 5,
+      "op_at_kill": "put",
+      "ops_completed_at_kill": [
+        "put",
+        "put_writes",
+        "put_writes",
+        "put_writes",
+        "put"
+      ],
+      "durable_prefix_frozen_at_exactly_K": true,
+      "ledger_at_kill": {
+        "s1": 1,
+        "s2": 1
+      },
+      "next_before_resume": [],
+      "run_complete_at_kill": true,
+      "resume_error": null,
+      "resume_result": 12,
+      "ledger_final": {
+        "s1": 2,
+        "s2": 2
+      },
+      "dup_s1": true,
+      "dup_s2": true,
+      "any_duplicate": true,
+      "recoverable": true
+    }
+  ],
+  "stable": {
+    "kill_points_total": 5,
+    "ops_sequence": [
+      "put",
+      "put_writes",
+      "put_writes",
+      "put_writes",
+      "put"
+    ],
+    "points_with_duplicate_effect": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "points_run_complete_at_kill_excluded_from_dup_accounting": [
+      5
+    ],
+    "points_unrecoverable": [],
+    "points_completed_without_kill": [],
+    "all_points_recoverable": true,
+    "freeze_exact_at_every_point": true,
+    "note": "task execution on this protocol completes before the sync flush finishes, so kill points vary the DURABLE prefix; the contract's subject -- what the durable state licenses on resume -- is exactly that prefix"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "probe": "158b_p14_llamaindex_park_kill",
+  "host": "Sajjad",
+  "utc": "2026-07-25T13:58:28+00:00",
+  "pins": {
+    "llama-index-workflows": "2.22.2"
+  },
+  "stable": {
+    "snapshot_survives_process_death": true,
+    "eo_prefix_across_park_kill": true,
+    "post_per_branch_exactly_once": true,
+    "fd_second_restore_own_answer": true,
+    "all_park_kill_cells_conformant": true
+  }
+}

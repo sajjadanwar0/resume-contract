@@ -8,6 +8,7 @@ version = "0.0.0"
 description = "Resume Contract revision cell: LangGraph 1.2.9 + durable checkpointers (sqlite, postgres) per results/revision/MANIFEST.json. Environment container, not a package."
 requires-python = ">=3.12"
 dependencies = [
+    "remit-contract",
     "langgraph==1.2.9",
     "langgraph-checkpoint==4.1.1",
     "langgraph-checkpoint-sqlite==3.1.0",
@@ -18,3 +19,5 @@ dependencies = [
 
 [tool.uv]
 package = false
+[tool.uv.sources]
+remit-contract = { path = "../../remit-contract/dist/remit_contract-0.1.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl" }

@@ -1,0 +1,39 @@
+{
+  "probe": "158b_p14_llamaindex_park_kill",
+  "host": "Sajjad",
+  "utc": "2026-07-25T13:58:28+00:00",
+  "pins": {
+    "llama-index-workflows": "2.22.2"
+  },
+  "crash_mechanism": "SIGKILL while the run is live-parked at InputRequiredEvent; the Context snapshot on disk is the durable artifact; barrier-synchronized, no timing window",
+  "victim_exit": "SIGKILL",
+  "ledger_at_kill": {
+    "pre": 1
+  },
+  "resume_yes_life": {
+    "answer": "YES",
+    "result": "answer=YES",
+    "_stderr_tail": null
+  },
+  "ledger_after_yes": {
+    "post:YES": 1,
+    "pre": 1
+  },
+  "resume_no_life": {
+    "answer": "NO",
+    "result": "answer=NO",
+    "_stderr_tail": null
+  },
+  "ledger_after_no": {
+    "post:NO": 1,
+    "post:YES": 1,
+    "pre": 1
+  },
+  "stable": {
+    "snapshot_survives_process_death": true,
+    "eo_prefix_across_park_kill": true,
+    "post_per_branch_exactly_once": true,
+    "fd_second_restore_own_answer": true,
+    "all_park_kill_cells_conformant": true
+  }
+}
