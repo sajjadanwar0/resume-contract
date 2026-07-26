@@ -1,14 +1,14 @@
 {
   "probe": "158c_p14_pydantic_graph_park_kill",
   "host": "Sajjad",
-  "utc": "2026-07-25T13:58:28+00:00",
+  "utc": "2026-07-26T05:07:42+00:00",
   "pins": {
     "pydantic-graph": "1.107.1"
   },
   "crash_mechanism": "SIGKILL while parked BETWEEN nodes under graph.iter (NodeA snapshotted, NodeB created, not started); barrier-synchronized",
   "victim_exit": "SIGKILL",
   "park_life": {
-    "pid": 117273,
+    "pid": 13301,
     "parked_before": "NodeB"
   },
   "ledger_at_kill": {

@@ -1,7 +1,7 @@
 {
   "probe": "158_p14_langgraph_park_kill",
   "host": "Sajjad",
-  "utc": "2026-07-25T13:58:27+00:00",
+  "utc": "2026-07-26T05:07:41+00:00",
   "pins": {
     "langgraph": "1.2.9",
     "langgraph-checkpoint": "4.1.1",
@@ -10,7 +10,7 @@
   "crash_mechanism": "SIGKILL of the process while the thread is parked at the interrupt (invoke returned; checkpoint durable); barrier-synchronized, no timing window",
   "victim_exit": "SIGKILL",
   "park_life": {
-    "pid": 117253,
+    "pid": 13281,
     "interrupted": true,
     "durability": "sync"
   },
