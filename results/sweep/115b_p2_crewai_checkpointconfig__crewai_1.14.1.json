@@ -1,0 +1,10 @@
+{
+  "crewai_version": "1.14.1",
+  "checkpoints_written_documented_event": 2,
+  "silent_noop_documented_event": false,
+  "violation_silent_noop_documented_event": false,
+  "first_run": "crashed as planned: RuntimeError",
+  "counter_at_crash": 1,
+  "n_checkpoints": 4,
+  "probe_error": "Traceback (most recent call last):\n  File \"/home/neo/RustroverProjects/resume-contract/probes/115b_p2_crewai_checkpointconfig.py\", line 104, in <module>\n    f2 = F.from_checkpoint(CheckpointConfig(restore_from=str(cps[-1])))\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/flow/flow.py\", line 940, in from_checkpoint\n    state = RuntimeState.from_checkpoint(\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/runtime.py\", line 133, in from_checkpoint\n    raw = provider.from_checkpoint(location)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/neo/RustroverProjects/resume-contract/.sweep-crewai-1.14.1/lib/python3.12/site-packages/crewai/state/provider/json_provider.py\", line 80, in from_checkpoint\n    return Path(location).read_text()\n           ^^^^^^^^^^^^^^\n  File \"/home/neo/.local/share/uv/python/cpython-3.12.10-linux-x86_64-gnu/lib/python3.12/pathlib.py\", line 1162, in __init__\n    super().__init__(*args)\n  File \"/home/neo/.local/share/uv/python/cpython-3.12.10-linux-x86_64-gnu/lib/python3.12/pathlib.py\", line 373, in __init__\n    raise TypeError(\nTypeError: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'CheckpointConfig'\n"
+}

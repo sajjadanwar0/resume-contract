@@ -1,0 +1,16 @@
+{
+  "probe": "158c_p14_pydantic_graph_park_kill",
+  "host": "Sajjad",
+  "utc": "2026-07-25T13:58:28+00:00",
+  "pins": {
+    "pydantic-graph": "1.107.1"
+  },
+  "stable": {
+    "between_node_snapshot_restorable_after_kill": true,
+    "resume_error": null,
+    "outcome": 11,
+    "eo_prefix_across_park_kill": true,
+    "b_execs_total": 1,
+    "expected_outcome_if_exactly_once": 11
+  }
+}

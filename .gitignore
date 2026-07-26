@@ -15,3 +15,6 @@ formal/tla/*_TTrace_*
 /remit_verus_*
 !*.rs
 *.pre_n3.bak
+crates/remit/proof/remit_verus_fd_machine
+crates/remit/proof/remit_verus_rd_interp
+*.zip

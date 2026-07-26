@@ -1,0 +1,15 @@
+
+thread '<unnamed>' (14711) panicked at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-0.26.0/src/types/dict.rs:448:21:
+dictionary changed size during iteration
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+--- PyO3 is resuming a panic after fetching a PanicException from Python. ---
+Python stack trace below:
+Traceback (most recent call last):
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai_1.15.6/lib/python3.12/site-packages/crewai/state/runtime.py", line 197, in _serialize
+    "event_record": self._event_record.model_dump(mode="json"),
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/neo/RustroverProjects/resume-contract/.sweep-crewai_1.15.6/lib/python3.12/site-packages/pydantic/main.py", line 464, in model_dump
+Error executing listener s2: simulated crash in s2
+    return self.__pydantic_serializer__.to_python(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pyo3_runtime.PanicException: dictionary changed size during iteration

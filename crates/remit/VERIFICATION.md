@@ -82,6 +82,8 @@ auto-trigger sites are annotated `#![auto]`. Re-discharge on the developer
 host, confirmed: `verification results:: 11 verified, 0 errors`
 (Verus 0.2026.05.03.8b81855). All stated obligations for EO/CO, PC, and FD
 are machine-checked; the proof is unbounded and structural.
+*(Historical: this eleven-item file predates the 2026-07-22 lemma audit;
+the standing count is ten --- see the post-adoption tallies.)*
 
 ## CV lemma set (proof/remit_verus_cv.rs) -- DISCHARGED (RD: see theorem files above)
 
@@ -114,7 +116,9 @@ set: `remit_verus.rs` verbatim plus the discharged CV/RD items, one
 `verus!` block, one `main`, the `use` set unified. A single invocation
 discharges all fifteen items -- `verification results:: 15 verified, 0
 errors` -- retiring the two-file composition caveat; Sec. 7.3 of manuscript
-revision r5 cites this target and this log.
+revision r5 cites this target and this log. *(Historical: the fifteen-item
+composition predates the 2026-07-22 audit; the standing `remit_verus_all.rs`
+count is twelve.)*
 
 ## Verification log
 
@@ -124,7 +128,8 @@ developer host: `4 verified, 0 errors`, with three deprecation warnings
 `same_superstep_writeset`). Markers applied via the recorded `sed`
 edits; clean re-discharge the same day: `4 verified, 0 errors`, no
 warnings --- and the core file re-attested fresh in the same session:
-`proof/remit_verus.rs` --- `11 verified, 0 errors`.
+`proof/remit_verus.rs` --- `11 verified, 0 errors`. *(Historical:
+pre-audit tally; standing count ten.)*
 
 **[2026-07-18]** Toolchain attestation on the developer host, recorded
 verbatim from `verus --version`:
@@ -156,6 +161,10 @@ verification results:: 4 verified, 0 errors
 verus crates/remit/proof/remit_verus_all.rs
 verification results:: 15 verified, 0 errors
 ```
+
+*(Historical logs: `remit_verus_cv_rd.rs` was deleted and the fifteen-item
+composition superseded in the 2026-07-22 audit; standing tallies: core ten,
+`remit_verus_all.rs` twelve.)*
 
 Comment-filtered `assume` count across all three proof files: `0, 0, 0`
 (command and result recorded in the certification rule above). The

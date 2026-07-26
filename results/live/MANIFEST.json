@@ -12,6 +12,12 @@
       "env": "langgraph-live",
       "script": "probes/122_p5_live_langgraph_anthropic_interrupt.py",
       "status": "run"
+    },
+    {
+      "id": "152",
+      "env": "langgraph-live",
+      "script": "probes/152_p13_live_pc_cv.py",
+      "status": "run"
     }
   ],
   "note": "stable_view fields only are audited; raw JSON may contain volatile ids/timestamps"

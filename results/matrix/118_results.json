@@ -109,5 +109,167 @@
   "s1_execs_order_C": 2,
   "s1_execs_order_N": 2,
   "violation_RD_recovery_depends_on_persistence_order": false,
-  "violation_EO_crash_resume_reexecutes_durable_task": true
+  "violation_EO_crash_resume_reexecutes_durable_task": true,
+  "rd_reflexive_same_log": {
+    "W": {
+      "order": "W",
+      "strategy": "deepcopy",
+      "construction": {
+        "crashed": "Crash",
+        "persistence_log": [
+          [
+            "put",
+            1
+          ],
+          [
+            "put_writes",
+            1,
+            [
+              "__return__"
+            ]
+          ],
+          [
+            "put_writes",
+            2,
+            [
+              "__error__"
+            ]
+          ],
+          [
+            "put_writes",
+            3,
+            [
+              "__error__"
+            ]
+          ]
+        ],
+        "s1_execs_at_crash": 1
+      },
+      "log_evidence": {
+        "identical_durable_log": "shared deep copies of one saver"
+      },
+      "decisions": [
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        },
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        }
+      ],
+      "identical": true
+    },
+    "C": {
+      "order": "C",
+      "strategy": "deepcopy",
+      "construction": {
+        "crashed": "Crash",
+        "persistence_log": [
+          [
+            "put",
+            1
+          ],
+          [
+            "put_writes",
+            1,
+            [
+              "__return__"
+            ]
+          ],
+          [
+            "put_writes",
+            2,
+            [
+              "__error__"
+            ]
+          ],
+          [
+            "put_writes",
+            3,
+            [
+              "__error__"
+            ]
+          ]
+        ],
+        "s1_execs_at_crash": 1
+      },
+      "log_evidence": {
+        "identical_durable_log": "shared deep copies of one saver"
+      },
+      "decisions": [
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        },
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        }
+      ],
+      "identical": true
+    },
+    "N": {
+      "order": "N",
+      "strategy": "deepcopy",
+      "construction": {
+        "crashed": "Crash",
+        "persistence_log": [
+          [
+            "put",
+            1
+          ],
+          [
+            "put_writes",
+            1,
+            [
+              "__return__"
+            ]
+          ],
+          [
+            "put_writes",
+            2,
+            [
+              "__error__"
+            ]
+          ],
+          [
+            "put_writes",
+            3,
+            [
+              "__error__"
+            ]
+          ]
+        ],
+        "s1_execs_at_crash": 1
+      },
+      "log_evidence": {
+        "identical_durable_log": "shared deep copies of one saver"
+      },
+      "decisions": [
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        },
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        }
+      ],
+      "identical": true
+    }
+  },
+  "rd_reflexive_same_log_identical_all": true
 }

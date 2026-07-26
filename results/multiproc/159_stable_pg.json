@@ -1,0 +1,37 @@
+{
+  "probe": "159_p14_multiproc_saver",
+  "host": "Sajjad",
+  "utc": "2026-07-25T15:21:27+00:00",
+  "backend": "postgres",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0",
+    "remit-contract": "0.1.0"
+  },
+  "stable": {
+    "co_concurrent_double_resume_inert_all_reps": false,
+    "race_same_gate_fire_distribution": {
+      "2": 10
+    },
+    "race_diff_gate_fire_distribution": {
+      "2": 10
+    },
+    "race_diff_double_consumption_reps": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "race_diff_served_other_value_reps": [],
+    "contention_per_thread_exactly_once": true,
+    "contention_victim_park_kill_recovered": true,
+    "shim_race_inert_all_reps": false
+  }
+}

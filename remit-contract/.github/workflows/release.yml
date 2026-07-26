@@ -1,0 +1,117 @@
+# .github/workflows/release.yml  (in the remit-contract repo)
+#
+# Builds wheels for Linux (x86_64 + aarch64, manylinux2014, abi3-py39),
+# macOS (universal2), and Windows (x64), plus the sdist, and publishes to
+# PyPI via Trusted Publishing (OIDC) -- no API token stored anywhere.
+#
+# One-time PyPI setup (before the first tag): PyPI -> your account or the
+# organization -> Publishing -> "Add a pending publisher":
+#   PyPI project name : remit-contract
+#   Owner             : sajjadanwar0        (or the org name)
+#   Repository        : remit-contract
+#   Workflow filename : release.yml
+#   Environment       : pypi
+# The first tag push then CREATES the project and publishes -- zero tokens.
+#
+# Release:  git tag v0.1.0 && git push origin v0.1.0
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: "2014"
+          args: --release -o dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ matrix.target }}
+          path: dist
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: universal2-apple-darwin
+          args: --release -o dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos
+          path: dist
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: x64
+          args: --release -o dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows
+          path: dist
+
+  sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: -o dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+  smoke:
+    # Install the built linux x86_64 wheel and run the binding + LangGraph
+    # repair suites at the paper pins before anything is published.
+    needs: [linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-linux-x86_64
+          path: dist
+      - run: |
+          pip install dist/remit_contract-*manylinux*.whl pytest
+          pip install 'langgraph==1.2.9' 'langgraph-checkpoint==4.1.1' \
+                      'langgraph-checkpoint-sqlite==3.1.0'
+          pytest tests/test_core_bindings.py tests/test_langgraph_repair.py -q
+
+  publish:
+    needs: [linux, macos, windows, sdist, smoke]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist

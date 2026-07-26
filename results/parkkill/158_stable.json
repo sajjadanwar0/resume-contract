@@ -1,0 +1,18 @@
+{
+  "probe": "158_p14_langgraph_park_kill",
+  "host": "Sajjad",
+  "utc": "2026-07-25T13:58:27+00:00",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0"
+  },
+  "stable": {
+    "interrupt_survives_process_death": true,
+    "eo_prefix_across_park_kill": true,
+    "gate_effect_exactly_once_supplied": true,
+    "pc_prefix_state_preserved": true,
+    "co_stray_inert": true,
+    "all_park_kill_cells_conformant": true
+  }
+}

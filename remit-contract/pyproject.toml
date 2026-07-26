@@ -35,6 +35,11 @@ sqlite = ["langgraph-checkpoint-sqlite>=3.0"]
 test = ["pytest>=8"]
 
 [tool.maturin]
+include = [
+  { path = "LICENSE", format = "sdist" },
+  { path = "VERIFICATION.md", format = "sdist" },
+  { path = "tests/*", format = "sdist" },
+]
 python-source = "python"
 module-name = "remit._core"
 manifest-path = "crates/remit-py/Cargo.toml"

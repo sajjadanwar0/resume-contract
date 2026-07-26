@@ -1,0 +1,62 @@
+{
+  "probe": "158_p14_langgraph_park_kill",
+  "host": "Sajjad",
+  "utc": "2026-07-25T13:58:27+00:00",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0"
+  },
+  "crash_mechanism": "SIGKILL of the process while the thread is parked at the interrupt (invoke returned; checkpoint durable); barrier-synchronized, no timing window",
+  "victim_exit": "SIGKILL",
+  "park_life": {
+    "pid": 117253,
+    "interrupted": true,
+    "durability": "sync"
+  },
+  "ledger_at_kill": {
+    "pre": 1
+  },
+  "checkpoint_rows_at_kill": {
+    "checkpoints": 3,
+    "writes": 5
+  },
+  "resume_life": {
+    "state_next_before_resume": [
+      "gate"
+    ],
+    "pending_interrupt_visible": true,
+    "durability": "sync",
+    "resume_result": {
+      "x": 1,
+      "pre_out": "pre:done",
+      "decision": true
+    },
+    "_stderr_tail": null
+  },
+  "ledger_after_resume": {
+    "gate:True": 1,
+    "pre": 1
+  },
+  "stray_life": {
+    "stray_result": {
+      "x": 1,
+      "pre_out": "pre:done",
+      "decision": true
+    },
+    "stray_error": null,
+    "_stderr_tail": null
+  },
+  "ledger_after_stray": {
+    "gate:True": 1,
+    "pre": 1
+  },
+  "stable": {
+    "interrupt_survives_process_death": true,
+    "eo_prefix_across_park_kill": true,
+    "gate_effect_exactly_once_supplied": true,
+    "pc_prefix_state_preserved": true,
+    "co_stray_inert": true,
+    "all_park_kill_cells_conformant": true
+  }
+}

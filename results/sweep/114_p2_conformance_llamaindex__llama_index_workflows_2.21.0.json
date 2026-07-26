@@ -1,0 +1,31 @@
+{
+  "llama_index_workflows_version": "2.21.0",
+  "A1_snapshot_resume_PC_EO": {
+    "pre_execs_at_snapshot": 1,
+    "pre_execs_total": 1,
+    "post_execs_total": 1,
+    "result": "ch_001:answer=YES",
+    "violation_PC_EO_pre_reexecuted": false
+  },
+  "A2_fork_determinism_FD": {
+    "resume_YES": "ch_001:answer=YES",
+    "resume_NO": "ch_001:answer=NO",
+    "violation_FD_second_answer_ignored": false
+  },
+  "A3_dual_response_CO": {
+    "post_execs": 1,
+    "result": "ch_001:answer=FIRST",
+    "violation_CO_post_fired_twice": false
+  },
+  "B1_wait_for_event_restore_PC_EO": {
+    "prefix_execs_at_snapshot": 1,
+    "prefix_execs_total": 2,
+    "suffix_execs_total": 1,
+    "result": "answer=YES",
+    "violation_PC_EO_prefix_reexecuted": true
+  },
+  "C1_nonserializable_store_CV": {
+    "to_dict": "raised ValueError",
+    "violation_CV_silent_corruption": false
+  }
+}

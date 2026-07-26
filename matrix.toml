@@ -69,3 +69,41 @@ id = "113v11"
 env = "langgraph-1.1"
 script = "probes/113_p1_langgraph_regressions.py"
 baseline = "results/regression"
+
+[[probe]]
+id = "152"
+env = "langgraph-live"
+script = "probes/152_p13_live_pc_cv.py"
+baseline = "results/live"
+requires_env = ["ANTHROPIC_API_KEY"]
+
+# ---- campaign p14: park-kill matrix + multi-process saver (reviewer round) ----
+[[probe]]
+id = "158"
+env = "langgraph-durable"
+script = "probes/158_p14_langgraph_park_kill.py"
+baseline = "results/parkkill"
+
+[[probe]]
+id = "158b"
+env = "llamaindex"
+script = "probes/158b_p14_llamaindex_park_kill.py"
+baseline = "results/parkkill"
+
+[[probe]]
+id = "158c"
+env = "pydantic-graph"
+script = "probes/158c_p14_pydantic_graph_park_kill.py"
+baseline = "results/parkkill"
+
+[[probe]]
+id = "159"
+env = "langgraph-durable"
+script = "probes/159_p14_multiproc_saver.py"
+baseline = "results/multiproc"
+
+[[probe]]
+id = "160"
+env = "langgraph-durable"
+script = "probes/160_p14_kill_point_sweep.py"
+baseline = "results/parkkill"

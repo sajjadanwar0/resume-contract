@@ -1,0 +1,274 @@
+{
+  "langgraph_version": "1.2.9",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "order_N": {
+    "order": "N",
+    "crashed_as": "Crash",
+    "s1_execs_at_crash": 1,
+    "s1_execs_after_resume": 2,
+    "s2_execs_after_resume": 1,
+    "result": 12,
+    "resume_error": null,
+    "persistence_log": [
+      [
+        "put",
+        1
+      ],
+      [
+        "put_writes",
+        1,
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        2,
+        [
+          "__error__"
+        ]
+      ],
+      [
+        "put_writes",
+        3,
+        [
+          "__error__"
+        ]
+      ]
+    ]
+  },
+  "order_W": {
+    "order": "W",
+    "crashed_as": "Crash",
+    "s1_execs_at_crash": 1,
+    "s1_execs_after_resume": 2,
+    "s2_execs_after_resume": 1,
+    "result": 12,
+    "resume_error": null,
+    "persistence_log": [
+      [
+        "put",
+        1
+      ],
+      [
+        "put_writes",
+        1,
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        2,
+        [
+          "__error__"
+        ]
+      ],
+      [
+        "put_writes",
+        3,
+        [
+          "__error__"
+        ]
+      ]
+    ]
+  },
+  "order_C": {
+    "order": "C",
+    "crashed_as": "Crash",
+    "s1_execs_at_crash": 1,
+    "s1_execs_after_resume": 2,
+    "s2_execs_after_resume": 1,
+    "result": 12,
+    "resume_error": null,
+    "persistence_log": [
+      [
+        "put",
+        1
+      ],
+      [
+        "put_writes",
+        1,
+        [
+          "__return__"
+        ]
+      ],
+      [
+        "put_writes",
+        2,
+        [
+          "__error__"
+        ]
+      ],
+      [
+        "put_writes",
+        3,
+        [
+          "__error__"
+        ]
+      ]
+    ]
+  },
+  "verdict": {
+    "backend": "SqliteSaver",
+    "recovery_identical_across_orders": true,
+    "violation_rd": false,
+    "note": "RD at checkpointer-API granularity on the durable saver; the executor pool itself is not raced."
+  },
+  "rd_reflexive_same_log": {
+    "N": {
+      "order": "N",
+      "construction": {
+        "crashed_as": "Crash",
+        "s1_execs_at_crash": 1,
+        "persistence_log": [
+          [
+            "put",
+            1
+          ],
+          [
+            "put_writes",
+            1,
+            [
+              "__return__"
+            ]
+          ],
+          [
+            "put_writes",
+            2,
+            [
+              "__error__"
+            ]
+          ],
+          [
+            "put_writes",
+            3,
+            [
+              "__error__"
+            ]
+          ]
+        ]
+      },
+      "durable_log_sha256": "fe2095781c43234d2db93d3879f1b58ec5d0c305060ebb35bd2e7009959348f0",
+      "copies_byte_identical": true,
+      "decisions": [
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        },
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        }
+      ],
+      "identical": true
+    },
+    "W": {
+      "order": "W",
+      "construction": {
+        "crashed_as": "Crash",
+        "s1_execs_at_crash": 1,
+        "persistence_log": [
+          [
+            "put",
+            1
+          ],
+          [
+            "put_writes",
+            1,
+            [
+              "__return__"
+            ]
+          ],
+          [
+            "put_writes",
+            2,
+            [
+              "__error__"
+            ]
+          ],
+          [
+            "put_writes",
+            3,
+            [
+              "__error__"
+            ]
+          ]
+        ]
+      },
+      "durable_log_sha256": "7f9d1d6cd6418166f167b7e8fd5056ea05de3042b5e1f4c794b44f9e16b972ee",
+      "copies_byte_identical": true,
+      "decisions": [
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        },
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        }
+      ],
+      "identical": true
+    },
+    "C": {
+      "order": "C",
+      "construction": {
+        "crashed_as": "Crash",
+        "s1_execs_at_crash": 1,
+        "persistence_log": [
+          [
+            "put",
+            1
+          ],
+          [
+            "put_writes",
+            1,
+            [
+              "__return__"
+            ]
+          ],
+          [
+            "put_writes",
+            2,
+            [
+              "__error__"
+            ]
+          ],
+          [
+            "put_writes",
+            3,
+            [
+              "__error__"
+            ]
+          ]
+        ]
+      },
+      "durable_log_sha256": "545ab9d5b624c5feaf872c4c7abb332b4244e76bb8d1081a3b5239f4202b6f2f",
+      "copies_byte_identical": true,
+      "decisions": [
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        },
+        {
+          "s1_execs": 1,
+          "s2_execs": 1,
+          "result": 12,
+          "resume_error": null
+        }
+      ],
+      "identical": true
+    }
+  },
+  "rd_reflexive_same_log_identical_all": true
+}

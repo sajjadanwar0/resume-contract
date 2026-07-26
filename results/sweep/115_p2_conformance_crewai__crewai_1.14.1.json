@@ -1,0 +1,23 @@
+{
+  "crewai_version": "1.14.1",
+  "R1_restore_after_success": {
+    "flow_id": "976bcbf6-c7ae-4045-897e-4cbe3bf5c9f6",
+    "counter_after_first_run": 11,
+    "counter_after_restore_run": 22,
+    "s1_execs_total": 2,
+    "s2_execs_total": 2,
+    "violation_EO_methods_replayed": true,
+    "violation_PC_state_compounded": true
+  },
+  "R2_crash_resume": {
+    "flow_id": "89f99ec2-d4c1-46b5-806d-0d67edb2923f",
+    "crash": "RuntimeError: simulated crash in s2",
+    "counter_at_crash": 1,
+    "counter_after_resume": 12,
+    "s1_execs_total": 2,
+    "s2_execs_total": 1,
+    "resume_error": null,
+    "violation_EO_completed_step_reexecuted": true,
+    "note_expected_counter_if_exactly_once": 11
+  }
+}

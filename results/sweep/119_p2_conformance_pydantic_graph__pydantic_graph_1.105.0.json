@@ -1,0 +1,24 @@
+{
+  "pydantic_graph_version": "1.105.0",
+  "G1_crash_resume": {
+    "crashed": "RuntimeError",
+    "a_execs_at_crash": 1,
+    "a_execs_total": 1,
+    "b_execs_total": 0,
+    "outcome": null,
+    "resume_error": "GraphRuntimeError: Unable to restore snapshot from state persistence.",
+    "expected_outcome_if_exactly_once": 11,
+    "violation_PC_EO_completed_node_reexecuted": false
+  },
+  "G2_completed_run_resume": {
+    "a_execs_after_stray_resume": 1,
+    "b_execs_after_stray_resume": 1,
+    "stray_resume_error": "GraphRuntimeError",
+    "stray_next_result": null,
+    "violation_CO_effect_refired": false
+  },
+  "G3_corrupt_snapshot": {
+    "corrupt_load_error": "ValidationError",
+    "violation_CV_silent_acceptance": false
+  }
+}

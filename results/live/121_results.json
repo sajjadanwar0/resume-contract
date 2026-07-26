@@ -1,5 +1,6 @@
 {
   "openai_agents_version": "0.18.2",
+  "model": "sdk-default",
   "charges_after_run1": 1,
   "charges_after_restore_run": 1,
   "violation_EO_session_restore_reinvoked_tool": false,

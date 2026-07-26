@@ -1,0 +1,1346 @@
+{
+  "probe": "159_p14_multiproc_saver",
+  "host": "Sajjad",
+  "utc": "2026-07-25T15:21:27+00:00",
+  "backend": "postgres",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0",
+    "remit-contract": "0.1.0"
+  },
+  "have_remit": true,
+  "arms": {
+    "race_same_stock": {
+      "reps": 10,
+      "shim": false,
+      "values": [
+        true,
+        true
+      ],
+      "gate_fire_distribution": {
+        "2": 10
+      },
+      "reps_with_duplicate_gate_fire": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reps_with_racer_error": [],
+      "reps_where_a_racer_was_served_the_other_value": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 60.6
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 32.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 37.9
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 43.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 35.7
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 61.0
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 39.4
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 45.3
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 36.0
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 52.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 5,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 32.3
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 60.9
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 35.3
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 58.2
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 60.7
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 33.4
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 8,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 33.1
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 46.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 9,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 58.9
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 35.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        }
+      ]
+    },
+    "race_diff_stock": {
+      "reps": 10,
+      "shim": false,
+      "values": [
+        true,
+        false
+      ],
+      "gate_fire_distribution": {
+        "2": 10
+      },
+      "reps_with_duplicate_gate_fire": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reps_with_racer_error": [],
+      "reps_where_a_racer_was_served_the_other_value": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 50.1
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 36.7
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 47.8
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 35.2
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 45.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 27.8
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 47.4
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 34.4
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 33.3
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 59.1
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 5,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 33.4
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 59.1
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 45.0
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 32.5
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 44.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 28.8
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 8,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 46.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 35.2
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 9,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 34.8
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 49.1
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:False",
+            "gate:True"
+          ]
+        }
+      ]
+    },
+    "contention_kill": {
+      "k": 4,
+      "shim": false,
+      "victim_exit": "SIGKILL",
+      "survivors": {
+        "1": {
+          "idx": 1,
+          "interrupted": true,
+          "result": {
+            "x": 1,
+            "pre_out": "pre:done",
+            "decision": true
+          },
+          "error": null
+        },
+        "2": {
+          "idx": 2,
+          "interrupted": true,
+          "result": {
+            "x": 1,
+            "pre_out": "pre:done",
+            "decision": true
+          },
+          "error": null
+        },
+        "3": {
+          "idx": 3,
+          "interrupted": true,
+          "result": {
+            "x": 1,
+            "pre_out": "pre:done",
+            "decision": true
+          },
+          "error": null
+        }
+      },
+      "victim_recovery": {
+        "result": {
+          "x": 1,
+          "pre_out": "pre:done",
+          "decision": true
+        },
+        "error": null
+      },
+      "per_thread_ledger": {
+        "w0": {
+          "gate:True": 1,
+          "pre": 1
+        },
+        "w1": {
+          "gate:True": 1,
+          "pre": 1
+        },
+        "w2": {
+          "gate:True": 1,
+          "pre": 1
+        },
+        "w3": {
+          "gate:True": 1,
+          "pre": 1
+        }
+      },
+      "per_thread_exactly_once": true,
+      "victim_recovered_ok": true
+    },
+    "race_same_shim": {
+      "reps": 10,
+      "shim": true,
+      "values": [
+        true,
+        true
+      ],
+      "gate_fire_distribution": {
+        "2": 10
+      },
+      "reps_with_duplicate_gate_fire": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reps_with_racer_error": [],
+      "reps_where_a_racer_was_served_the_other_value": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 45.3
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 38.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 46.1
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 35.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 47.9
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 36.4
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 60.2
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 37.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 71.6
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 53.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 5,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 55.5
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 33.9
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 38.8
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 44.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 52.8
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 42.9
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 8,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 48.6
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 39.7
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 9,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 32.9
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 69.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        }
+      ]
+    }
+  },
+  "stable": {
+    "co_concurrent_double_resume_inert_all_reps": false,
+    "race_same_gate_fire_distribution": {
+      "2": 10
+    },
+    "race_diff_gate_fire_distribution": {
+      "2": 10
+    },
+    "race_diff_double_consumption_reps": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "race_diff_served_other_value_reps": [],
+    "contention_per_thread_exactly_once": true,
+    "contention_victim_park_kill_recovered": true,
+    "shim_race_inert_all_reps": false
+  }
+}
