@@ -1,0 +1,100 @@
+{
+ "probe": "169_p16_harness_mutation",
+ "host": "Sajjad",
+ "utc": "2026-07-27T13:29:14+00:00",
+ "baseline": {
+  "LG.EO.crash": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.EO.sigkill": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.FD.6663": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.CV.repair": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.CV.nopersist": {
+   "observed": false,
+   "paper_reports": false,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.RD.reflexive": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.RD.orderinv": {
+   "observed": false,
+   "paper_reports": false,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.CO.concurrent": {
+   "observed": false,
+   "paper_reports": false,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.killsweep": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "LG.killsweep.rec": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "CA.restore.dup": {
+   "observed": 2,
+   "paper_reports": 2,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "AG.restore.EO": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "AG.doublerestore": {
+   "observed": 0,
+   "paper_reports": 0,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "PG.parkkill.ok": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  },
+  "ORACLE.noovercount": {
+   "observed": true,
+   "paper_reports": true,
+   "receipt_found": true,
+   "agrees_with_paper": true
+  }
+ },
+ "baseline_receipts_missing": [],
+ "baseline_disagreeing_with_paper": [],
+ "mutants": {}
+}

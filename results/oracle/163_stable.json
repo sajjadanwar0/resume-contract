@@ -1,0 +1,58 @@
+{
+  "probe": "163_p15_oracle_atomicity",
+  "host": "Sajjad",
+  "utc": "2026-07-26T17:04:46+00:00",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0"
+  },
+  "kill_matrix": {
+    "pre_insert": {
+      "post_crash_s2": [
+        0
+      ],
+      "post_resume_s2": [
+        1
+      ],
+      "s1_always_one": true,
+      "all_as_expected": true
+    },
+    "post_insert": {
+      "post_crash_s2": [
+        1
+      ],
+      "post_resume_s2": [
+        2
+      ],
+      "s1_always_one": true,
+      "all_as_expected": true
+    },
+    "post_persist": {
+      "post_crash_s2": [
+        1
+      ],
+      "post_resume_s2": [
+        1
+      ],
+      "s1_always_one": true,
+      "all_as_expected": true
+    },
+    "none": {
+      "post_crash_s2": [
+        1
+      ],
+      "post_resume_s2": [
+        1
+      ],
+      "s1_always_one": true,
+      "all_as_expected": true
+    }
+  },
+  "stable": {
+    "overcount_impossible_no_record_without_effect": true,
+    "loss_window_resolves_as_duplicate_not_undercount": true,
+    "complete_boundary_never_reexecutes": true,
+    "prefix_task_stable_at_one": true
+  }
+}

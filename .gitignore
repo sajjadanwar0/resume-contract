@@ -18,3 +18,11 @@ formal/tla/*_TTrace_*
 crates/remit/proof/remit_verus_fd_machine
 crates/remit/proof/remit_verus_rd_interp
 *.zip
+
+# p16 generated artifacts (167/168/169)
+formal/tla/consumecount/logs/
+formal/tla/consumecount/*_*.cfg
+formal/tla/consumecount/meta_*
+formal/tla/*.audit.out
+tools/tla2tools.jar
+.venv168/

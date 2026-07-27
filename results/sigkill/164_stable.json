@@ -1,0 +1,19 @@
+{
+  "probe": "164_p15_sigkill_crewai_pydantic",
+  "host": "Sajjad",
+  "utc": "2026-07-26T17:25:28+00:00",
+  "pins": {
+    "crewai": "1.15.2",
+    "pydantic_graph": "1.107.1"
+  },
+  "stable": {
+    "crewai_victim_sigkilled_every_rep": true,
+    "crewai_completed_s1_reexecuted_under_sigkill": true,
+    "crewai_matrix_verdict_replicated": true,
+    "pg_victim_sigkilled_every_rep": true,
+    "pg_midnode_resume_error_types": [
+      "GraphRuntimeError"
+    ],
+    "pg_matrix_verdict_replicated": true
+  }
+}

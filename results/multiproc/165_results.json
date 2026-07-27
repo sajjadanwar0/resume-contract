@@ -1,0 +1,1167 @@
+{
+  "probe": "165_p15_crossproc_consumption_gate",
+  "host": "Sajjad",
+  "utc": "2026-07-27T06:34:35+00:00",
+  "backend": "sqlite",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0"
+  },
+  "gate_design": {
+    "version": "v2 (read-path)",
+    "claim_key": "<thread_id, checkpoint_id of the parked tuple>",
+    "cas": "SQLite PRIMARY KEY INSERT (IntegrityError = lose)",
+    "primary_interposition": "get_tuple returning a pending __interrupt__ write",
+    "secondary_interposition": "put_writes on the __resume__ channel (late by construction; the v1 measurement)",
+    "v1_falsified": "write-path-only gate: race still duplicated every rep; the __resume__ journal write is executor-concurrent with gated execution, so its rejection surfaces only at superstep join",
+    "scope": "ordinary address only; fork-flagged deliveries out of scope; get_tuple has no read-intent discriminator, so inspection during a park would take the claim (the CO analogue of the FI gap, at the read path)"
+  },
+  "arms": {
+    "seq_control_gate": {
+      "park": {
+        "interrupted": true
+      },
+      "first_resume": {
+        "result": {
+          "x": 1,
+          "pre_out": "pre:done",
+          "decision": true
+        },
+        "error": null,
+        "error_type": null
+      },
+      "ledger": {
+        "gate:True": 1,
+        "pre": 1
+      },
+      "gate_fires_total": 1,
+      "gate_values_fired": [
+        "gate:True"
+      ]
+    },
+    "race_same_gate": {
+      "reps": 10,
+      "gate": true,
+      "values": [
+        true,
+        true
+      ],
+      "gate_fire_distribution": {
+        "1": 10
+      },
+      "reps_with_duplicate_gate_fire": [],
+      "claim_rejections_per_rep": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "reps_with_non_gate_error": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 49.4
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs0 ckpt=1f189852-59f6-6ce7-8001-cd842fa2aae9 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 21.3
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 49.2
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs1 ckpt=1f189852-682d-60e2-8001-7212df0fdb70 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 21.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 43.8
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs2 ckpt=1f189852-75f6-63b2-8001-fad4c851683a already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.3
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs3 ckpt=1f189852-8362-6def-8001-415e08443fd9 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.7
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.4
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs4 ckpt=1f189852-90da-6b46-8001-01954b9d9ebf already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.3
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 5,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 49.8
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs5 ckpt=1f189852-9dcc-6429-8001-cf5eebb5c178 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs6 ckpt=1f189852-ab1b-622f-8001-7a71075bd19c already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.9
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 51.0
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.2
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs7 ckpt=1f189852-b8d0-65fe-8001-e68940eb1f56 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 8,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 49.0
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs8 ckpt=1f189852-c688-6f66-8001-e702404ef8b1 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 21.0
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 9,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gs9 ckpt=1f189852-d3c4-6192-8001-ff17dc5109c4 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.7
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.3
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        }
+      ]
+    },
+    "race_diff_gate": {
+      "reps": 10,
+      "gate": true,
+      "values": [
+        true,
+        false
+      ],
+      "gate_fire_distribution": {
+        "1": 10
+      },
+      "reps_with_duplicate_gate_fire": [],
+      "claim_rejections_per_rep": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "reps_with_non_gate_error": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 50.3
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd0 ckpt=1f189852-e104-6a9f-8001-c2698f7691bc already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 21.2
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd1 ckpt=1f189852-ee04-6643-8001-aedfe4c6e5e9 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.8
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 47.2
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd2 ckpt=1f189852-faf3-613b-8001-968618937b41 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.5
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 49.3
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 47.3
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd3 ckpt=1f189853-0844-6586-8001-7358632d4eee already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 11.9
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.9
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd4 ckpt=1f189853-156b-6fda-8001-38358b84a22a already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 21.2
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 5,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 45.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd5 ckpt=1f189853-235f-65ce-8001-e6649e8caa38 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 10.9
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd6 ckpt=1f189853-3314-62db-8001-4d3eefbf9d32 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd7 ckpt=1f189853-40df-62c7-8001-37f6b5c075e9 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 10.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 45.7
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 8,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd8 ckpt=1f189853-4e1a-6099-8001-64293f7d608a already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.8
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 49.7
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        },
+        {
+          "rep": 9,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "ConsumptionClaimRejected: interrupt consumption for thread=53733b-gd9 ckpt=1f189853-5b5a-6be1-8001-3076a57af4f6 already claimed by another process",
+              "error_type": "ConsumptionClaimRejected",
+              "dt_ms": 20.8
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.4
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ],
+          "claim_rejections": [
+            "ConsumptionClaimRejected"
+          ]
+        }
+      ]
+    },
+    "race_same_stock": {
+      "reps": 5,
+      "gate": false,
+      "values": [
+        true,
+        true
+      ],
+      "gate_fire_distribution": {
+        "2": 5
+      },
+      "reps_with_duplicate_gate_fire": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "claim_rejections_per_rep": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reps_with_non_gate_error": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 36.4
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 54.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": []
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 35.7
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 49.5
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": []
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 36.5
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 61.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": []
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 40.9
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 69.5
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": []
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 27.3
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "error_type": null,
+              "dt_ms": 48.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ],
+          "claim_rejections": []
+        }
+      ]
+    },
+    "stray_after_completion_gate": {
+      "park": {
+        "interrupted": true
+      },
+      "first_resume": {
+        "result": {
+          "x": 1,
+          "pre_out": "pre:done",
+          "decision": true
+        },
+        "error": null,
+        "error_type": null
+      },
+      "stray_resume": {
+        "result": {
+          "x": 1,
+          "pre_out": "pre:done",
+          "decision": true
+        },
+        "error": null,
+        "error_type": null
+      },
+      "ledger": {
+        "gate:True": 1,
+        "pre": 1
+      },
+      "gate_fires_total": 1,
+      "gate_values_fired": [
+        "gate:True"
+      ]
+    }
+  },
+  "stable": {
+    "gate_binds_at": "get_tuple",
+    "seq_single_resume_unblocked_fires_once": true,
+    "gate_race_same_fire_distribution": {
+      "1": 10
+    },
+    "gate_race_same_duplicate_reps": [],
+    "gate_race_diff_fire_distribution": {
+      "1": 10
+    },
+    "gate_race_diff_duplicate_reps": [],
+    "gate_loser_rejected_loudly_every_race_rep": true,
+    "stock_control_duplicate_reps": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "stock_control_fire_distribution": {
+      "2": 5
+    },
+    "stray_after_completion_effect_inert": true,
+    "stray_after_completion_disposition": "silent"
+  }
+}

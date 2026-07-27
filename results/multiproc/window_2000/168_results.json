@@ -1,0 +1,831 @@
+{
+ "probe": "168_p16_multiracer_sweep",
+ "host": "Sajjad",
+ "utc": "2026-07-27T18:21:06+00:00",
+ "pins": {
+  "langgraph": "1.2.9",
+  "langgraph-checkpoint": "4.1.1",
+  "langgraph-checkpoint-sqlite": "3.1.0",
+  "langgraph-checkpoint-postgres": "3.1.0"
+ },
+ "reps": 10,
+ "ks": [
+  4
+ ],
+ "jitters_ms": [
+  0,
+  100,
+  500,
+  1000,
+  3000
+ ],
+ "backends": [
+  "sqlite",
+  "postgres"
+ ],
+ "gate_duration_ms": 2000,
+ "stable": {
+  "P1_duplicates_scale_beyond_two": true,
+  "P1_max_fires_by_k_at_zero_jitter": {
+   "4": 4
+  },
+  "P2_jitter_reduces_duplicates": false,
+  "P2_response_by_k": {
+   "sqlite.k4": "flat",
+   "postgres.k4": "flat"
+  },
+  "window_at_least_ms": 3000,
+  "window_edge_ms": 1000,
+  "saturation_mean_fires_over_k": {
+   "sqlite.k4.j0": 1.0,
+   "sqlite.k4.j100": 1.0,
+   "sqlite.k4.j500": 1.0,
+   "sqlite.k4.j1000": 1.0,
+   "sqlite.k4.j3000": 0.9,
+   "postgres.k4.j0": 1.0,
+   "postgres.k4.j100": 1.0,
+   "postgres.k4.j500": 1.0,
+   "postgres.k4.j1000": 1.0,
+   "postgres.k4.j3000": 0.9
+  },
+  "gate_duration_ms": 2000,
+  "widest_jitter_still_duplicating_ms": 3000,
+  "P3_reproduces_probe159_k2_j0": null,
+  "max_fires_observed": 4,
+  "any_racer_errors": false
+ },
+ "cells": [
+  {
+   "k": 4,
+   "jitter_ms": 0,
+   "backend": "sqlite",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 100,
+   "backend": "sqlite",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 500,
+   "backend": "sqlite",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 1000,
+   "backend": "sqlite",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 3000,
+   "backend": "sqlite",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "2": 2,
+    "4": 8
+   },
+   "max_fires": 4,
+   "min_fires": 2,
+   "mean_fires": 3.6,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 2,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 2,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 0,
+   "backend": "postgres",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 100,
+   "backend": "postgres",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 500,
+   "backend": "postgres",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 1000,
+   "backend": "postgres",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "4": 10
+   },
+   "max_fires": 4,
+   "min_fires": 4,
+   "mean_fires": 4.0,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "jitter_ms": 3000,
+   "backend": "postgres",
+   "reps": 10,
+   "gate_duration_ms": 2000,
+   "gate_fire_distribution": {
+    "2": 2,
+    "4": 8
+   },
+   "max_fires": 4,
+   "min_fires": 2,
+   "mean_fires": 3.6,
+   "reps_with_duplicate": 10,
+   "racer_errors_total": 0,
+   "per_rep": [
+    {
+     "rep": 0,
+     "gate_fires": 2,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 1,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 2,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 3,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 4,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 5,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 6,
+     "gate_fires": 2,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 7,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 8,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    },
+    {
+     "rep": 9,
+     "gate_fires": 4,
+     "pre_fires": 1,
+     "racer_errors": 0
+    }
+   ]
+  }
+ ]
+}

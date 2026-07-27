@@ -1,0 +1,47 @@
+{
+  "probe": "165_p15_crossproc_consumption_gate",
+  "host": "Sajjad",
+  "utc": "2026-07-27T06:33:55+00:00",
+  "backend": "postgres",
+  "pins": {
+    "langgraph": "1.2.9",
+    "langgraph-checkpoint": "4.1.1",
+    "langgraph-checkpoint-sqlite": "3.1.0",
+    "langgraph-checkpoint-postgres": "3.1.0",
+    "psycopg": "3.3.4"
+  },
+  "gate_design": {
+    "version": "v2 (read-path)",
+    "claim_key": "<thread_id, checkpoint_id of the parked tuple>",
+    "cas": "Postgres INSERT ... ON CONFLICT DO NOTHING (rowcount=0 = lose)",
+    "primary_interposition": "get_tuple returning a pending __interrupt__ write",
+    "secondary_interposition": "put_writes on the __resume__ channel (late by construction; the v1 measurement)",
+    "v1_falsified": "write-path-only gate: race still duplicated every rep; the __resume__ journal write is executor-concurrent with gated execution, so its rejection surfaces only at superstep join",
+    "scope": "ordinary address only; fork-flagged deliveries out of scope; get_tuple has no read-intent discriminator, so inspection during a park would take the claim (the CO analogue of the FI gap, at the read path)"
+  },
+  "stable": {
+    "gate_binds_at": "get_tuple",
+    "seq_single_resume_unblocked_fires_once": true,
+    "gate_race_same_fire_distribution": {
+      "1": 10
+    },
+    "gate_race_same_duplicate_reps": [],
+    "gate_race_diff_fire_distribution": {
+      "1": 10
+    },
+    "gate_race_diff_duplicate_reps": [],
+    "gate_loser_rejected_loudly_every_race_rep": true,
+    "stock_control_duplicate_reps": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "stock_control_fire_distribution": {
+      "2": 5
+    },
+    "stray_after_completion_effect_inert": true,
+    "stray_after_completion_disposition": "silent"
+  }
+}

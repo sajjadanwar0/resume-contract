@@ -80,7 +80,7 @@ if [[ $SCALED -eq 1 ]]; then
 fi
 
 # ---------------------------------------------------------------- [1] TLC ---
-note "[1/5] TLC verification matrix (ResumeContract, LangGraphFork, R10)"
+note "[1/5] TLC verification matrix (ResumeContract, LangGraphFork, R10, R11)"
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC   (-workers 1: see header)"
 pushd formal/tla > /dev/null
@@ -92,6 +92,8 @@ declare -A MODULE=(
   [LGF_AsImplemented]=LangGraphFork [LGF_ForkKeyed]=LangGraphFork
   [SEP_reference]=R10_Separations [SEP_regate]=R10_Separations
   [SEP_rebuild]=R10_Separations [SEP_redeliver]=R10_Separations
+  [C0_reference]=R11_ConsumeCount [C1_raceconsume]=R11_ConsumeCount
+  [C2_raceeffect]=R11_ConsumeCount
 )
 declare -A EXPECT=(
   [R0_reference]="Model checking completed. No error has been found."
@@ -107,6 +109,14 @@ declare -A EXPECT=(
   [SEP_regate]="Invariant RecoveryDeterminism is violated"
   [SEP_rebuild]="Invariant PrefixConsistency is violated"
   [SEP_redeliver]="Invariant EffectExactlyOnce is violated"
+  # R11 splits Property 5 into CO-c (consumption count) and CO-e (effect
+  # inertness). C0 is the conservative-extension gate: it MUST reproduce
+  # R0's 87/59 exactly, which [2] audits from the committed receipt.
+  # C1 is the separating witness for Proposition 2(iv): CO-c fails while
+  # the other seven invariants hold over the entire reachable space.
+  [C0_reference]="Model checking completed. No error has been found."
+  [C1_raceconsume]="Invariant ConsumeOnceCount is violated"
+  [C2_raceeffect]="Invariant EffectExactlyOnce is violated"
 )
 # The four SEP_* headline cells are the conjunction-independence witnesses
 # (Proposition 2, clause (v)). Every SEP config checks ALL SEVEN invariants
@@ -119,7 +129,8 @@ declare -A EXPECT=(
 for cfg in R0_reference R1_replay R2_forkignore R3_invalidpersist \
            R4_nondetrec R5_doubleconsume R6_liveness \
            LGF_AsImplemented LGF_ForkKeyed \
-           SEP_reference SEP_regate SEP_rebuild SEP_redeliver; do
+           SEP_reference SEP_regate SEP_rebuild SEP_redeliver \
+           C0_reference C1_raceconsume C2_raceeffect; do
   $TLC -deadlock -config "$cfg.cfg" -workers 1 "${MODULE[$cfg]}.tla" \
        > "$cfg.audit.out" 2>&1 || true
   if grep -q "${EXPECT[$cfg]}" "$cfg.audit.out"; then
@@ -238,6 +249,84 @@ if absent:
     print("   or ./reproduce.sh --scaled to run all three matrices, then audit.)")
 sys.exit(rc)
 PYAUDIT
+
+# ------------------------------------- [2b] p16 concurrency + self-audit ---
+note "[2b/5] p16 receipts (167 consume-count, 168 multi-racer, 169 audit)"
+python3 - << 'PYP16' || fail=1
+import json, os, sys
+rc = 0
+
+# --- 167: the R11 matrix. Two gates, both load-bearing for Prop 2(iv). ---
+p167 = "formal/tla/consumecount/167_matrix.json"
+if not os.path.exists(p167):
+    print("  167: ABSENT (re-derive: ./167_consumecount_matrix.sh <tla2tools.jar>)")
+else:
+    m = json.load(open(p167))["cells"]
+    # Gate A: C0 must equal R0's 87/59 on every invariant -> conservative
+    # extension. If it does not, R11 is a different model and the
+    # separation it witnesses is not a separation of THIS contract.
+    c0 = {k: v for k, v in m.items() if k.startswith("C0_reference.")}
+    bad = [k for k, v in c0.items()
+           if v.get("verdict") != "holds"
+           or (v.get("generated"), v.get("distinct")) != (87, 59)]
+    print(f"  167 C0 conservative-extension gate: "
+          f"{'OK (87/59 on all %d)' % len(c0) if not bad else 'FAIL ' + str(bad)}")
+    rc |= bool(bad)
+    # Gate B: C1 must violate ConsumeOnceCount and NOTHING else.
+    c1 = {k.split(".")[1]: v for k, v in m.items()
+          if k.startswith("C1_raceconsume.")}
+    viol = sorted(k for k, v in c1.items() if v.get("verdict") == "violated")
+    ok = viol == ["ConsumeOnceCount"]
+    print(f"  167 C1 separating witness: "
+          f"{'OK (CO-c only)' if ok else 'FAIL -- violated: %s' % viol}")
+    rc |= (not ok)
+
+# --- 168: the concurrency characterization. ---
+p168 = "results/multiproc/168_stable.json"
+if not os.path.exists(p168):
+    print("  168: ABSENT (re-derive: probes/168_p16_multiracer_sweep.py)")
+else:
+    st = json.load(open(p168))["stable"]
+    # P3 is null on a TARGETED sweep (--ks / --jitters excluding k=2/j=0).
+    # That is "not evaluated", not "failed": treat it as SKIP so a window
+    # dose-response run does not red-flag an intact artifact. Only an
+    # explicit False is a failure.
+    p3 = st.get("P3_reproduces_probe159_k2_j0")
+    print(f"  168 P3 reproduces probe 159 at k=2/j=0: "
+          f"{'OK' if p3 is True else 'SKIP (cell not in this sweep)' if p3 is None else 'FAIL'}")
+    rc |= (p3 is False)
+    for lab, good in [
+        ("P1 duplicates scale beyond two", st.get("P1_duplicates_scale_beyond_two") is True),
+        ("no racer errors",                st.get("any_racer_errors") is False)]:
+        print(f"  168 {lab}: {'OK' if good else 'FAIL'}")
+        rc |= (not good)
+    if st.get("gate_duration_ms"):
+        print(f"  168 window dose-response: gate {st['gate_duration_ms']} ms, "
+              f"edge {st.get('window_edge_ms')} ms")
+    sat = st.get("saturation_mean_fires_over_k", {})
+    if sat:
+        lo = min(sat.values())
+        print(f"  168 saturation: {sum(1 for v in sat.values() if v >= 0.999)}"
+              f"/{len(sat)} cells at 1.0, min {lo}")
+
+# --- 169: does the committed evidence agree with the paper? ---
+p169 = "results/mutation/169_report.json"
+if not os.path.exists(p169):
+    print("  169: ABSENT (re-derive: probes/169_p16_harness_mutation.py --baseline)")
+else:
+    r = json.load(open(p169))
+    miss, dis = r["baseline_receipts_missing"], r["baseline_disagreeing_with_paper"]
+    n = len(r["baseline"])
+    print(f"  169 receipt self-audit: {n - len(miss)}/{n} present, "
+          f"{len(dis)} disagreeing with the paper")
+    if miss:
+        print(f"    MISSING: {miss}")
+    if dis:
+        print(f"    DISAGREEING: {dis}")
+    rc |= bool(dis)          # a disagreement is a hard failure; absence is not
+
+sys.exit(rc)
+PYP16
 
 if [[ $TLC_ONLY -eq 1 ]]; then
   [[ $fail -eq 0 ]] && echo "TLC-only audit: CLEAN" || echo "TLC-only audit: FAILED"

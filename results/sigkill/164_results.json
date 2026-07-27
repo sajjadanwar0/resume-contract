@@ -1,0 +1,170 @@
+{
+  "probe": "164_p15_sigkill_crewai_pydantic",
+  "host": "Sajjad",
+  "utc": "2026-07-26T17:25:28+00:00",
+  "reps": 3,
+  "halves": {
+    "crewai": {
+      "pin": "1.15.2",
+      "reps": [
+        {
+          "rep": 0,
+          "victim": {
+            "returncode": -9
+          },
+          "post_crash_counts": {
+            "s1": 1
+          },
+          "resume": {
+            "restored_id": "c9aabacd-2adf-46e4-95a3-3a9bda69e094",
+            "error": null,
+            "error_type": null,
+            "returncode": 0
+          },
+          "final_counts": {
+            "s1": 2,
+            "s2": 1
+          },
+          "victim_sigkilled": true,
+          "s1_duplicated": true,
+          "as_expected": true
+        },
+        {
+          "rep": 1,
+          "victim": {
+            "returncode": -9
+          },
+          "post_crash_counts": {
+            "s1": 1
+          },
+          "resume": {
+            "restored_id": "83d4cd30-960d-4dc2-9d88-84519ab1109f",
+            "error": null,
+            "error_type": null,
+            "returncode": 0
+          },
+          "final_counts": {
+            "s1": 2,
+            "s2": 1
+          },
+          "victim_sigkilled": true,
+          "s1_duplicated": true,
+          "as_expected": true
+        },
+        {
+          "rep": 2,
+          "victim": {
+            "returncode": -9
+          },
+          "post_crash_counts": {
+            "s1": 1
+          },
+          "resume": {
+            "restored_id": "eb57faec-fdf2-478b-940c-ea809549dd03",
+            "error": null,
+            "error_type": null,
+            "returncode": 0
+          },
+          "final_counts": {
+            "s1": 2,
+            "s2": 1
+          },
+          "victim_sigkilled": true,
+          "s1_duplicated": true,
+          "as_expected": true
+        }
+      ]
+    },
+    "pydantic_graph": {
+      "pin": "1.107.1",
+      "reps": [
+        {
+          "rep": 0,
+          "victim": {
+            "_stderr_tail": "  from pydantic_graph import BaseNode, End, Graph, GraphRunContext",
+            "returncode": -9
+          },
+          "post_crash_counts": {
+            "a": 1,
+            "b": 1
+          },
+          "resume": {
+            "outcome": null,
+            "error": "GraphRuntimeError: Unable to restore snapshot from state persistence.",
+            "error_type": "GraphRuntimeError",
+            "_stderr_tail": "  from pydantic_graph import BaseNode, End, Graph, GraphRunContext",
+            "returncode": 0
+          },
+          "final_counts": {
+            "a": 1,
+            "b": 1
+          },
+          "victim_sigkilled": true,
+          "resume_error_type": "GraphRuntimeError",
+          "as_expected": true
+        },
+        {
+          "rep": 1,
+          "victim": {
+            "_stderr_tail": "  from pydantic_graph import BaseNode, End, Graph, GraphRunContext",
+            "returncode": -9
+          },
+          "post_crash_counts": {
+            "a": 1,
+            "b": 1
+          },
+          "resume": {
+            "outcome": null,
+            "error": "GraphRuntimeError: Unable to restore snapshot from state persistence.",
+            "error_type": "GraphRuntimeError",
+            "_stderr_tail": "  from pydantic_graph import BaseNode, End, Graph, GraphRunContext",
+            "returncode": 0
+          },
+          "final_counts": {
+            "a": 1,
+            "b": 1
+          },
+          "victim_sigkilled": true,
+          "resume_error_type": "GraphRuntimeError",
+          "as_expected": true
+        },
+        {
+          "rep": 2,
+          "victim": {
+            "_stderr_tail": "  from pydantic_graph import BaseNode, End, Graph, GraphRunContext",
+            "returncode": -9
+          },
+          "post_crash_counts": {
+            "a": 1,
+            "b": 1
+          },
+          "resume": {
+            "outcome": null,
+            "error": "GraphRuntimeError: Unable to restore snapshot from state persistence.",
+            "error_type": "GraphRuntimeError",
+            "_stderr_tail": "  from pydantic_graph import BaseNode, End, Graph, GraphRunContext",
+            "returncode": 0
+          },
+          "final_counts": {
+            "a": 1,
+            "b": 1
+          },
+          "victim_sigkilled": true,
+          "resume_error_type": "GraphRuntimeError",
+          "as_expected": true
+        }
+      ]
+    }
+  },
+  "stable": {
+    "crewai_victim_sigkilled_every_rep": true,
+    "crewai_completed_s1_reexecuted_under_sigkill": true,
+    "crewai_matrix_verdict_replicated": true,
+    "pg_victim_sigkilled_every_rep": true,
+    "pg_midnode_resume_error_types": [
+      "GraphRuntimeError"
+    ],
+    "pg_matrix_verdict_replicated": true
+  },
+  "merged_from_previous_receipt": true
+}

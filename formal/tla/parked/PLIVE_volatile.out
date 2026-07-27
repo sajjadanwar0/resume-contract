@@ -1,0 +1,97 @@
+TLC2 Version 2026.04.09.014118 (rev: 389440f)
+Running breadth-first search Model-Checking with fp 81 and seed 115642310915711205 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 94446] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/ResumeContractParked.tla (file:/home/neo/RustroverProjects/resume-contract/formal/tla/parked/../ResumeContractParked.tla)
+Parsing file /tmp/tlc-14063219201616022029/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-14063219201616022029/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-14063219201616022029/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-14063219201616022029/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-14063219201616022029/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-14063219201616022029/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-14063219201616022029/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module ResumeContractParked
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module ResumeContractParked
+Starting... (2026-07-26 22:34:38)
+Implied-temporal checking--satisfiability problem has 1 branches.
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-07-26 22:34:38.
+Progress(8) at 2026-07-26 22:34:38: 88 states generated, 60 distinct states found, 0 states left on queue.
+Checking temporal properties for the complete state space with 60 total distinct states at (2026-07-26 22:34:38)
+Error: Temporal property EventuallyCompletes was violated.
+
+Error: The following behavior constitutes a counter-example:
+
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+
+State 2: <ExecTask line 124, col 3 to line 136, col 60 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 3: <EmitInterrupt line 142, col 3 to line 149, col 72 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = TRUE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = TRUE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 4: <CrashWhileParked line 209, col 3 to line 227, col 73 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = TRUE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 5: Stuttering
+Finished checking temporal properties in 00s at 2026-07-26 22:34:38
+88 states generated, 60 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 8.
+Finished in 00s at (2026-07-26 22:34:38)
+Trace exploration spec path: ../ResumeContractParked_TTrace_1785087278.tla

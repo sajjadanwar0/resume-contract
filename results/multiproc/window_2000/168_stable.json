@@ -1,0 +1,41 @@
+{
+ "probe": "168_p16_multiracer_sweep",
+ "host": "Sajjad",
+ "utc": "2026-07-27T18:21:06+00:00",
+ "pins": {
+  "langgraph": "1.2.9",
+  "langgraph-checkpoint": "4.1.1",
+  "langgraph-checkpoint-sqlite": "3.1.0",
+  "langgraph-checkpoint-postgres": "3.1.0"
+ },
+ "stable": {
+  "P1_duplicates_scale_beyond_two": true,
+  "P1_max_fires_by_k_at_zero_jitter": {
+   "4": 4
+  },
+  "P2_jitter_reduces_duplicates": false,
+  "P2_response_by_k": {
+   "sqlite.k4": "flat",
+   "postgres.k4": "flat"
+  },
+  "window_at_least_ms": 3000,
+  "window_edge_ms": 1000,
+  "saturation_mean_fires_over_k": {
+   "sqlite.k4.j0": 1.0,
+   "sqlite.k4.j100": 1.0,
+   "sqlite.k4.j500": 1.0,
+   "sqlite.k4.j1000": 1.0,
+   "sqlite.k4.j3000": 0.9,
+   "postgres.k4.j0": 1.0,
+   "postgres.k4.j100": 1.0,
+   "postgres.k4.j500": 1.0,
+   "postgres.k4.j1000": 1.0,
+   "postgres.k4.j3000": 0.9
+  },
+  "gate_duration_ms": 2000,
+  "widest_jitter_still_duplicating_ms": 3000,
+  "P3_reproduces_probe159_k2_j0": null,
+  "max_fires_observed": 4,
+  "any_racer_errors": false
+ }
+}
