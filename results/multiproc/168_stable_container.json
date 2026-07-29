@@ -1,0 +1,72 @@
+{
+ "probe": "168_p16_multiracer_sweep",
+ "host": "ip-172-26-8-201",
+ "utc": "2026-07-29T07:00:53+00:00",
+ "pins": {
+  "langgraph": "1.2.9",
+  "langgraph-checkpoint": "4.1.1",
+  "langgraph-checkpoint-sqlite": "3.1.0",
+  "langgraph-checkpoint-postgres": "3.1.0"
+ },
+ "stable": {
+  "P1_duplicates_scale_beyond_two": true,
+  "P1_max_fires_by_k_at_zero_jitter": {
+   "2": 2,
+   "3": 3,
+   "4": 4,
+   "8": 8
+  },
+  "P2_jitter_reduces_duplicates": false,
+  "P2_response_by_k": {
+   "sqlite.k2": "flat",
+   "sqlite.k3": "flat",
+   "sqlite.k4": "flat",
+   "sqlite.k8": "flat",
+   "postgres.k2": "flat",
+   "postgres.k3": "flat",
+   "postgres.k4": "flat",
+   "postgres.k8": "flat"
+  },
+  "window_at_least_ms": 25,
+  "window_edge_ms": 25,
+  "saturation_mean_fires_over_k": {
+   "sqlite.k2.j0": 1.0,
+   "sqlite.k2.j1": 1.0,
+   "sqlite.k2.j5": 1.0,
+   "sqlite.k2.j25": 0.9,
+   "sqlite.k3.j0": 1.0,
+   "sqlite.k3.j1": 1.0,
+   "sqlite.k3.j5": 1.0,
+   "sqlite.k3.j25": 0.9,
+   "sqlite.k4.j0": 1.0,
+   "sqlite.k4.j1": 1.0,
+   "sqlite.k4.j5": 1.0,
+   "sqlite.k4.j25": 0.925,
+   "sqlite.k8.j0": 1.0,
+   "sqlite.k8.j1": 1.0,
+   "sqlite.k8.j5": 1.0,
+   "sqlite.k8.j25": 1.0,
+   "postgres.k2.j0": 1.0,
+   "postgres.k2.j1": 1.0,
+   "postgres.k2.j5": 1.0,
+   "postgres.k2.j25": 0.9,
+   "postgres.k3.j0": 1.0,
+   "postgres.k3.j1": 1.0,
+   "postgres.k3.j5": 1.0,
+   "postgres.k3.j25": 1.0,
+   "postgres.k4.j0": 1.0,
+   "postgres.k4.j1": 1.0,
+   "postgres.k4.j5": 1.0,
+   "postgres.k4.j25": 1.0,
+   "postgres.k8.j0": 1.0,
+   "postgres.k8.j1": 0.975,
+   "postgres.k8.j5": 0.938,
+   "postgres.k8.j25": 0.988
+  },
+  "gate_duration_ms": 0,
+  "widest_jitter_still_duplicating_ms": 25,
+  "P3_reproduces_probe159_k2_j0": true,
+  "max_fires_observed": 8,
+  "any_racer_errors": false
+ }
+}
