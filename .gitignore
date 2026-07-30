@@ -26,3 +26,27 @@ formal/tla/consumecount/meta_*
 formal/tla/*.audit.out
 tools/tla2tools.jar
 .venv168/
+
+# TLC metadirs from the IndCheck matrix
+formal/tla/states_*/
+formal/tla/.states_*/
+
+# paper build artifacts -- scoped to the basename ON PURPOSE.
+# A bare *.out would untrack 167 TLC receipts.
+resume-contract.aux
+resume-contract.log
+resume-contract.out
+resume-contract.bbl
+resume-contract.blg
+resume-contract.toc
+resume-contract.synctex.gz
+
+# TLC run scratch (receipts live in results/tla/)
+formal/tla/indcheck/
+formal/tla/independence_ref_rerun/
+# heavy per-rep sweep output (canonical 168 receipts are committed separately)
+results/multiproc/window_100/
+# compiled verus binaries
+remit_verus_cv_rd
+# prebuilt extension module (the wheel is the artifact; BUILD_AND_TEST rebuilds)
+remit-contract/python/remit/_core.abi3.so
