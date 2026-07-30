@@ -1,0 +1,15 @@
+{
+  "artifact": "IndCheck.tla inductive-invariant matrix",
+  "method": "INIT <- InvFast, NEXT <- Next: every invariant-state taken as an initial state and every successor checked, so a clean run establishes Inv /\\ [Next]_vars => Inv' at the configured constants",
+  "also_checked": ["EquivGuard (InvFast <=> Inv)", "InvImpliesContract", "InitImpliesInv"],
+  "constant_coverage": "each of the six configuration bounds varies in at least one pair across R0/R2/R3",
+  "stable_fields": ["verdict", "generated", "distinct", "depth"],
+  "excluded_fields": ["seed", "fingerprint_collision_estimates"],
+  "workers_affect_counts": false,
+  "cells": [
+    {"label":"R0","constants":"N=3 IP=2 |V|=2 MaxResumes=2 MaxCrashes=1 MaxExtraResumes=1","verdict":"no_error","generated":19659,"distinct":8610,"depth":1,"expected_generated":19659,"expected_distinct":8610,"audit":"pass"},
+    {"label":"R2","constants":"N=4 IP=3 |V|=2 MaxResumes=2 MaxCrashes=2 MaxExtraResumes=1","verdict":"no_error","generated":1009076,"distinct":450926,"depth":1,"expected_generated":1009076,"expected_distinct":450926,"audit":"pass"},
+    {"label":"R3","constants":"N=3 IP=2 |V|=3 MaxResumes=3 MaxCrashes=1 MaxExtraResumes=2","verdict":"no_error","generated":249915,"distinct":97800,"depth":1,"expected_generated":249915,"expected_distinct":97800,"audit":"pass"}
+  ],
+  "matrix_audit": "pass"
+}
