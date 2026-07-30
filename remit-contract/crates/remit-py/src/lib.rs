@@ -20,6 +20,7 @@ create_exception!(remit._core, RemitDuplicateEffect, RemitError, "EO/CO: the (br
 create_exception!(remit._core, RemitPrefixViolation, RemitError, "PC: attempted to re-enter or skip the durable prefix; the commit was refused.");
 create_exception!(remit._core, RemitValidityError, RemitError, "CV: the state failed schema validation; nothing was persisted (loud, not silent).");
 create_exception!(remit._core, RemitOrderViolation, RemitError, "RD: a checkpoint was submitted before its declared writes were sequenced (#8039 window); refused.");
+create_exception!(remit._core, RemitConsumeConflict, RemitError, "CO (cross-process): the parked interrupt's consumption was already claimed by another process; this invocation was refused before any node executed.");
 
 fn raise(e: core::RemitError) -> PyErr {
     let msg = e.to_string();
@@ -318,6 +319,47 @@ fn fork_view(explicit_checkpoint_address: bool, fork_flag: bool, has_recorded_re
     }
 }
 
+/// CO (cross-process) / probe-165 rule as a pure module-level function:
+/// given whether the loaded checkpoint carries a pending `__interrupt__`
+/// write, whether the cross-process gate is enabled, and whether the
+/// invocation carries fork or read (inspection) intent, return `"attempt"`
+/// (take the `(thread, checkpoint)` claim in the shared store before any
+/// node executes) or `"pass"` (the gate does not engage: fork intent claims
+/// a fresh branch key instead, inspection must not consume, an
+/// interrupt-free checkpoint has nothing to claim, and a disabled gate
+/// preserves stock behavior).
+#[pyfunction]
+#[pyo3(signature = (has_pending_interrupt, gate_enabled, fork_intent, inspect_intent))]
+fn consume_view(
+    has_pending_interrupt: bool,
+    gate_enabled: bool,
+    fork_intent: bool,
+    inspect_intent: bool,
+) -> &'static str {
+    match core::consume_view(has_pending_interrupt, gate_enabled, fork_intent, inspect_intent) {
+        core::ConsumeDecision::AttemptClaim => "attempt",
+        core::ConsumeDecision::Pass => "pass",
+    }
+}
+
+/// The claim outcome, decided by the core: the compare-and-swap winner is
+/// served (`Ok`); the loser is refused loudly with `RemitConsumeConflict`
+/// *before any node executes*. The adapter reports `claim_won` and applies
+/// this verdict mechanically — it holds no branch of its own on the
+/// outcome.
+#[pyfunction]
+#[pyo3(signature = (claim_won, thread, checkpoint_id))]
+fn consume_claim_check(claim_won: bool, thread: &str, checkpoint_id: &str) -> PyResult<()> {
+    match core::consume_claim_verdict(claim_won) {
+        core::ClaimVerdict::Serve => Ok(()),
+        core::ClaimVerdict::Conflict => Err(RemitConsumeConflict::new_err(format!(
+            "CO refused (cross-process consume-once): interrupt consumption for \
+             thread={thread} checkpoint={checkpoint_id} is already claimed by another \
+             process; this invocation was rejected before any node executed"
+        ))),
+    }
+}
+
 /// RD, standalone: recovery over an explicit log `[(task, seq), ...]` is a
 /// pure, order-independent function; returns the `SkipTo` task.
 #[pyfunction]
@@ -338,12 +380,15 @@ fn recover_from_log(log: Vec<(u32, u64)>) -> u32 {
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyCore>()?;
     m.add_function(wrap_pyfunction!(fork_view, m)?)?;
+    m.add_function(wrap_pyfunction!(consume_view, m)?)?;
+    m.add_function(wrap_pyfunction!(consume_claim_check, m)?)?;
     m.add_function(wrap_pyfunction!(recover_from_log, m)?)?;
     m.add("RemitError", m.py().get_type::<RemitError>())?;
     m.add("RemitDuplicateEffect", m.py().get_type::<RemitDuplicateEffect>())?;
     m.add("RemitPrefixViolation", m.py().get_type::<RemitPrefixViolation>())?;
     m.add("RemitValidityError", m.py().get_type::<RemitValidityError>())?;
     m.add("RemitOrderViolation", m.py().get_type::<RemitOrderViolation>())?;
+    m.add("RemitConsumeConflict", m.py().get_type::<RemitConsumeConflict>())?;
     m.add("__core_language__", "rust")?;
     Ok(())
 }

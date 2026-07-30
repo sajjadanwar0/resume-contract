@@ -23,7 +23,16 @@ processes over one on-disk checkpointer database:
   D. race_same under the packaged REMIT shim (one shim instance PER PROCESS
                     over the same db) -- does per-process interposition
                     change or break the race behavior?  (Scope probe: the
-                    shim's sequencer is per-process by construction.)
+                    shim's sequencer is per-process by construction.
+                    RETAINED as the ungated differential now that the shim
+                    ships an opt-in gate: default wrap must still race.)
+  E. race_same under the shim's CROSS-PROCESS GATE (v0.1.1+,
+                    wrap(..., cross_process_gate=True)): probe 165's
+                    read-path claim, promoted into the package.  Expected:
+                    exactly one racer fires; the loser raises
+                    RemitConsumeConflict inside get_tuple, before any node.
+  F. race_diff under the gate: the loser with the other value is refused,
+                    not served the winner's branch.
 
 Oracle: on-disk SQLite effect ledger, rows tagged by thread, written by the
 node bodies, read by the parent (cross-process, kill-surviving).
@@ -120,12 +129,14 @@ def make_saver(ctx):
         from psycopg.rows import dict_row
         conn = Connection.connect(ctx["pg_dsn"], autocommit=True,
                                   prepare_threshold=0, row_factory=dict_row)
-        saver = (_rls.wrap(PostgresSaver, conn) if ctx.get("shim")
-                 else PostgresSaver(conn))
+        saver = (_rls.wrap(PostgresSaver, conn,
+                           cross_process_gate=bool(ctx.get("shim_gate")))
+                 if ctx.get("shim") else PostgresSaver(conn))
         return saver, conn.close
     conn = sqlite3.connect(ctx["db"], check_same_thread=False, timeout=60)
-    saver = (_rls.wrap(SqliteSaver, conn) if ctx.get("shim")
-             else SqliteSaver(conn))
+    saver = (_rls.wrap(SqliteSaver, conn,
+                       cross_process_gate=bool(ctx.get("shim_gate")))
+             if ctx.get("shim") else SqliteSaver(conn))
     return saver, conn.close
 
 
@@ -247,13 +258,15 @@ def _last_json(proc, timeout):
 
 
 # ------------------------------------------------------------ parent arms
-def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn):
+def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn,
+             shim_gate=False):
     reps_out = []
     for i in range(reps):
         d0 = tempfile.mkdtemp(prefix=f"p159_{tag}_{i}_", dir=base)
         thread = f"{tag}{i}"
         ctx0 = {"db": f"{d0}/ckpt.sqlite", "ledger": f"{base}/ledger.sqlite",
-                "thread": thread, "shim": shim, "pg_dsn": pg_dsn}
+                "thread": thread, "shim": shim, "shim_gate": shim_gate,
+                "pg_dsn": pg_dsn}
         pk = _spawn("park", ctx0)
         pk_out = _last_json(pk, 60)
         racers, flags = [], []
@@ -294,8 +307,13 @@ def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn):
                 if dec is not None and dec != x["value"] \
                         and f"gate:{x['value']}" not in r["gate_values_fired"]:
                     served_other.append(r["rep"])
+    conflicts = [sum(1 for x in r["racers"]
+                     if "RemitConsumeConflict" in (x.get("error") or ""))
+                 for r in reps_out]
     return {
-        "reps": reps, "shim": shim, "values": [value_a, value_b],
+        "reps": reps, "shim": shim, "shim_gate": shim_gate,
+        "values": [value_a, value_b],
+        "claim_rejections_per_rep": conflicts,
         "gate_fire_distribution": dist,
         "reps_with_duplicate_gate_fire": dup,
         "reps_with_racer_error": errs,
@@ -361,6 +379,12 @@ def parent_main(args):
     if HAVE_REMIT:
         arms["race_same_shim"] = run_race(base, "rss", True, True,
                                           args.reps, True, args.pg_dsn)
+        arms["race_same_shim_gate"] = run_race(base, "rsg", True, True,
+                                               args.reps, True, args.pg_dsn,
+                                               shim_gate=True)
+        arms["race_diff_shim_gate"] = run_race(base, "rdg", True, False,
+                                               args.reps, True, args.pg_dsn,
+                                               shim_gate=True)
     result = {
         "probe": "159_p14_multiproc_saver",
         "host": socket.gethostname(),
@@ -394,6 +418,26 @@ def parent_main(args):
                 arms["contention_kill"]["victim_recovered_ok"],
             "shim_race_inert_all_reps":
                 (not arms["race_same_shim"]["reps_with_duplicate_gate_fire"])
+                if HAVE_REMIT else None,
+            "shim_gate_race_same_fire_distribution":
+                arms["race_same_shim_gate"]["gate_fire_distribution"]
+                if HAVE_REMIT else None,
+            "shim_gate_race_same_duplicate_reps":
+                arms["race_same_shim_gate"]["reps_with_duplicate_gate_fire"]
+                if HAVE_REMIT else None,
+            "shim_gate_race_diff_fire_distribution":
+                arms["race_diff_shim_gate"]["gate_fire_distribution"]
+                if HAVE_REMIT else None,
+            "shim_gate_race_diff_served_other_value_reps":
+                arms["race_diff_shim_gate"]
+                    ["reps_where_a_racer_was_served_the_other_value"]
+                if HAVE_REMIT else None,
+            "shim_gate_loser_rejected_loudly_every_race_rep":
+                (all(c == 1 for c in
+                     arms["race_same_shim_gate"]["claim_rejections_per_rep"])
+                 and all(c == 1 for c in
+                         arms["race_diff_shim_gate"]
+                             ["claim_rejections_per_rep"]))
                 if HAVE_REMIT else None,
         },
     }

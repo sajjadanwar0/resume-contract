@@ -294,6 +294,72 @@ pub enum ViewDecision {
     KeepRecorded,
 }
 
+/// **CO across processes / probe-165 rule as a pure function.** The
+/// cross-process consume-once repair binds at the durable-state read the
+/// execution loop performs before gated execution (`get_tuple` returning a
+/// checkpoint that carries a pending `__interrupt__` write) and takes a
+/// claim on `(thread, checkpoint)` in the *shared store* under a uniqueness
+/// constraint — the compare-and-swap the paper's Section on the
+/// cross-process cell names. This function is the core's answer to "should
+/// this read attempt that claim?":
+///
+/// * a parked consumable is present, the gate is enabled, and the
+///   invocation carries neither fork intent nor read (inspection) intent →
+///   [`ConsumeDecision::AttemptClaim`];
+/// * otherwise → [`ConsumeDecision::Pass`] — fork-intent deliveries claim a
+///   fresh branch key instead (FD/FI, probe 155's composition), inspection
+///   reads must not consume (the read-intent gap, made explicit as an
+///   opt-out rather than left as an interface defect), a completed or
+///   interrupt-free checkpoint has nothing to claim, and a disabled gate
+///   preserves stock behavior bit for bit.
+///
+/// The adapter executes the claim (one `INSERT` under a primary-key /
+/// `ON CONFLICT` constraint in the saver's own store) and reports the
+/// outcome to [`consume_claim_verdict`]; it decides nothing itself.
+pub fn consume_view(
+    has_pending_interrupt: bool,
+    gate_enabled: bool,
+    fork_intent: bool,
+    inspect_intent: bool,
+) -> ConsumeDecision {
+    if has_pending_interrupt && gate_enabled && !fork_intent && !inspect_intent {
+        ConsumeDecision::AttemptClaim
+    } else {
+        ConsumeDecision::Pass
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ConsumeDecision {
+    /// Take the `(thread, checkpoint)` claim in the shared store before any
+    /// node executes; exactly one process can win.
+    AttemptClaim,
+    /// Do not engage the gate for this read.
+    Pass,
+}
+
+/// **The claim outcome, decided in one place.** The compare-and-swap has
+/// exactly two outcomes and the core owns the mapping: the winner is served
+/// the parked state ([`ClaimVerdict::Serve`]); the loser is refused loudly
+/// *before any node executes* ([`ClaimVerdict::Conflict`]) — the
+/// cross-process analogue of consume-once, measured as `{1:10}` on both
+/// durable backends by probe 165 where the stock plane duplicates `10/10`
+/// (probe 159). The adapter maps `Conflict` to `RemitConsumeConflict`
+/// mechanically.
+pub fn consume_claim_verdict(claim_won: bool) -> ClaimVerdict {
+    if claim_won {
+        ClaimVerdict::Serve
+    } else {
+        ClaimVerdict::Conflict
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ClaimVerdict {
+    Serve,
+    Conflict,
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 struct InterruptState {
     /// Every recorded resume value, in ordinal order. Both values of a fork
@@ -745,5 +811,28 @@ mod tests {
         assert_eq!(fork_view(false, false, true), KeepRecorded); // replay / T3
         assert_eq!(fork_view(true, false, false), KeepRecorded); // nothing to strip
         assert_eq!(fork_view(false, false, false), KeepRecorded);
+    }
+
+    #[test]
+    fn co_consume_view_matches_probe_165() {
+        use ConsumeDecision::*;
+        // Arm B/C: parked consumable, gate on, ordinary address -> claim.
+        assert_eq!(consume_view(true, true, false, false), AttemptClaim);
+        // Fork-intent delivery claims a fresh branch key instead (probe 155
+        // composition); the consumption gate stands aside.
+        assert_eq!(consume_view(true, true, true, false), Pass);
+        // Read-intent (inspection) must not consume: the read-intent gap,
+        // exposed as an explicit opt-out.
+        assert_eq!(consume_view(true, true, false, true), Pass);
+        // Arm E: completed / interrupt-free checkpoint -> nothing to claim.
+        assert_eq!(consume_view(false, true, false, false), Pass);
+        // Gate disabled (the default): stock behavior preserved bit for bit.
+        assert_eq!(consume_view(true, false, false, false), Pass);
+    }
+
+    #[test]
+    fn co_claim_verdict_is_the_cas_outcome() {
+        assert_eq!(consume_claim_verdict(true), ClaimVerdict::Serve);
+        assert_eq!(consume_claim_verdict(false), ClaimVerdict::Conflict);
     }
 }
