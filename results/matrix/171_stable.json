@@ -1,0 +1,29 @@
+{
+ "probe": "171_p16_lgf_outofsample",
+ "host": "Sajjad",
+ "utc": "2026-07-30T14:03:05+00:00",
+ "backend": "memory",
+ "pins": {
+  "langgraph": "1.2.9",
+  "langgraph-checkpoint": "4.1.1",
+  "langgraph-checkpoint-sqlite": null
+ },
+ "stable": {
+  "predictions_registered_in_source": [
+   "P-A_three_resumes_abc",
+   "P-B_fork_after_stray",
+   "P-C_interleaved_bare_and_map",
+   "P-D_two_checkpoints_independent"
+  ],
+  "confirmed": [
+   "P-A_three_resumes_abc",
+   "P-B_fork_after_stray",
+   "P-C_interleaved_bare_and_map",
+   "P-D_two_checkpoints_independent"
+  ],
+  "mispredicted": [],
+  "errored": [],
+  "model_out_of_sample_confirmed": true,
+  "negative_control_PD_confirmed": true
+ }
+}

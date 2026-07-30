@@ -1,0 +1,128 @@
+{
+ "probe": "170_p16_mutation_operators",
+ "host": "Sajjad",
+ "utc": "2026-07-29T15:07:22+00:00",
+ "mode": "apply",
+ "operators": {
+  "M1": {
+   "operator": "effect_undercount",
+   "applied": true,
+   "tree": "/tmp/mut/M1",
+   "sites": [
+    {
+     "file": "probes/159_p14_multiproc_saver.py",
+     "count": 1
+    },
+    {
+     "file": "probes/126_p6_langgraph_sqlite_durable.py",
+     "count": 1
+    }
+   ],
+   "predicted_kills": [
+    "LG.CO.concurrent"
+   ],
+   "error": null
+  },
+  "M2": {
+   "operator": "effect_overcount",
+   "applied": true,
+   "tree": "/tmp/mut/M2",
+   "sites": [
+    {
+     "file": "probes/159_p14_multiproc_saver.py",
+     "count": 1
+    },
+    {
+     "file": "probes/126_p6_langgraph_sqlite_durable.py",
+     "count": 1
+    }
+   ],
+   "predicted_kills": [],
+   "error": null
+  },
+  "M3": {
+   "operator": "crash_noop",
+   "applied": true,
+   "tree": "/tmp/mut/M3",
+   "sites": [
+    {
+     "file": "probes/159_p14_multiproc_saver.py",
+     "count": 1
+    }
+   ],
+   "predicted_kills": [
+    "LG.CO.concurrent"
+   ],
+   "error": null
+  },
+  "M4": {
+   "operator": "fork_value_ignore",
+   "applied": true,
+   "tree": "/tmp/mut/M4",
+   "sites": [
+    {
+     "file": "probes/125_p4_shim_fd_langgraph.py",
+     "count": 1
+    }
+   ],
+   "predicted_kills": [
+    "LG.FD.6663"
+   ],
+   "error": null
+  },
+  "M5": {
+   "operator": "label_rule_invert",
+   "applied": false,
+   "tree": "/tmp/mut/M5",
+   "sites": [],
+   "predicted_kills": [],
+   "error": "M5: the U/X label rule is not in the measurement path (no probe records it, matrix.toml has no such column), so it has no mechanical site. Table 5 note b's sensitivity claim must be discharged by recomputing the matrix under the alternative rule, not by mutation. Reported as a scope limit, not a passing mutant."
+  },
+  "M6": {
+   "operator": "state_only_oracle",
+   "applied": true,
+   "tree": "/tmp/mut/M6",
+   "sites": [
+    {
+     "file": "probes/159_p14_multiproc_saver.py",
+     "count": 1
+    }
+   ],
+   "predicted_kills": [
+    "LG.CO.concurrent"
+   ],
+   "error": null
+  },
+  "M7": {
+   "operator": "barrier_removed",
+   "applied": true,
+   "tree": "/tmp/mut/M7",
+   "sites": [
+    {
+     "file": "probes/159_p14_multiproc_saver.py",
+     "count": 1
+    }
+   ],
+   "predicted_kills": [],
+   "error": null
+  },
+  "M8": {
+   "operator": "pin_drift",
+   "applied": true,
+   "tree": "/tmp/mut/M8",
+   "sites": [
+    {
+     "file": "envs/langgraph/pyproject.toml",
+     "count": 1
+    }
+   ],
+   "predicted_kills": [
+    "__REFUSAL__"
+   ],
+   "error": null
+  }
+ },
+ "operators_without_live_sites": [
+  "M5"
+ ]
+}

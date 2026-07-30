@@ -1,0 +1,101 @@
+{
+ "probe": "171_p16_lgf_outofsample",
+ "host": "Sajjad",
+ "utc": "2026-07-29T09:16:57+00:00",
+ "backend": "memory",
+ "pins": {
+  "langgraph": "1.2.9",
+  "langgraph-checkpoint": "4.1.1",
+  "langgraph-checkpoint-sqlite": null
+ },
+ "predictions": {
+  "P-A_three_resumes_abc": {
+   "served": [
+    "a",
+    "a",
+    "a"
+   ]
+  },
+  "P-B_fork_after_stray": {
+   "served": [
+    "a",
+    null,
+    "a"
+   ],
+   "stray_effect_delta": 0
+  },
+  "P-C_interleaved_bare_and_map": {
+   "served": [
+    "a",
+    "a",
+    "a"
+   ]
+  },
+  "P-D_two_checkpoints_independent": {
+   "served": [
+    "a",
+    "b",
+    "a",
+    "b"
+   ]
+  }
+ },
+ "stable": {
+  "predictions_registered_in_source": [
+   "P-A_three_resumes_abc",
+   "P-B_fork_after_stray",
+   "P-C_interleaved_bare_and_map",
+   "P-D_two_checkpoints_independent"
+  ],
+  "confirmed": [
+   "P-A_three_resumes_abc",
+   "P-B_fork_after_stray",
+   "P-C_interleaved_bare_and_map",
+   "P-D_two_checkpoints_independent"
+  ],
+  "mispredicted": [],
+  "errored": [],
+  "model_out_of_sample_confirmed": true,
+  "negative_control_PD_confirmed": true
+ },
+ "results": {
+  "P-A_three_resumes_abc": {
+   "protocol": "P-A_three_resumes_abc",
+   "served": [
+    "a",
+    "a",
+    "a"
+   ],
+   "error": null
+  },
+  "P-B_fork_after_stray": {
+   "protocol": "P-B_fork_after_stray",
+   "served": [
+    "a",
+    null,
+    "a"
+   ],
+   "error": null,
+   "stray_effect_delta": 0
+  },
+  "P-C_interleaved_bare_and_map": {
+   "protocol": "P-C_interleaved_bare_and_map",
+   "served": [
+    "a",
+    "a",
+    "a"
+   ],
+   "error": null
+  },
+  "P-D_two_checkpoints_independent": {
+   "protocol": "P-D_two_checkpoints_independent",
+   "served": [
+    "a",
+    "b",
+    "a",
+    "b"
+   ],
+   "error": null
+  }
+ }
+}

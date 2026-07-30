@@ -1,0 +1,542 @@
+{
+ "probe": "172_p16_mutation_diff",
+ "host": "Sajjad",
+ "utc": "2026-07-29T15:14:25+00:00",
+ "baseline_gaps": [],
+ "mutants": {
+  "M1": {
+   "verdict": "AS PREDICTED",
+   "predicted_kills": [
+    "LG.CO.concurrent"
+   ],
+   "observed_kills": [
+    "LG.CO.concurrent"
+   ],
+   "unchanged": [
+    "AG.doublerestore",
+    "AG.restore.EO",
+    "CA.restore.dup",
+    "LG.CV.nopersist",
+    "LG.CV.repair",
+    "LG.EO.crash",
+    "LG.EO.sigkill",
+    "LG.FD.6663",
+    "LG.RD.orderinv",
+    "LG.RD.reflexive",
+    "LG.killsweep",
+    "LG.killsweep.rec",
+    "ORACLE.noovercount",
+    "PG.parkkill.ok"
+   ],
+   "unscored_probe_failed": [],
+   "unscored_no_receipt": [],
+   "reachable_cells": [
+    "LG.CO.concurrent"
+   ],
+   "incoherent_predictions": [],
+   "runs": {
+    "115b_p2_crewai_checkpointconfig": {
+     "ok": true,
+     "note": "ok (env crewai, stdout persisted)",
+     "cells": [
+      "CA.restore.dup"
+     ]
+    },
+    "118_p3_langgraph_rd_interleavings": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.EO.crash",
+      "LG.RD.reflexive",
+      "LG.RD.orderinv"
+     ]
+    },
+    "123_p4_shim_cv_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.CV.repair",
+      "LG.CV.nopersist"
+     ]
+    },
+    "125_p4_shim_fd_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.FD.6663"
+     ]
+    },
+    "133_p7_langgraph_real_kill": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.EO.sigkill"
+     ]
+    },
+    "140_p8_autogen_state_column": {
+     "ok": true,
+     "note": "ok (env autogen, stdout persisted)",
+     "cells": [
+      "AG.restore.EO",
+      "AG.doublerestore"
+     ]
+    },
+    "158c_p14_pydantic_graph_park_kill": {
+     "ok": true,
+     "note": "ok (env pydantic-graph, stdout persisted)",
+     "cells": [
+      "PG.parkkill.ok"
+     ]
+    },
+    "159_p14_multiproc_saver": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.CO.concurrent"
+     ]
+    },
+    "160_p14_kill_point_sweep": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.killsweep",
+      "LG.killsweep.rec"
+     ]
+    },
+    "163_p15_oracle_atomicity": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "ORACLE.noovercount"
+     ]
+    }
+   }
+  },
+  "M2": {
+   "verdict": "AS PREDICTED",
+   "predicted_kills": [],
+   "observed_kills": [],
+   "unchanged": [
+    "AG.doublerestore",
+    "AG.restore.EO",
+    "CA.restore.dup",
+    "LG.CO.concurrent",
+    "LG.CV.nopersist",
+    "LG.CV.repair",
+    "LG.EO.crash",
+    "LG.EO.sigkill",
+    "LG.FD.6663",
+    "LG.RD.orderinv",
+    "LG.RD.reflexive",
+    "LG.killsweep",
+    "LG.killsweep.rec",
+    "ORACLE.noovercount",
+    "PG.parkkill.ok"
+   ],
+   "unscored_probe_failed": [],
+   "unscored_no_receipt": [],
+   "reachable_cells": [
+    "LG.CO.concurrent"
+   ],
+   "incoherent_predictions": [],
+   "runs": {
+    "115b_p2_crewai_checkpointconfig": {
+     "ok": true,
+     "note": "ok (env crewai, stdout persisted)",
+     "cells": [
+      "CA.restore.dup"
+     ]
+    },
+    "118_p3_langgraph_rd_interleavings": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.EO.crash",
+      "LG.RD.reflexive",
+      "LG.RD.orderinv"
+     ]
+    },
+    "123_p4_shim_cv_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.CV.repair",
+      "LG.CV.nopersist"
+     ]
+    },
+    "125_p4_shim_fd_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.FD.6663"
+     ]
+    },
+    "133_p7_langgraph_real_kill": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.EO.sigkill"
+     ]
+    },
+    "140_p8_autogen_state_column": {
+     "ok": true,
+     "note": "ok (env autogen, stdout persisted)",
+     "cells": [
+      "AG.restore.EO",
+      "AG.doublerestore"
+     ]
+    },
+    "158c_p14_pydantic_graph_park_kill": {
+     "ok": true,
+     "note": "ok (env pydantic-graph, stdout persisted)",
+     "cells": [
+      "PG.parkkill.ok"
+     ]
+    },
+    "159_p14_multiproc_saver": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.CO.concurrent"
+     ]
+    },
+    "160_p14_kill_point_sweep": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.killsweep",
+      "LG.killsweep.rec"
+     ]
+    },
+    "163_p15_oracle_atomicity": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "ORACLE.noovercount"
+     ]
+    }
+   }
+  },
+  "M4": {
+   "verdict": "AS PREDICTED",
+   "predicted_kills": [
+    "LG.FD.6663"
+   ],
+   "observed_kills": [
+    "LG.FD.6663"
+   ],
+   "unchanged": [
+    "AG.doublerestore",
+    "AG.restore.EO",
+    "CA.restore.dup",
+    "LG.CO.concurrent",
+    "LG.CV.nopersist",
+    "LG.CV.repair",
+    "LG.EO.crash",
+    "LG.EO.sigkill",
+    "LG.RD.orderinv",
+    "LG.RD.reflexive",
+    "LG.killsweep",
+    "LG.killsweep.rec",
+    "ORACLE.noovercount",
+    "PG.parkkill.ok"
+   ],
+   "unscored_probe_failed": [],
+   "unscored_no_receipt": [],
+   "reachable_cells": [
+    "LG.FD.6663"
+   ],
+   "incoherent_predictions": [],
+   "runs": {
+    "115b_p2_crewai_checkpointconfig": {
+     "ok": true,
+     "note": "ok (env crewai, stdout persisted)",
+     "cells": [
+      "CA.restore.dup"
+     ]
+    },
+    "118_p3_langgraph_rd_interleavings": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.EO.crash",
+      "LG.RD.reflexive",
+      "LG.RD.orderinv"
+     ]
+    },
+    "123_p4_shim_cv_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.CV.repair",
+      "LG.CV.nopersist"
+     ]
+    },
+    "125_p4_shim_fd_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.FD.6663"
+     ]
+    },
+    "133_p7_langgraph_real_kill": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.EO.sigkill"
+     ]
+    },
+    "140_p8_autogen_state_column": {
+     "ok": true,
+     "note": "ok (env autogen, stdout persisted)",
+     "cells": [
+      "AG.restore.EO",
+      "AG.doublerestore"
+     ]
+    },
+    "158c_p14_pydantic_graph_park_kill": {
+     "ok": true,
+     "note": "ok (env pydantic-graph, stdout persisted)",
+     "cells": [
+      "PG.parkkill.ok"
+     ]
+    },
+    "159_p14_multiproc_saver": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.CO.concurrent"
+     ]
+    },
+    "160_p14_kill_point_sweep": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.killsweep",
+      "LG.killsweep.rec"
+     ]
+    },
+    "163_p15_oracle_atomicity": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "ORACLE.noovercount"
+     ]
+    }
+   }
+  },
+  "M6": {
+   "verdict": "AS PREDICTED",
+   "predicted_kills": [
+    "LG.CO.concurrent"
+   ],
+   "observed_kills": [
+    "LG.CO.concurrent"
+   ],
+   "unchanged": [
+    "AG.doublerestore",
+    "AG.restore.EO",
+    "CA.restore.dup",
+    "LG.CV.nopersist",
+    "LG.CV.repair",
+    "LG.EO.crash",
+    "LG.EO.sigkill",
+    "LG.FD.6663",
+    "LG.RD.orderinv",
+    "LG.RD.reflexive",
+    "LG.killsweep",
+    "LG.killsweep.rec",
+    "ORACLE.noovercount",
+    "PG.parkkill.ok"
+   ],
+   "unscored_probe_failed": [],
+   "unscored_no_receipt": [],
+   "reachable_cells": [
+    "LG.CO.concurrent"
+   ],
+   "incoherent_predictions": [],
+   "runs": {
+    "115b_p2_crewai_checkpointconfig": {
+     "ok": true,
+     "note": "ok (env crewai, stdout persisted)",
+     "cells": [
+      "CA.restore.dup"
+     ]
+    },
+    "118_p3_langgraph_rd_interleavings": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.EO.crash",
+      "LG.RD.reflexive",
+      "LG.RD.orderinv"
+     ]
+    },
+    "123_p4_shim_cv_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.CV.repair",
+      "LG.CV.nopersist"
+     ]
+    },
+    "125_p4_shim_fd_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.FD.6663"
+     ]
+    },
+    "133_p7_langgraph_real_kill": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.EO.sigkill"
+     ]
+    },
+    "140_p8_autogen_state_column": {
+     "ok": true,
+     "note": "ok (env autogen, stdout persisted)",
+     "cells": [
+      "AG.restore.EO",
+      "AG.doublerestore"
+     ]
+    },
+    "158c_p14_pydantic_graph_park_kill": {
+     "ok": true,
+     "note": "ok (env pydantic-graph, stdout persisted)",
+     "cells": [
+      "PG.parkkill.ok"
+     ]
+    },
+    "159_p14_multiproc_saver": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.CO.concurrent"
+     ]
+    },
+    "160_p14_kill_point_sweep": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.killsweep",
+      "LG.killsweep.rec"
+     ]
+    },
+    "163_p15_oracle_atomicity": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "ORACLE.noovercount"
+     ]
+    }
+   }
+  },
+  "M7": {
+   "verdict": "AS PREDICTED",
+   "predicted_kills": [],
+   "observed_kills": [],
+   "unchanged": [
+    "AG.doublerestore",
+    "AG.restore.EO",
+    "CA.restore.dup",
+    "LG.CO.concurrent",
+    "LG.CV.nopersist",
+    "LG.CV.repair",
+    "LG.EO.crash",
+    "LG.EO.sigkill",
+    "LG.FD.6663",
+    "LG.RD.orderinv",
+    "LG.RD.reflexive",
+    "LG.killsweep",
+    "LG.killsweep.rec",
+    "ORACLE.noovercount",
+    "PG.parkkill.ok"
+   ],
+   "unscored_probe_failed": [],
+   "unscored_no_receipt": [],
+   "reachable_cells": [
+    "LG.CO.concurrent"
+   ],
+   "incoherent_predictions": [],
+   "runs": {
+    "115b_p2_crewai_checkpointconfig": {
+     "ok": true,
+     "note": "ok (env crewai, stdout persisted)",
+     "cells": [
+      "CA.restore.dup"
+     ]
+    },
+    "118_p3_langgraph_rd_interleavings": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.EO.crash",
+      "LG.RD.reflexive",
+      "LG.RD.orderinv"
+     ]
+    },
+    "123_p4_shim_cv_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.CV.repair",
+      "LG.CV.nopersist"
+     ]
+    },
+    "125_p4_shim_fd_langgraph": {
+     "ok": true,
+     "note": "ok (env langgraph, stdout persisted)",
+     "cells": [
+      "LG.FD.6663"
+     ]
+    },
+    "133_p7_langgraph_real_kill": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.EO.sigkill"
+     ]
+    },
+    "140_p8_autogen_state_column": {
+     "ok": true,
+     "note": "ok (env autogen, stdout persisted)",
+     "cells": [
+      "AG.restore.EO",
+      "AG.doublerestore"
+     ]
+    },
+    "158c_p14_pydantic_graph_park_kill": {
+     "ok": true,
+     "note": "ok (env pydantic-graph, stdout persisted)",
+     "cells": [
+      "PG.parkkill.ok"
+     ]
+    },
+    "159_p14_multiproc_saver": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.CO.concurrent"
+     ]
+    },
+    "160_p14_kill_point_sweep": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "LG.killsweep",
+      "LG.killsweep.rec"
+     ]
+    },
+    "163_p15_oracle_atomicity": {
+     "ok": true,
+     "note": "ok (env langgraph-durable, stdout persisted)",
+     "cells": [
+      "ORACLE.noovercount"
+     ]
+    }
+   }
+  }
+ }
+}

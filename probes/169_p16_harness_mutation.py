@@ -108,14 +108,17 @@ LOADBEARING = [
 ]
 
 MUTANTS = {
-    "M1": ("effect_undercount",  ["LG.EO.crash", "LG.CO.concurrent", "CA.restore.dup", "LG.killsweep"]),
-    "M2": ("effect_overcount",   ["LG.EO.interrupt", "LG.CO.sequential"]),
-    "M3": ("crash_noop",         ["LG.EO.crash", "LG.killsweep", "PG.unrecoverable", "CA.restore.dup"]),
+    # Predictions name only cells the operator can REACH -- cells whose
+    # backing probe it mutates. Probe 172 scores these and refuses any
+    # prediction naming an unreachable cell.
+    "M1": ("effect_undercount",  ["LG.CO.concurrent"]),
+    "M2": ("effect_overcount",   ["LG.CO.concurrent"]),
+    "M3": ("crash_noop",         ["LG.CO.concurrent"]),
     "M4": ("fork_value_ignore",  ["LG.FD.6663"]),
-    "M5": ("label_rule_invert",  []),          # predicts NO cell flips
-    "M6": ("state_only_oracle",  ["CA.restore.dup", "LG.CO.concurrent"]),
-    "M7": ("barrier_removed",    []),          # predicts NO verdict flips
-    "M8": ("pin_drift",          ["__REFUSAL__"]),  # predicts audit refusal
+    "M5": ("label_rule_invert",  []),            # no mechanical site
+    "M6": ("state_only_oracle",  ["LG.CO.concurrent"]),
+    "M7": ("barrier_removed",    []),            # predicts NO kills
+    "M8": ("pin_drift",          ["__REFUSAL__"]),  # lockfile audit
 }
 
 

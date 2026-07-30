@@ -111,16 +111,31 @@ def run_probe(env: str, script: str) -> dict:
     proc = subprocess.run(
         cmd, cwd=ROOT, capture_output=True, text=True, timeout=900, env=env,
     )
-    # Probes may emit framework banners before the JSON object; take the
-    # first line that opens the JSON document through EOF.
+    # Probes emit human-readable progress before their JSON document, and
+    # that progress may itself contain braces -- probe 171 prints Python dict
+    # reprs of its predicted/observed pairs, whose single quotes are not JSON.
+    # Taking the first "{" in stdout and parsing to EOF therefore fails on any
+    # probe whose prose mentions a brace, and fails LATE, mid-audit. Scan every
+    # candidate offset instead and accept the first that actually decodes,
+    # which is the earliest well-formed document and so the outermost one when
+    # objects nest. Trailing prose after the document is tolerated because
+    # raw_decode stops at the closing brace rather than requiring EOF.
     out = proc.stdout
-    start = out.find("{")
-    if start < 0:
-        raise RuntimeError(
-            f"{script}: no JSON on stdout (rc={proc.returncode})\n"
-            f"stderr tail: {proc.stderr[-500:]}"
-        )
-    return json.loads(out[start:])
+    dec = json.JSONDecoder()
+    for i, ch in enumerate(out):
+        if ch != "{":
+            continue
+        try:
+            obj, _ = dec.raw_decode(out[i:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict) and obj:
+            return obj
+    raise RuntimeError(
+        f"{script}: no decodable JSON object on stdout (rc={proc.returncode})\n"
+        f"stdout tail: {out[-500:]}\n"
+        f"stderr tail: {proc.stderr[-500:]}"
+    )
 
 
 def main() -> int:
@@ -134,6 +149,42 @@ def main() -> int:
     plan = tomllib.loads((ROOT / args.plan).read_text())
     basedir = ROOT / args.baseline
     basedir.mkdir(parents=True, exist_ok=True)
+
+    # Validate the whole plan before executing any of it. A missing key used
+    # to surface as a bare KeyError partway through the run, after minutes of
+    # probe execution and with no indication of which entry was malformed --
+    # and, because the crash came late, the entries after it were silently
+    # never audited at all. Report every offender at once, up front.
+    malformed = []
+    for i, probe in enumerate(plan["probe"]):
+        gaps = [k for k in ("id", "env", "script") if k not in probe]
+        if gaps:
+            malformed.append((i, probe.get("script", "<no script>"), gaps))
+    if malformed:
+        print(f"FATAL: {args.plan} has {len(malformed)} malformed entr"
+              f"{'y' if len(malformed) == 1 else 'ies'}:")
+        for i, script, gaps in malformed:
+            print(f"  [[probe]] #{i} ({script}) missing: {', '.join(gaps)}")
+        return 2
+
+    # A probe that writes its own <id>_stable.json cannot be a plan row. The
+    # runner compares stable_view(stdout) against that filename, but a
+    # self-writing probe puts a receipt wrapper there ({backend, host, pins,
+    # probe, stable, utc}) rather than a stable view, so the comparison fails
+    # on SHAPE and reports every field as run=None -- which reads like a
+    # verdict regression and is not one. This was previously enforced only by
+    # a comment in the plan; enforce it here.
+    selfwriters = []
+    for probe in plan["probe"]:
+        src = ROOT / probe["script"]
+        if src.exists() and "_stable.json" in src.read_text():
+            selfwriters.append((probe["id"], probe["script"]))
+    if selfwriters:
+        print(f"FATAL: {args.plan} lists {len(selfwriters)} self-writing probe(s);")
+        print("       these are gated on committed receipts, not re-executed here:")
+        for pid, script in selfwriters:
+            print(f"  [[probe]] id={pid} ({script}) writes its own <id>_stable.json")
+        return 2
 
     failures = 0
     manifests = {}

@@ -77,6 +77,18 @@ script = "probes/152_p13_live_pc_cv.py"
 baseline = "results/live"
 requires_env = ["ANTHROPIC_API_KEY"]
 
+# probe 171 is NOT a row here, for the same reason the p14 probes below are
+# not: it writes its own results/matrix/171_stable.json in a receipt wrapper
+# ({backend, host, pins, probe, stable, utc}), whereas the runner writes
+# stable_view(stdout). The two shapes can never compare equal, so listing it
+# makes the audit fail on a format mismatch rather than on a verdict. It is
+# gated on its committed receipt by reproduce.sh step [2b] instead.
+
+[[probe]]
+id = "140"
+env = "autogen"
+script = "probes/140_p8_autogen_state_column.py"
+baseline = "results/revision"
 # ---- campaign p14: park-kill matrix + multi-process saver ----
 # Deliberately NOT rows in this plan. The conformance runner re-executes every
 # listed probe and diffs stable_view(stdout) against <id>_stable.json in the

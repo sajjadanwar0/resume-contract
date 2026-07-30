@@ -14,6 +14,15 @@
 #   [3] Conformance plan (matrix.toml): every planned probe re-run inside its
 #       pinned per-framework env; stable verdict fields diffed against the
 #       committed baselines (live-keyed probes skip without API keys).
+#   [2c] IndCheck inductive-invariant matrix: Inv is checked INDUCTIVE (every
+#       invariant-state taken as an initial state, every successor checked --
+#       stronger than reachability, since it quantifies over unreachable
+#       states too) at three constant sets between which each of the six
+#       configuration bounds varies. Audits the committed receipt; --scaled
+#       re-runs all three (~5 min, R2 dominates).
+#   [0] Structural: every probe number the paper cites exists in the artifact
+#       (probe_inventory_gate.sh). Skipped, not failed, when the paper is not
+#       in the tree -- the artifact is distributable without it.
 #   [4] Remit skeleton invariants: cargo test (seven property-named tests).
 #   [5] Remit Verus proofs: every positive target must discharge with
 #       0 errors; every negative certificate must fail in exactly the
@@ -80,7 +89,26 @@ if [[ $SCALED -eq 1 ]]; then
 fi
 
 # ---------------------------------------------------------------- [1] TLC ---
-note "[1/5] TLC verification matrix (ResumeContract, LangGraphFork, R10, R11)"
+# ----------------------------------------- [0] paper <-> artifact sync ---
+# Forward direction is HARD: a probe number the paper cites with no file
+# behind it is a broken claim. Reverse direction emits NOTEs only. The gate
+# needs the paper, which the artifact does not require; absent it, SKIP.
+note "[0/6] Structural: paper<->probe inventory"
+PAPER="${PAPER:-}"
+if [[ -z "$PAPER" ]]; then
+  for cand in resume-contract.tex resume_contract.tex paper/resume-contract.tex; do
+    [[ -f "$cand" ]] && { PAPER="$cand"; break; }
+  done
+fi
+if [[ -z "$PAPER" || ! -f "$PAPER" ]]; then
+  echo "  SKIP -- no paper .tex in tree (set PAPER=<path> to enable)"
+elif [[ ! -x probe_inventory_gate.sh && ! -f probe_inventory_gate.sh ]]; then
+  echo "  SKIP -- probe_inventory_gate.sh absent"
+else
+  bash probe_inventory_gate.sh "$PAPER" probes . || fail=1
+fi
+
+note "[1/6] TLC verification matrix (ResumeContract, LangGraphFork, R10, R11)"
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC   (-workers 1: see header)"
 pushd formal/tla > /dev/null
@@ -142,7 +170,7 @@ done
 popd > /dev/null
 
 # ------------------------------------------------- [2] committed receipts ---
-note "[2/5] Committed matrix receipts (161 independence, 162 separations)"
+note "[2/6] Committed matrix receipts (161 independence, 162 separations)"
 python3 - << 'PYAUDIT' || fail=1
 import json, os, sys
 
@@ -251,7 +279,7 @@ sys.exit(rc)
 PYAUDIT
 
 # ------------------------------------- [2b] p16 concurrency + self-audit ---
-note "[2b/5] p16 receipts (167 consume-count, 168 multi-racer, 169 audit)"
+note "[2b/6] p16 receipts (167 consume-count, 168 multi-racer, 169 audit)"
 python3 - << 'PYP16' || fail=1
 import json, os, sys
 rc = 0
@@ -309,6 +337,73 @@ else:
         print(f"  168 saturation: {sum(1 for v in sat.values() if v >= 0.999)}"
               f"/{len(sat)} cells at 1.0, min {lo}")
 
+# --- provenance: a copied receipt must not pass as a replication -------
+# Two runs on two machines cannot share a wall-clock second. This gate
+# exists because a container receipt was once produced by copying its
+# developer-host twin and rewriting only the host field: every cell
+# agreed, which is exactly what made it invisible. Cell agreement is the
+# claim, so it cannot also be the check.
+import glob, itertools
+stamps = {}
+for q in glob.glob("results/**/*.json", recursive=True) + \
+         glob.glob("formal/**/*.json", recursive=True):
+    try:
+        j = json.load(open(q))
+    except Exception:
+        continue
+    if isinstance(j, dict) and "host" in j and "utc" in j:
+        stamps.setdefault(j["utc"], []).append((q, j["host"]))
+clashes = [(u, v) for u, v in stamps.items()
+           if len({h for _, h in v}) > 1]
+if clashes:
+    for u, v in clashes:
+        print(f"  PROVENANCE FAIL: utc {u} shared by differing hosts:")
+        for q, h in v:
+            print(f"      {h:20s} {q}")
+    rc |= 1
+else:
+    print(f"  provenance: OK ({len(stamps)} timestamped receipts, "
+          f"no cross-host collision)")
+
+# a receipt's FILENAME must not contradict its CONTENTS. A file named
+# _memory that records backend "sqlite" is a mislabeled copy, and no
+# timestamp or host check catches it: same machine, same second, same
+# run. Both mislabelings this artifact has seen came from copying a
+# receipt under a name describing a run that never happened.
+FILENAME_CLAIMS = {"_memory": ("backend", "memory"),
+                   "_sqlite": ("backend", "sqlite"),
+                   "_postgres": ("backend", "postgres"),
+                   "_inmemory": ("backend", "memory")}
+for q in glob.glob("results/**/*.json", recursive=True) + \
+         glob.glob("formal/**/*.json", recursive=True):
+    base = os.path.basename(q)
+    for token, (field, want) in FILENAME_CLAIMS.items():
+        if token not in base:
+            continue
+        try:
+            j = json.load(open(q))
+        except Exception:
+            continue
+        got = j.get(field)
+        if got is not None and got != want:
+            print(f"  PROVENANCE FAIL: {q} is named {token} but records "
+                  f"{field}={got!r}")
+            rc |= 1
+
+# a _container receipt must not carry its canonical twin's timestamp
+for cq in glob.glob("results/**/*_container.json", recursive=True) + \
+          glob.glob("formal/**/*_container.json", recursive=True):
+    tq = cq.replace("_container.json", ".json")
+    if not os.path.exists(tq):
+        continue
+    try:
+        a, b = json.load(open(cq)), json.load(open(tq))
+    except Exception:
+        continue
+    if a.get("utc") and a.get("utc") == b.get("utc"):
+        print(f"  PROVENANCE FAIL: {cq} shares utc with {tq}")
+        rc |= 1
+
 # --- 169: does the committed evidence agree with the paper? ---
 p169 = "results/mutation/169_report.json"
 if not os.path.exists(p169):
@@ -328,13 +423,124 @@ else:
 sys.exit(rc)
 PYP16
 
+# ------------------------------------------- [2c] IndCheck (inductive) ---
+# ---- 171: out-of-sample prediction test for LangGraphFork.tla ----------
+# Gated on its committed receipt rather than re-executed: 171 writes its own
+# <id>_stable.json, so it cannot be a matrix.toml row (see the note there).
+# The claim this gates is Sec. 4.3's: four protocols the model was never
+# exercised on, predictions registered in the probe source BEFORE the run,
+# all four confirmed -- with P-D the negative control that carries the weight,
+# since a degenerate model serving the first value ever seen would satisfy the
+# other three and fail it.
+python3 - << 'PY171' || fail=1
+import json, os, sys
+rc = 0
+found = False
+for path in ("results/matrix/171_stable.json",
+             "results/matrix/171_stable_memory.json",
+             "results/matrix/171_stable_sqlite.json"):
+    if not os.path.exists(path):
+        continue
+    found = True
+    st = json.load(open(path)).get("stable", {})
+    reg  = st.get("predictions_registered_in_source", [])
+    conf = st.get("confirmed", [])
+    bad = []
+    if len(reg) != 4:                                bad.append(f"registered={len(reg)}")
+    if sorted(conf) != sorted(reg):                  bad.append("confirmed != registered")
+    if st.get("mispredicted"):                       bad.append(f"mispredicted={st['mispredicted']}")
+    if st.get("errored"):                            bad.append(f"errored={st['errored']}")
+    if st.get("model_out_of_sample_confirmed") is not True: bad.append("out_of_sample not confirmed")
+    if st.get("negative_control_PD_confirmed") is not True: bad.append("negative control P-D not confirmed")
+    label = os.path.basename(path)
+    if bad:
+        print(f"  171 {label}: FAIL -- {', '.join(bad)}"); rc = 1
+    else:
+        print(f"  171 {label}: OK (4/4 registered predictions confirmed, "
+              f"P-D negative control holds)")
+if not found:
+    print("  171: ABSENT (re-derive: envs/langgraph/.venv/bin/python "
+          "probes/171_p16_lgf_outofsample.py --out results/matrix)")
+sys.exit(rc)
+PY171
+
+note "[2c/6] IndCheck inductive-invariant matrix (R0/R2/R3)"
+if [[ $SCALED -eq 1 ]]; then
+  if [[ -f 173_indcheck_matrix.sh ]]; then
+    echo "  [--scaled] re-running all three cells (~5 min; R2 dominates)"
+    bash 173_indcheck_matrix.sh 4 || fail=1
+  else
+    echo "  173_indcheck_matrix.sh absent -- cannot re-run"; fail=1
+  fi
+fi
+python3 - << 'PYIND' || fail=1
+import json, os, sys
+
+# Expected cells. Counts are deterministic in the worker count here: this
+# enumerates every state satisfying the invariant as an initial state rather
+# than racing a breadth-first search to a counterexample, so there is no
+# parallel-search nondeterminism to pin. The single-worker convention that
+# governs counterexample DEPTHS elsewhere in this script does not apply.
+EXP = {
+  "R0": (19659,   8610),
+  "R2": (1009076, 450926),
+  "R3": (249915,  97800),
+}
+p = "results/tla/indcheck/indcheck_matrix.json"
+if not os.path.exists(p):
+    print(f"  SKIP -- no receipt at {p} (re-derive: ./173_indcheck_matrix.sh)")
+    sys.exit(0)
+
+m = json.load(open(p))
+rc = 0
+seen = {c["label"]: c for c in m.get("cells", [])}
+
+missing = sorted(set(EXP) - set(seen))
+if missing:
+    print(f"  FAIL -- receipt missing cells {missing}"); rc = 1
+
+for label, (gen, dist) in EXP.items():
+    c = seen.get(label)
+    if c is None:
+        continue
+    bad = []
+    if c.get("verdict") != "no_error":         bad.append(f"verdict={c.get('verdict')}")
+    if c.get("generated") != gen:              bad.append(f"generated={c.get('generated')}")
+    if c.get("distinct")  != dist:             bad.append(f"distinct={c.get('distinct')}")
+    if c.get("depth")     != 1:                bad.append(f"depth={c.get('depth')}")
+    if c.get("audit")     != "pass":           bad.append(f"audit={c.get('audit')}")
+    if bad:
+        print(f"  {label}: FAIL -- {', '.join(bad)}"); rc = 1
+    else:
+        print(f"  {label}: OK ({c.get('constants','')}) "
+              f"{gen} generated / {dist} distinct, inductive")
+
+# Coverage gate. Three passing cells prove nothing about generality if they
+# are the same configuration three times; this asserts the six bounds are
+# actually varied, which is the claim Sec. 9 makes.
+if not missing:
+    def bounds(c):
+        return dict(kv.split("=", 1) for kv in c["constants"].split())
+    b = {k: bounds(v) for k, v in seen.items() if k in EXP}
+    keys = set().union(*(set(v) for v in b.values()))
+    pinned = [k for k in sorted(keys) if len({v.get(k) for v in b.values()}) == 1]
+    if pinned:
+        print(f"  FAIL -- bounds never varied across cells: {pinned}"); rc = 1
+    else:
+        print(f"  coverage: OK (all {len(keys)} bounds vary in at least one pair)")
+
+if m.get("matrix_audit") != "pass":
+    print(f"  FAIL -- matrix_audit={m.get('matrix_audit')}"); rc = 1
+sys.exit(rc)
+PYIND
+
 if [[ $TLC_ONLY -eq 1 ]]; then
   [[ $fail -eq 0 ]] && echo "TLC-only audit: CLEAN" || echo "TLC-only audit: FAILED"
   exit $fail
 fi
 
 # -------------------------------------------------- [3] conformance plan ---
-note "[3/5] Conformance plan (matrix.toml vs committed baselines)"
+note "[3/6] Conformance plan (matrix.toml vs committed baselines)"
 uv sync --quiet
 # langgraph-durable carries the durable-backend and p14 probes (157-160) and
 # declares remit-contract, whose shim arms degrade silently if it is absent.
@@ -346,7 +552,7 @@ uv run python -m conformance.runner \
   --plan matrix.toml --baseline results/pilot || fail=1
 
 # --------------------------------------------------------- [4] Remit tests ---
-note "[4/5] Remit invariants + line-identical core (cargo test + n3 gate)"
+note "[4/6] Remit invariants + line-identical core (cargo test + n3 gate)"
 # Toolchain absence is a SKIP, not a failure -- the same posture step [5]
 # takes for Verus. A reviewer without a Rust toolchain should see which
 # evidence was not exercised, not a red AUDIT RESULT on an intact artifact.
@@ -360,7 +566,7 @@ fi
 bash n3_sync_check.sh . || fail=1
 
 # ------------------------------------------------------ [5] Verus proofs ----
-note "[5/5] Remit Verus proofs (crates/remit/proof)"
+note "[5/6] Remit Verus proofs (crates/remit/proof)"
 if command -v verus >/dev/null 2>&1; then
   for f in remit_verus remit_verus_cv remit_verus_all \
            remit_verus_fd_machine remit_verus_rd_interp \
