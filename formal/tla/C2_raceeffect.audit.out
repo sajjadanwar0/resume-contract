@@ -1,0 +1,110 @@
+TLC2 Version 2026.04.09.014118 (rev: 389440f)
+Running breadth-first search Model-Checking with fp 80 and seed 3478515113161452101 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 19037] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/R11_ConsumeCount.tla
+Parsing file /tmp/tlc-9138361234226523878/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-9138361234226523878/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-9138361234226523878/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-9138361234226523878/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-9138361234226523878/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-9138361234226523878/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-9138361234226523878/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module R11_ConsumeCount
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module R11_ConsumeCount
+Starting... (2026-07-31 13:04:23)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-07-31 13:04:23.
+Error: Invariant EffectExactlyOnce is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0>>
+/\ consumedVal = NoVal
+/\ consumeCount = 0
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+/\ raceUsed = FALSE
+
+State 2: <ExecTask line 108, col 3 to line 117, col 75 of module R11_ConsumeCount>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ consumeCount = 0
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+/\ raceUsed = FALSE
+
+State 3: <EmitInterrupt line 120, col 3 to line 126, col 43 of module R11_ConsumeCount>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ consumeCount = 0
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = TRUE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+/\ raceUsed = FALSE
+
+State 4: <Consume(va) line 129, col 3 to line 140, col 72 of module R11_ConsumeCount>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 0>>
+/\ consumedVal = va
+/\ consumeCount = 1
+/\ extraResumes = 0
+/\ frontier = 2
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 3
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
+/\ recHist = <<>>
+/\ raceUsed = FALSE
+
+State 5: <RaceConsume(va) line 149, col 3 to line 162, col 62 of module R11_ConsumeCount>
+/\ pcRegress = FALSE
+/\ effects = <<1, 2, 0>>
+/\ consumedVal = va
+/\ consumeCount = 2
+/\ extraResumes = 0
+/\ frontier = 2
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va, va>>
+/\ forkOuts = <<<<va>>, <<va>>>>
+/\ pc = 3
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
+/\ recHist = <<>>
+/\ raceUsed = TRUE
+
+9 states generated, 9 distinct states found, 3 states left on queue.
+The depth of the complete state graph search is 5.
+Finished in 00s at (2026-07-31 13:04:23)
+Trace exploration spec path: ./R11_ConsumeCount_TTrace_1785485063.tla
