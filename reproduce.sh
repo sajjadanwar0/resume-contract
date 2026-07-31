@@ -247,12 +247,22 @@ P14 = {
     {"race_same_gate_fire_distribution": {"2": 10},
      "race_diff_gate_fire_distribution": {"2": 10},
      "contention_per_thread_exactly_once": True,
-     "shim_race_inert_all_reps": False},
+     "shim_race_inert_all_reps": False,
+     "shim_gate_race_same_fire_distribution": {"1": 10},
+     "shim_gate_race_same_duplicate_reps": [],
+     "shim_gate_race_diff_fire_distribution": {"1": 10},
+     "shim_gate_race_diff_served_other_value_reps": [],
+     "shim_gate_loser_rejected_loudly_every_race_rep": True},
   "results/multiproc/159_stable_pg.json":
     {"race_same_gate_fire_distribution": {"2": 10},
      "race_diff_gate_fire_distribution": {"2": 10},
      "contention_per_thread_exactly_once": True,
-     "shim_race_inert_all_reps": False},
+     "shim_race_inert_all_reps": False,
+     "shim_gate_race_same_fire_distribution": {"1": 10},
+     "shim_gate_race_same_duplicate_reps": [],
+     "shim_gate_race_diff_fire_distribution": {"1": 10},
+     "shim_gate_race_diff_served_other_value_reps": [],
+     "shim_gate_loser_rejected_loudly_every_race_rep": True},
 }
 for path, want in P14.items():
     lab = "p14 " + (os.path.basename(path)
@@ -267,6 +277,13 @@ for path, want in P14.items():
         print(f"  {lab}: FAIL"); [print("      " + b) for b in bad]; rc = 1
     else:
         print(f"  {lab}: OK ({len(want)} fields)")
+    # the shipped-shim repair claim is pin-relative: a 159 receipt must
+    # carry the remit-contract version whose gate the paper cites.
+    if "/159_" in path:
+        pin = json.load(open(path)).get("pins", {}).get("remit-contract")
+        if pin != "0.1.2":
+            print(f"  {lab}: FAIL -- remit-contract pin {pin!r} != '0.1.2'")
+            rc = 1
 
 if absent:
     print("  (missing receipts are not a failure -- re-derive with:")
@@ -373,6 +390,7 @@ else:
 FILENAME_CLAIMS = {"_memory": ("backend", "memory"),
                    "_sqlite": ("backend", "sqlite"),
                    "_postgres": ("backend", "postgres"),
+                   "_pg": ("backend", "postgres"),
                    "_inmemory": ("backend", "memory")}
 for q in glob.glob("results/**/*.json", recursive=True) + \
          glob.glob("formal/**/*.json", recursive=True):
@@ -568,10 +586,10 @@ bash n3_sync_check.sh . || fail=1
 # ------------------------------------------------------ [5] Verus proofs ----
 note "[5/6] Remit Verus proofs (crates/remit/proof)"
 if command -v verus >/dev/null 2>&1; then
-  for f in remit_verus remit_verus_cv remit_verus_all \
-           remit_verus_fd_machine remit_verus_rd_interp \
-           remit_verus_recover_exec remit_verus_ledger_exec; do
-    p="crates/remit/proof/$f.rs"
+  # glob, not a hardcoded list: a new proof file must fail the audit
+  # until it discharges, never be silently unaudited.
+  for p in crates/remit/proof/*.rs; do
+    f=$(basename "$p" .rs)
     if verus "$p" 2>&1 | tee "/tmp/verus_$f.out" \
          | grep -qE "[0-9]+ verified, 0 errors"; then
       echo "  $f: $(grep -oE '[0-9]+ verified, [0-9]+ errors' "/tmp/verus_$f.out" | head -1)"
