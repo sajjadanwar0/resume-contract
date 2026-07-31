@@ -134,7 +134,7 @@ requires-dist = [
     { name = "langgraph-checkpoint-sqlite", specifier = "==3.1.0" },
     { name = "psycopg", specifier = "==3.3.4" },
     { name = "pydantic", specifier = ">=2,<3" },
-    { name = "remit-contract", path = "../../remit-contract/dist/remit_contract-0.1.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl" },
+    { name = "remit-contract", path = "../../remit-contract/dist/remit_contract-0.1.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl" },
 ]
 
 [[package]]
@@ -613,10 +613,10 @@ wheels = [
 
 [[package]]
 name = "remit-contract"
-version = "0.1.0"
-source = { path = "../../remit-contract/dist/remit_contract-0.1.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl" }
+version = "0.1.2"
+source = { path = "../../remit-contract/dist/remit_contract-0.1.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl" }
 wheels = [
-    { filename = "remit_contract-0.1.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2aed2cbfc56e1725fbb0ac98a665d23058d518544642309d223759d0746fc58d" },
+    { filename = "remit_contract-0.1.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8e71e1e916d025237f93ee1bdcb42941cfa3b2f07cee22f90069b2b66be4cc28" },
 ]
 
 [package.metadata]
