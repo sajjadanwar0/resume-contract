@@ -33,8 +33,8 @@ Cells:
   G7   core verdict surface: consume_view / consume_claim_check bindings
   G9   fresh-database first-claim DDL race (Postgres catalog refusal
        42P07/23505) absorbed as table-exists; claim proceeds
-  PG*  G1/G2 on PostgresSaver when REMIT_TEST_PG_DSN is set, plus the
-       loud refusal of a non-autocommit connection
+  PG*  G1/G1b/G2 on PostgresSaver when REMIT_TEST_PG_DSN is set, plus
+       the loud refusal of a non-autocommit connection
 
 Requires ``langgraph`` and ``langgraph-checkpoint-sqlite`` (skipped
 otherwise); the PG cells additionally require
@@ -374,20 +374,31 @@ def _pg_saver(dsn, autocommit=True, **kw):
 
 @pytest.mark.skipif(not PG_DSN, reason="REMIT_TEST_PG_DSN not set")
 def test_pg_g1_race_and_g2_sequential():
-    """PG G1+G2: the same CAS on live PostgresSaver — one served, one
-    refused; the sequential control untouched."""
+    """PG G1+G2, mirroring the sqlite G1 staging exactly: racer B takes the
+    claim via a bare ``get_tuple`` of the PARKED state, so A's resume is a
+    concurrent loser (refused before any node) rather than a
+    post-completion stray. (The first version of this test resumed B to
+    completion first — the G1b staging — and correctly observed inertness
+    instead of a conflict: the gate does not engage once no pending
+    ``__interrupt__`` remains. That order lives in test_pg_g1b below.)"""
     tag = f"pg-{uuid.uuid4().hex[:6]}"
     ledger = []
     saver_a = _pg_saver(PG_DSN)
     app_a = build(saver_a, ledger)
     cfg = park(app_a, tag)
+    assert ledger == [], "parking must not fire the gated effect"
+
     saver_b = _pg_saver(PG_DSN)
+    t = saver_b.get_tuple(cfg)          # B wins the claim on the parked state
+    assert t is not None
+
+    with pytest.raises(remit.RemitConsumeConflict):
+        app_a.invoke(Command(resume=True), cfg)
+    assert ledger == [], "the refused racer must not reach the node"
+
     app_b = build(saver_b, ledger)
     r = app_b.invoke(Command(resume=True), cfg)
     assert r.get("value") == 1 and ledger == [1]
-    with pytest.raises(remit.RemitConsumeConflict):
-        app_a.invoke(Command(resume=True), cfg)
-    assert ledger == [1]
 
     seq_tag = f"pgseq-{uuid.uuid4().hex[:6]}"
     ledger2 = []
@@ -396,6 +407,26 @@ def test_pg_g1_race_and_g2_sequential():
     cfg2 = park(app_c, seq_tag)
     r2 = app_c.invoke(Command(resume=True), cfg2)
     assert r2.get("value") == 1 and ledger2 == [1]
+
+
+@pytest.mark.skipif(not PG_DSN, reason="REMIT_TEST_PG_DSN not set")
+def test_pg_g1b_late_resume_after_consumption_is_inert():
+    """PG G1b: once the winner has consumed to completion, a late resume
+    from the other instance is the stray case — gate not engaged, effect
+    inert, stock disposition preserved (the behavior the first PG G1
+    accidentally measured)."""
+    tag = f"pgb-{uuid.uuid4().hex[:6]}"
+    ledger = []
+    saver_a = _pg_saver(PG_DSN)
+    app_a = build(saver_a, ledger)
+    cfg = park(app_a, tag)
+    saver_b = _pg_saver(PG_DSN)
+    app_b = build(saver_b, ledger)
+    r = app_b.invoke(Command(resume=True), cfg)   # B claims inside get_tuple
+    assert r.get("value") == 1 and ledger == [1]
+    r2 = app_a.invoke(Command(resume=False), cfg)  # late, post-consumption
+    assert ledger == [1], f"the late value must fire nothing, got {ledger}"
+    assert r2.get("value") == 1
 
 
 @pytest.mark.skipif(not PG_DSN, reason="REMIT_TEST_PG_DSN not set")
