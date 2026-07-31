@@ -586,9 +586,11 @@ bash n3_sync_check.sh . || fail=1
 # ------------------------------------------------------ [5] Verus proofs ----
 note "[5/6] Remit Verus proofs (crates/remit/proof)"
 if command -v verus >/dev/null 2>&1; then
-  # glob, not a hardcoded list: a new proof file must fail the audit
-  # until it discharges, never be silently unaudited.
-  for p in crates/remit/proof/*.rs; do
+  # Positive set by naming convention: every remit_verus*.rs must
+  # discharge clean. A new proof file following the convention is audited
+  # automatically; anything else at top level is caught by the classifier
+  # tripwire below -- nothing is silently unaudited either way.
+  for p in crates/remit/proof/remit_verus*.rs; do
     f=$(basename "$p" .rs)
     if verus "$p" 2>&1 | tee "/tmp/verus_$f.out" \
          | grep -qE "[0-9]+ verified, 0 errors"; then
@@ -596,6 +598,30 @@ if command -v verus >/dev/null 2>&1; then
     else
       echo "  $f: FAILED"; tail -5 "/tmp/verus_$f.out"; fail=1
     fi
+  done
+  # Differential certificate at top level (exp6): its documented contract
+  # is the SPLIT shape -- fd_keyed discharges, fd_stock is REJECTED (FD is
+  # false under the stock #6663 rule) -- so the audit enforces exactly
+  # that, never 0-errors.
+  p=crates/remit/proof/probe_fd_stock_rule.rs
+  if [[ -f "$p" ]]; then
+    out=$(verus "$p" 2>&1 || true)
+    if grep -qE "1 verified, 1 errors?" <<<"$out"; then
+      echo "  probe_fd_stock_rule: OK (expected split: 1 verified, 1 errors)"
+    else
+      echo "  probe_fd_stock_rule: FAIL -- expected '1 verified, 1 errors'; got:"
+      grep -m1 "verification results" <<<"$out" || tail -3 <<<"$out"; fail=1
+    fi
+  fi
+  # Classifier tripwire: any OTHER top-level .rs in proof/ is unclassified
+  # -- a hard failure, not a silent skip. Route it into the positive set
+  # (remit_verus*.rs), name it here as a differential, or move it under
+  # negative/ before freezing.
+  for p in crates/remit/proof/*.rs; do
+    case "$(basename "$p")" in
+      remit_verus*.rs|probe_fd_stock_rule.rs) ;;
+      *) echo "  UNCLASSIFIED proof file: $p"; fail=1 ;;
+    esac
   done
   # Negative certificates: each must FAIL in exactly the expected shape.
   # verus exits nonzero here BY DESIGN; capture output first (a direct
