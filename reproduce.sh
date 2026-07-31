@@ -606,10 +606,10 @@ if command -v verus >/dev/null 2>&1; then
   p=crates/remit/proof/probe_fd_stock_rule.rs
   if [[ -f "$p" ]]; then
     out=$(verus "$p" 2>&1 || true)
-    if grep -qE "1 verified, 1 errors?" <<<"$out"; then
-      echo "  probe_fd_stock_rule: OK (expected split: 1 verified, 1 errors)"
+    if grep -qE "2 verified, 1 errors?" <<<"$out"; then
+      echo "  probe_fd_stock_rule: OK (expected split: 2 verified, 1 errors -- fd_stock rejected)"
     else
-      echo "  probe_fd_stock_rule: FAIL -- expected '1 verified, 1 errors'; got:"
+      echo "  probe_fd_stock_rule: FAIL -- expected '2 verified, 1 errors'; got:"
       grep -m1 "verification results" <<<"$out" || tail -3 <<<"$out"; fail=1
     fi
   fi
