@@ -1,0 +1,162 @@
+{
+  "probe": 174,
+  "role": "serve",
+  "host": "ip-172-26-8-201",
+  "ts": "2026-07-31T12:01:16.960485+00:00",
+  "langgraph": "1.2.9",
+  "remit_contract": "0.1.2",
+  "cells": [
+    {
+      "arm": "stock",
+      "gate_ms": 2000,
+      "reps": 10,
+      "fires": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "distribution": {
+        "1": 10
+      },
+      "loser_errors": [],
+      "racer_errors": [],
+      "cross_host_attested": true,
+      "host_pairs": [
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ]
+      ]
+    },
+    {
+      "arm": "gate",
+      "gate_ms": 2000,
+      "reps": 10,
+      "fires": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "distribution": {
+        "1": 10
+      },
+      "loser_errors": [],
+      "racer_errors": [],
+      "cross_host_attested": true,
+      "host_pairs": [
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ],
+        [
+          "Sajjad",
+          "ip-172-26-8-201"
+        ]
+      ]
+    }
+  ],
+  "stable": [
+    {
+      "arm": "stock",
+      "gate_ms": 2000,
+      "distribution": {
+        "1": 10
+      },
+      "loser_errors": [],
+      "racer_errors": [],
+      "cross_host_attested": true
+    },
+    {
+      "arm": "gate",
+      "gate_ms": 2000,
+      "distribution": {
+        "1": 10
+      },
+      "loser_errors": [],
+      "racer_errors": [],
+      "cross_host_attested": true
+    }
+  ]
+}

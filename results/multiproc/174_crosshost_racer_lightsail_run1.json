@@ -1,0 +1,148 @@
+{
+  "probe": 174,
+  "role": "race",
+  "host_tag": "lightsail",
+  "hostname": "ip-172-26-8-201",
+  "log": [
+    {
+      "round": 178549911901,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2072.7
+    },
+    {
+      "round": 178549911902,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2065.9
+    },
+    {
+      "round": 178549911903,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2065.4
+    },
+    {
+      "round": 178549911904,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2065.4
+    },
+    {
+      "round": 178549911905,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2065.7
+    },
+    {
+      "round": 178549911906,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2065.7
+    },
+    {
+      "round": 178549911907,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2067.8
+    },
+    {
+      "round": 178549911908,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2069.5
+    },
+    {
+      "round": 178549911909,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2067.3
+    },
+    {
+      "round": 178549911910,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2067.1
+    },
+    {
+      "round": 178549911911,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2069.9
+    },
+    {
+      "round": 178549911912,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2071.2
+    },
+    {
+      "round": 178549911913,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2069.8
+    },
+    {
+      "round": 178549911914,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2069.3
+    },
+    {
+      "round": 178549911915,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2069.2
+    },
+    {
+      "round": 178549911916,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2070.4
+    },
+    {
+      "round": 178549911917,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2082.3
+    },
+    {
+      "round": 178549911918,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2069.4
+    },
+    {
+      "round": 178549911919,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2069.3
+    },
+    {
+      "round": 178549911920,
+      "arm": "gate",
+      "outcome": "fired",
+      "error": "",
+      "t_fire_ms": 2071.2
+    }
+  ]
+}

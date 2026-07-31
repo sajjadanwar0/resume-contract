@@ -29,6 +29,30 @@ first cross-host run; the run may falsify them):
                         node's execution time; reported as an observed
                         frequency only.
 
+Run provenance (2026-07-31, receipts 174_crosshost_matrix.json of that
+date): at per-query ~451 ms tunnel latency the remote racer paid
+connect + saver.setup() inside the timed window; its read arrived
+2.5-3.5 s after release, past the winner's ~2.07 s superstep join, so
+every remote delivery took the post-completion inert path -- stock
+{1:10} with zero duplication, gate vacuous (nothing to refuse). P1 was
+FALSIFIED at that arrival offset, consistent with the dose-response
+edge (offset > D => miss), and the within-host smoke {2:2}/{1:2} is the
+differential showing the machinery detects the race when offset ~ 0.
+v2 therefore: (a) builds the saver BEFORE announcing readiness, so the
+post-release path is read + invoke only; (b) stamps a server-clock
+arrive_at per racer pre-invoke, and serve reports per-round
+arrival_offsets_ms + max_offset_ms, so every receipt self-evidences
+whether a race occurred; (c) classifies racer outcomes as
+fired / inert / refused / errored via a node-execution flag, with
+fired_by re-derived from the ledger as ground truth. Re-registered
+predictions, valid only when max_offset_ms < D:
+
+  P1' stock, max_offset_ms < D : fires 2 in every repetition.
+  P2' gate,  max_offset_ms < D : {1:reps}; the losing racer refused
+                                 with RemitConsumeConflict.
+  A receipt whose max_offset_ms >= D decides neither prediction and
+  must trigger a rerun at D > 2x max_offset_ms, not a paper claim.
+
 Scope, stated the way Sec. 9 states scope: this measures cross-host
 DISTRIBUTION of the racers over one networked store. It does not
 measure partitions, packet loss, or multi-store topologies; those
@@ -54,16 +78,19 @@ is the durable env's, per the pin guard):
   # between attempts (host A): drop xh174_* coordination/ledger tables
   $PY probes/174_p17_crosshost_race.py reset --dsn "$PG_DSN"
 
-  # shell 1, host A (coordinator: parks runs, releases barrier, judges)
+  # ONE racer per host, BACKGROUNDED (racers loop forever and are
+  # kill-safe: the racer receipt is rewritten after every round):
+  #   host A: nohup $PY probes/174_p17_crosshost_race.py race \
+  #             --dsn "$PG_DSN" --host-tag hostA \
+  #             > /tmp/racer174.log 2>&1 & echo $! > /tmp/racer174.pid
+  #   host B: same with --host-tag hostB and host B's DSN
+  # then, foreground on host A:
   $PY probes/174_p17_crosshost_race.py serve --dsn "$PG_DSN" \
       --reps 10 --arms stock,gate --gate-ms 2000
-
-  # shell 2, host A  AND  shell 3, host B (ONE racer per host; racers
-  # loop forever -- Ctrl-C them after serve prints its receipt; the
-  # racer receipt is rewritten after every round, so Ctrl-C loses
-  # nothing)
-  $PY probes/174_p17_crosshost_race.py race  --dsn "$PG_DSN" --host-tag hostA
-  $PY probes/174_p17_crosshost_race.py race  --dsn "$PG_DSN" --host-tag hostB
+  # after the receipt prints: kill $(cat /tmp/racer174.pid) on both
+  # hosts. Racers are resilient to starting BEFORE init and to reset
+  # under their feet (missing tables / deleted rounds -> retry), so
+  # start order is genuinely arbitrary.
 
 Pre-flight (single host, two local racers with distinct tags, remote or
 local DSN): serve --smoke.  The coordinator records the two racers'
@@ -151,7 +178,8 @@ def _init_tables(dsn):
             thread TEXT, task TEXT)""")
         c.execute("""CREATE TABLE IF NOT EXISTS xh174_results (
             round BIGINT, host TEXT, outcome TEXT, error TEXT,
-            t_fire_ms DOUBLE PRECISION, PRIMARY KEY (round, host))""")
+            t_invoke_ms DOUBLE PRECISION, arrive_at TIMESTAMPTZ,
+            PRIMARY KEY (round, host))""")
 
 
 def _ledger_write(dsn, rnd, host, thread, task):
@@ -179,6 +207,8 @@ def _make_saver(dsn, gated):
 
 
 def _build_graph(dsn, saver, rnd, host_tag, gate_ms, thread):
+    flag = {"fired": False}   # set only when THIS process's node runs
+
     class S(TypedDict, total=False):
         pre_out: str
         decision: bool
@@ -193,6 +223,7 @@ def _build_graph(dsn, saver, rnd, host_tag, gate_ms, thread):
                                            # model-call / payment stand-in
                                            # (probe 168's dose axis)
         _ledger_write(dsn, rnd, host_tag, thread, "gate")
+        flag["fired"] = True
         return {"decision": bool(decision)}
 
     g = StateGraph(S)
@@ -201,7 +232,7 @@ def _build_graph(dsn, saver, rnd, host_tag, gate_ms, thread):
     g.add_edge(START, "pre")
     g.add_edge("pre", "gate")
     g.add_edge("gate", END)
-    return g.compile(checkpointer=saver)
+    return g.compile(checkpointer=saver), flag
 
 
 # ---------------------------------------------------------------- roles
@@ -233,15 +264,17 @@ def role_serve(a):
         for arm in arms:
             if arm == "gate" and not HAVE_REMIT:
                 _fail(f"gate arm needs remit-contract: {_REMIT_ERR}")
-            fires, losers, hostpairs = [], [], []
+            fires, losers, others, hostpairs = [], [], [], []
+            offsets, fired_by = [], []
             for rep in range(reps):
                 rnd += 1
                 thread = f"xh174-{uuid.uuid4().hex[:8]}"
                 # Park through a STOCK saver in every arm (see docstring).
                 saver, close = _make_saver(a.dsn, gated=False)
                 try:
-                    graph = _build_graph(a.dsn, saver, rnd, "coordinator",
-                                         a.gate_ms, thread)
+                    graph, _ = _build_graph(a.dsn, saver, rnd,
+                                            "coordinator", a.gate_ms,
+                                            thread)
                     graph.invoke({}, {"configurable":
                                       {"thread_id": thread}})
                 finally:
@@ -266,8 +299,9 @@ def role_serve(a):
                 t0 = time.time()
                 while True:                      # wait for two verdicts
                     done = coord.execute(
-                        "SELECT host, outcome, error FROM xh174_results "
-                        "WHERE round=%s", (rnd,)).fetchall()
+                        "SELECT host, outcome, error, arrive_at "
+                        "FROM xh174_results WHERE round=%s",
+                        (rnd,)).fetchall()
                     if len(done) >= 2:
                         break
                     if time.time() - t0 > ROUND_TIMEOUT_S:
@@ -277,17 +311,33 @@ def role_serve(a):
                     "SELECT COUNT(*) FROM xh174_effects "
                     "WHERE round=%s AND task='gate'", (rnd,)).fetchone()[0]
                 fires.append(n)
-                losers.extend(e for _, o, e in done
+                fired_by.append(sorted(r[0] for r in coord.execute(
+                    "SELECT host FROM xh174_effects "
+                    "WHERE round=%s AND task='gate'", (rnd,)).fetchall()))
+                arr = [r[3] for r in done if r[3] is not None]
+                offsets.append(round(abs((arr[0] - arr[1])
+                                         .total_seconds()) * 1000.0, 1)
+                               if len(arr) == 2 else None)
+                losers.extend(e for _, o, e, _a in done
                               if o == "refused" and e)
+                others.extend(e for _, o, e, _a in done
+                              if o == "errored" and e)
                 coord.execute("UPDATE xh174_rounds SET done=TRUE "
                               "WHERE round=%s", (rnd,))
             dist = {}
             for f in fires:
                 dist[str(f)] = dist.get(str(f), 0) + 1
             same_host = any(len(set(p)) < 2 for p in hostpairs)
+            real = [o for o in offsets if o is not None]
             cell = {"arm": arm, "gate_ms": a.gate_ms, "reps": reps,
                     "fires": fires, "distribution": dist,
+                    "fired_by": fired_by,
+                    "arrival_offsets_ms": offsets,
+                    "max_offset_ms": (max(real) if real else None),
+                    "raced": (bool(real)
+                              and max(real) < a.gate_ms),
                     "loser_errors": sorted(set(losers)),
+                    "racer_errors": sorted(set(others)),
                     "cross_host_attested": not same_host,
                     "host_pairs": hostpairs}
             cells.append(cell)
@@ -304,7 +354,8 @@ def role_serve(a):
                "cells": cells,
                "stable": [{k: c[k] for k in
                            ("arm", "gate_ms", "distribution",
-                            "loser_errors", "cross_host_attested")}
+                            "max_offset_ms", "raced", "loser_errors",
+                            "racer_errors", "cross_host_attested")}
                           for c in cells]}
     p = outdir / "174_crosshost_matrix.json"
     p.write_text(json.dumps(receipt, indent=2))
@@ -316,60 +367,128 @@ def role_race(a):
     log = []
     coord = _coord(a.dsn)
     print(json.dumps({"racer": a.host_tag, "hostname": HOSTNAME,
-                      "note": "looping; Ctrl-C after serve prints its "
+                      "note": "looping; kill after serve prints its "
                               "receipt"}))
+
+    def _reconnect():
+        nonlocal coord
+        try:
+            coord.close()
+        except Exception:
+            pass
+        time.sleep(1.0)
+        coord = _coord(a.dsn)
+
     try:
         while True:
-            row = coord.execute(
-                "SELECT r.round, r.thread, r.arm, r.gate_ms "
-                "FROM xh174_rounds r WHERE r.done=FALSE AND NOT EXISTS "
-                "(SELECT 1 FROM xh174_ready y WHERE y.round=r.round "
-                " AND y.host=%s) ORDER BY r.round LIMIT 1",
-                (a.host_tag,)).fetchone()
+            try:
+                row = coord.execute(
+                    "SELECT r.round, r.thread, r.arm, r.gate_ms "
+                    "FROM xh174_rounds r WHERE r.done=FALSE AND NOT EXISTS "
+                    "(SELECT 1 FROM xh174_ready y WHERE y.round=r.round "
+                    " AND y.host=%s) ORDER BY r.round LIMIT 1",
+                    (a.host_tag,)).fetchone()
+            except psycopg.errors.UndefinedTable:
+                time.sleep(0.5)          # pre-init, or reset in flight
+                continue
+            except psycopg.OperationalError:
+                _reconnect()             # tunnel blip / server restart
+                continue
             if row is None:
                 time.sleep(IDLE_S)
                 continue
             rnd, thread, arm, gate_ms = row
-            coord.execute(
-                "INSERT INTO xh174_ready (round, host, hostname) "
-                "VALUES (%s, %s, %s) ON CONFLICT DO NOTHING",
-                (rnd, a.host_tag, HOSTNAME))
-            while True:                          # spin on the barrier
-                rel = coord.execute(
-                    "SELECT released FROM xh174_rounds WHERE round=%s",
-                    (rnd,)).fetchone()[0]
-                if rel:
-                    break
-                time.sleep(POLL_S)
-            outcome, err, t0 = "fired", "", time.time()
-            saver = close = None
+            # Build saver + graph BEFORE announcing readiness: a deployed
+            # worker holds a long-lived saver, so connect + setup() is
+            # probe overhead, not delivery latency, and must not sit
+            # inside the timed window (run-1 finding, 2026-07-31).
+            close = None
             try:
                 saver, close = _make_saver(a.dsn, gated=(arm == "gate"))
-                graph = _build_graph(a.dsn, saver, rnd, a.host_tag,
-                                     gate_ms, thread)
-                graph.invoke(Command(resume=True),
-                             {"configurable": {"thread_id": thread}})
-            except Exception as e:               # loser path under gate
-                outcome = "refused"
-                err = type(e).__name__
-            finally:
+                graph, flag = _build_graph(a.dsn, saver, rnd, a.host_tag,
+                                           gate_ms, thread)
+            except Exception as e:
                 if close:
                     close()
+                log.append({"round": rnd, "arm": arm,
+                            "outcome": "build_error",
+                            "error": type(e).__name__, "t_invoke_ms": 0})
+                time.sleep(0.5)
+                continue
+            try:
+                coord.execute(
+                    "INSERT INTO xh174_ready (round, host, hostname) "
+                    "VALUES (%s, %s, %s) ON CONFLICT DO NOTHING",
+                    (rnd, a.host_tag, HOSTNAME))
+            except psycopg.errors.UndefinedTable:
+                close(); time.sleep(0.5)
+                continue
+            except psycopg.OperationalError:
+                close(); _reconnect()
+                continue
+            aborted = False
+            while True:                  # spin on the barrier
+                try:
+                    rel = coord.execute(
+                        "SELECT released FROM xh174_rounds "
+                        "WHERE round=%s", (rnd,)).fetchone()
+                except psycopg.errors.UndefinedTable:
+                    aborted = True       # reset dropped the tables
+                    break
+                except psycopg.OperationalError:
+                    _reconnect()
+                    continue
+                if rel is None:          # round deleted by a reset
+                    aborted = True
+                    break
+                if rel[0]:
+                    break
+                time.sleep(POLL_S)
+            if aborted:
+                close(); time.sleep(0.5)
+                continue
+            arrive_at = None             # server-clock arrival marker,
+            try:                         # host-neutral by construction
+                arrive_at = coord.execute("SELECT now()").fetchone()[0]
+            except (psycopg.errors.UndefinedTable,
+                    psycopg.OperationalError):
+                pass
+            outcome, err, t0 = "inert", "", time.time()
+            try:
+                graph.invoke(Command(resume=True),
+                             {"configurable": {"thread_id": thread}})
+                if flag["fired"]:
+                    outcome = "fired"    # THIS node executed; "inert"
+                                         # means invoke returned without
+                                         # it (post-completion swallow)
+            except Exception as e:
+                err = type(e).__name__
+                outcome = ("refused" if "RemitConsume" in err
+                           else "errored")
+            finally:
+                close()
             dt = (time.time() - t0) * 1000.0
-            coord.execute(
-                "INSERT INTO xh174_results "
-                "(round, host, outcome, error, t_fire_ms) "
-                "VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
-                (rnd, a.host_tag, outcome, err, dt))
+            try:
+                coord.execute(
+                    "INSERT INTO xh174_results "
+                    "(round, host, outcome, error, t_invoke_ms, arrive_at) "
+                    "VALUES (%s, %s, %s, %s, %s, %s) "
+                    "ON CONFLICT DO NOTHING",
+                    (rnd, a.host_tag, outcome, err, dt, arrive_at))
+            except (psycopg.errors.UndefinedTable,
+                    psycopg.OperationalError):
+                pass
             log.append({"round": rnd, "arm": arm, "outcome": outcome,
-                        "error": err, "t_fire_ms": round(dt, 1)})
+                        "error": err, "t_invoke_ms": round(dt, 1)})
             (outdir / f"174_crosshost_racer_{a.host_tag}.json").write_text(
                 json.dumps({"probe": 174, "role": "race",
                             "host_tag": a.host_tag, "hostname": HOSTNAME,
                             "log": log}, indent=2))
     finally:
-        coord.close()
-
+        try:
+            coord.close()
+        except Exception:
+            pass
 
 def main():
     ap = argparse.ArgumentParser()

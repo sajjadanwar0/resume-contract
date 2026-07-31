@@ -1,0 +1,148 @@
+{
+  "probe": 174,
+  "role": "race",
+  "host_tag": "devhost",
+  "hostname": "Sajjad",
+  "log": [
+    {
+      "round": 178550059001,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 10648.7
+    },
+    {
+      "round": 178550059002,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 10853.8
+    },
+    {
+      "round": 178550059003,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 10951.4
+    },
+    {
+      "round": 178550059004,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 10844.4
+    },
+    {
+      "round": 178550059005,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 10247.9
+    },
+    {
+      "round": 178550059006,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 10406.1
+    },
+    {
+      "round": 178550059007,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 10649.6
+    },
+    {
+      "round": 178550059008,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 11123.6
+    },
+    {
+      "round": 178550059009,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 9632.0
+    },
+    {
+      "round": 178550059010,
+      "arm": "stock",
+      "outcome": "fired",
+      "error": "",
+      "t_invoke_ms": 11469.1
+    },
+    {
+      "round": 178550059011,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 3072.3
+    },
+    {
+      "round": 178550059012,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 1756.8
+    },
+    {
+      "round": 178550059013,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 2186.1
+    },
+    {
+      "round": 178550059014,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 3277.2
+    },
+    {
+      "round": 178550059015,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 2457.9
+    },
+    {
+      "round": 178550059016,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 2456.6
+    },
+    {
+      "round": 178550059017,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 2867.9
+    },
+    {
+      "round": 178550059018,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 2456.9
+    },
+    {
+      "round": 178550059019,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 3750.9
+    },
+    {
+      "round": 178550059020,
+      "arm": "gate",
+      "outcome": "refused",
+      "error": "RemitConsumeConflict",
+      "t_invoke_ms": 2457.9
+    }
+  ]
+}
