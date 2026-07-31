@@ -1,22 +1,35 @@
 {
   "probe": "159_p14_multiproc_saver",
   "host": "Sajjad",
-  "utc": "2026-07-26T05:08:24+00:00",
+  "utc": "2026-07-31T05:46:35+00:00",
   "backend": "sqlite",
   "pins": {
     "langgraph": "1.2.9",
     "langgraph-checkpoint": "4.1.1",
     "langgraph-checkpoint-sqlite": "3.1.0",
-    "remit-contract": "0.1.0"
+    "remit-contract": "0.1.2"
   },
   "have_remit": true,
   "arms": {
     "race_same_stock": {
       "reps": 10,
       "shim": false,
+      "shim_gate": false,
       "values": [
         true,
         true
+      ],
+      "claim_rejections_per_rep": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "gate_fire_distribution": {
         "2": 10
@@ -51,7 +64,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 54.9
+              "dt_ms": 55.9
             },
             {
               "idx": 1,
@@ -62,7 +75,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 36.4
+              "dt_ms": 37.1
             }
           ],
           "ledger": {
@@ -89,7 +102,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 55.6
+              "dt_ms": 54.6
             },
             {
               "idx": 1,
@@ -100,7 +113,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 36.5
+              "dt_ms": 36.0
             }
           ],
           "ledger": {
@@ -127,7 +140,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 34.9
+              "dt_ms": 41.2
             },
             {
               "idx": 1,
@@ -138,7 +151,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.6
+              "dt_ms": 68.8
             }
           ],
           "ledger": {
@@ -165,7 +178,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 54.2
+              "dt_ms": 34.7
             },
             {
               "idx": 1,
@@ -176,7 +189,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.3
+              "dt_ms": 48.8
             }
           ],
           "ledger": {
@@ -203,7 +216,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 42.1
+              "dt_ms": 70.9
             },
             {
               "idx": 1,
@@ -214,7 +227,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 68.9
+              "dt_ms": 51.8
             }
           ],
           "ledger": {
@@ -241,83 +254,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.1
-            },
-            {
-              "idx": 1,
-              "value": true,
-              "result": {
-                "x": 1,
-                "pre_out": "pre:done",
-                "decision": true
-              },
-              "error": null,
-              "dt_ms": 54.1
-            }
-          ],
-          "ledger": {
-            "gate:True": 2,
-            "pre": 1
-          },
-          "gate_fires_total": 2,
-          "gate_values_fired": [
-            "gate:True"
-          ]
-        },
-        {
-          "rep": 6,
-          "park": {
-            "interrupted": true
-          },
-          "racers": [
-            {
-              "idx": 0,
-              "value": true,
-              "result": {
-                "x": 1,
-                "pre_out": "pre:done",
-                "decision": true
-              },
-              "error": null,
-              "dt_ms": 37.0
-            },
-            {
-              "idx": 1,
-              "value": true,
-              "result": {
-                "x": 1,
-                "pre_out": "pre:done",
-                "decision": true
-              },
-              "error": null,
-              "dt_ms": 55.2
-            }
-          ],
-          "ledger": {
-            "gate:True": 2,
-            "pre": 1
-          },
-          "gate_fires_total": 2,
-          "gate_values_fired": [
-            "gate:True"
-          ]
-        },
-        {
-          "rep": 7,
-          "park": {
-            "interrupted": true
-          },
-          "racers": [
-            {
-              "idx": 0,
-              "value": true,
-              "result": {
-                "x": 1,
-                "pre_out": "pre:done",
-                "decision": true
-              },
-              "error": null,
-              "dt_ms": 38.4
+              "dt_ms": 41.5
             },
             {
               "idx": 1,
@@ -341,6 +278,82 @@
           ]
         },
         {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 37.4
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 56.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 34.7
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 48.7
+            }
+          ],
+          "ledger": {
+            "gate:True": 2,
+            "pre": 1
+          },
+          "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
           "rep": 8,
           "park": {
             "interrupted": true
@@ -355,7 +368,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 59.7
+              "dt_ms": 48.4
             },
             {
               "idx": 1,
@@ -366,7 +379,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 49.2
+              "dt_ms": 34.6
             }
           ],
           "ledger": {
@@ -393,7 +406,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 40.7
+              "dt_ms": 74.5
             },
             {
               "idx": 1,
@@ -404,7 +417,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 68.8
+              "dt_ms": 41.2
             }
           ],
           "ledger": {
@@ -421,9 +434,22 @@
     "race_diff_stock": {
       "reps": 10,
       "shim": false,
+      "shim_gate": false,
       "values": [
         true,
         false
+      ],
+      "claim_rejections_per_rep": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "gate_fire_distribution": {
         "2": 10
@@ -458,7 +484,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 36.0
+              "dt_ms": 68.9
             },
             {
               "idx": 1,
@@ -469,7 +495,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 55.1
+              "dt_ms": 39.9
             }
           ],
           "ledger": {
@@ -498,7 +524,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 51.5
+              "dt_ms": 35.2
             },
             {
               "idx": 1,
@@ -509,7 +535,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 75.3
+              "dt_ms": 49.3
             }
           ],
           "ledger": {
@@ -538,7 +564,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 68.6
+              "dt_ms": 34.1
             },
             {
               "idx": 1,
@@ -549,7 +575,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 38.6
+              "dt_ms": 48.9
             }
           ],
           "ledger": {
@@ -578,7 +604,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.8
+              "dt_ms": 34.6
             },
             {
               "idx": 1,
@@ -589,7 +615,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 35.6
+              "dt_ms": 53.3
             }
           ],
           "ledger": {
@@ -618,7 +644,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 49.2
+              "dt_ms": 35.2
             },
             {
               "idx": 1,
@@ -629,7 +655,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 34.0
+              "dt_ms": 48.8
             }
           ],
           "ledger": {
@@ -658,7 +684,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 49.3
+              "dt_ms": 55.4
             },
             {
               "idx": 1,
@@ -669,7 +695,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 58.7
+              "dt_ms": 36.7
             }
           ],
           "ledger": {
@@ -698,7 +724,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 34.8
+              "dt_ms": 35.8
             },
             {
               "idx": 1,
@@ -709,7 +735,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 49.3
+              "dt_ms": 49.8
             }
           ],
           "ledger": {
@@ -738,7 +764,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 35.0
+              "dt_ms": 32.5
             },
             {
               "idx": 1,
@@ -749,7 +775,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 49.3
+              "dt_ms": 48.0
             }
           ],
           "ledger": {
@@ -778,7 +804,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.9
+              "dt_ms": 35.9
             },
             {
               "idx": 1,
@@ -789,7 +815,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 35.1
+              "dt_ms": 49.0
             }
           ],
           "ledger": {
@@ -818,7 +844,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 57.0
+              "dt_ms": 44.7
             },
             {
               "idx": 1,
@@ -829,7 +855,7 @@
                 "decision": false
               },
               "error": null,
-              "dt_ms": 35.6
+              "dt_ms": 60.1
             }
           ],
           "ledger": {
@@ -913,9 +939,22 @@
     "race_same_shim": {
       "reps": 10,
       "shim": true,
+      "shim_gate": false,
       "values": [
         true,
         true
+      ],
+      "claim_rejections_per_rep": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "gate_fire_distribution": {
         "2": 10
@@ -950,7 +989,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 35.8
+              "dt_ms": 34.5
             },
             {
               "idx": 1,
@@ -961,7 +1000,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 49.5
+              "dt_ms": 48.6
             }
           ],
           "ledger": {
@@ -988,7 +1027,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 36.8
+              "dt_ms": 48.7
             },
             {
               "idx": 1,
@@ -999,7 +1038,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 61.9
+              "dt_ms": 35.3
             }
           ],
           "ledger": {
@@ -1026,7 +1065,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 49.2
+              "dt_ms": 66.5
             },
             {
               "idx": 1,
@@ -1037,7 +1076,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 36.5
+              "dt_ms": 53.3
             }
           ],
           "ledger": {
@@ -1064,7 +1103,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 49.1
+              "dt_ms": 50.0
             },
             {
               "idx": 1,
@@ -1075,7 +1114,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 35.2
+              "dt_ms": 34.3
             }
           ],
           "ledger": {
@@ -1102,7 +1141,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.6
+              "dt_ms": 56.0
             },
             {
               "idx": 1,
@@ -1113,7 +1152,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 35.4
+              "dt_ms": 37.6
             }
           ],
           "ledger": {
@@ -1140,7 +1179,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 37.4
+              "dt_ms": 68.9
             },
             {
               "idx": 1,
@@ -1151,7 +1190,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 69.3
+              "dt_ms": 39.9
             }
           ],
           "ledger": {
@@ -1178,7 +1217,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 36.4
+              "dt_ms": 48.8
             },
             {
               "idx": 1,
@@ -1189,7 +1228,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.6
+              "dt_ms": 36.3
             }
           ],
           "ledger": {
@@ -1216,7 +1255,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 45.6
+              "dt_ms": 48.4
             },
             {
               "idx": 1,
@@ -1227,7 +1266,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 61.5
+              "dt_ms": 34.4
             }
           ],
           "ledger": {
@@ -1254,7 +1293,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 49.4
+              "dt_ms": 54.3
             },
             {
               "idx": 1,
@@ -1265,7 +1304,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 36.3
+              "dt_ms": 36.1
             }
           ],
           "ledger": {
@@ -1292,7 +1331,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 48.9
+              "dt_ms": 33.8
             },
             {
               "idx": 1,
@@ -1303,7 +1342,7 @@
                 "decision": true
               },
               "error": null,
-              "dt_ms": 35.0
+              "dt_ms": 48.6
             }
           ],
           "ledger": {
@@ -1311,6 +1350,766 @@
             "pre": 1
           },
           "gate_fires_total": 2,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        }
+      ]
+    },
+    "race_same_shim_gate": {
+      "reps": 10,
+      "shim": true,
+      "shim_gate": true,
+      "values": [
+        true,
+        true
+      ],
+      "claim_rejections_per_rep": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "gate_fire_distribution": {
+        "1": 10
+      },
+      "reps_with_duplicate_gate_fire": [],
+      "reps_with_racer_error": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reps_where_a_racer_was_served_the_other_value": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 50.8
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg0 checkpoint=1f18ca31-eb37-6585-8001-2cd4e32ea4aa is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 44.5
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg1 checkpoint=1f18ca31-f843-616a-8001-980faf139953 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 56.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 51.7
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg2 checkpoint=1f18ca32-0865-624a-8001-a394716f3c99 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 29.2
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg3 checkpoint=1f18ca32-1841-660f-8001-0489992cc267 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.0
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 49.7
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 49.8
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg4 checkpoint=1f18ca32-263f-6099-8001-812d70c854d9 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.5
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 5,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg5 checkpoint=1f18ca32-34b7-62af-8001-468e9066c507 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.4
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 50.2
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 51.5
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg6 checkpoint=1f18ca32-425d-6165-8001-7909dc241c15 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.6
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 47.2
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg7 checkpoint=1f18ca32-5042-623a-8001-512b0e7ddba9 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 21.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 8,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg8 checkpoint=1f18ca32-603d-67f3-8001-7ea0f9203f10 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 82.0
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 72.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 9,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 50.2
+            },
+            {
+              "idx": 1,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rsg9 checkpoint=1f18ca32-7121-6782-8001-46e21690b39d is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.5
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        }
+      ]
+    },
+    "race_diff_shim_gate": {
+      "reps": 10,
+      "shim": true,
+      "shim_gate": true,
+      "values": [
+        true,
+        false
+      ],
+      "claim_rejections_per_rep": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "gate_fire_distribution": {
+        "1": 10
+      },
+      "reps_with_duplicate_gate_fire": [],
+      "reps_with_racer_error": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reps_where_a_racer_was_served_the_other_value": [],
+      "per_rep": [
+        {
+          "rep": 0,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg0 checkpoint=1f18ca32-81a6-6228-8001-25ad10aaedad is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 35.7
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 58.2
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ]
+        },
+        {
+          "rep": 1,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg1 checkpoint=1f18ca32-927c-63ab-8001-7c879e516505 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 35.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 48.5
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ]
+        },
+        {
+          "rep": 2,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 42.4
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg2 checkpoint=1f18ca32-a323-657f-8001-846c64c10e3c is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 56.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 3,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg3 checkpoint=1f18ca32-b1ad-6944-8001-55d05fb300d4 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.2
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 68.6
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ]
+        },
+        {
+          "rep": 4,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 48.5
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg4 checkpoint=1f18ca32-bf36-6842-8001-3988fcdcee8b is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 5,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg5 checkpoint=1f18ca32-cc59-6008-8001-d07facf6d658 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 35.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": false
+              },
+              "error": null,
+              "dt_ms": 49.1
+            }
+          ],
+          "ledger": {
+            "gate:False": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:False"
+          ]
+        },
+        {
+          "rep": 6,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 50.4
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg6 checkpoint=1f18ca32-da05-6d8f-8001-6f869e02c604 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.4
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 7,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 60.3
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg7 checkpoint=1f18ca32-e83d-6beb-8001-ad600ecfe3b1 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.1
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 8,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 51.6
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg8 checkpoint=1f18ca32-f71f-65cd-8001-763dab92929a is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 35.8
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
+          "gate_values_fired": [
+            "gate:True"
+          ]
+        },
+        {
+          "rep": 9,
+          "park": {
+            "interrupted": true
+          },
+          "racers": [
+            {
+              "idx": 0,
+              "value": true,
+              "result": {
+                "x": 1,
+                "pre_out": "pre:done",
+                "decision": true
+              },
+              "error": null,
+              "dt_ms": 47.9
+            },
+            {
+              "idx": 1,
+              "value": false,
+              "result": null,
+              "error": "RemitConsumeConflict: CO refused (cross-process consume-once): interrupt consumption for thread=201571-rdg9 checkpoint=1f18ca33-0846-6732-8001-c16a0b087447 is already claimed by another process; this invocation was rejected before any node executed",
+              "dt_ms": 36.0
+            }
+          ],
+          "ledger": {
+            "gate:True": 1,
+            "pre": 1
+          },
+          "gate_fires_total": 1,
           "gate_values_fired": [
             "gate:True"
           ]
@@ -1341,6 +2140,15 @@
     "race_diff_served_other_value_reps": [],
     "contention_per_thread_exactly_once": true,
     "contention_victim_park_kill_recovered": true,
-    "shim_race_inert_all_reps": false
+    "shim_race_inert_all_reps": false,
+    "shim_gate_race_same_fire_distribution": {
+      "1": 10
+    },
+    "shim_gate_race_same_duplicate_reps": [],
+    "shim_gate_race_diff_fire_distribution": {
+      "1": 10
+    },
+    "shim_gate_race_diff_served_other_value_reps": [],
+    "shim_gate_loser_rejected_loudly_every_race_rep": true
   }
 }
