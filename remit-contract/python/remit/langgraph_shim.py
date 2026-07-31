@@ -207,9 +207,22 @@ class RemitSaverMixin:
             "(thread TEXT NOT NULL, ckpt TEXT NOT NULL, "
             " PRIMARY KEY (thread, ckpt))"
         )
-        conn.execute(ddl)
-        if not is_pg:
-            conn.commit()
+        try:
+            conn.execute(ddl)
+            if not is_pg:
+                conn.commit()
+        except Exception as exc:
+            # Two processes' FIRST claims on a fresh database can race the
+            # DDL itself: Postgres enforces catalog uniqueness before the
+            # IF NOT EXISTS check settles and refuses one creator with
+            # SQLSTATE 42P07 (duplicate_table) or 23505 (unique_violation
+            # on the pg_type row) -- measured live at probe 159's PG rep 0
+            # on a fresh database, 2026-07-31. Either code means the table
+            # exists, which is exactly this function's postcondition;
+            # absorb it and proceed to the claim (autocommit keeps the
+            # connection usable after the refused statement).
+            if getattr(exc, "sqlstate", None) not in ("42P07", "23505"):
+                raise
         self._remit_claims_ready = True
 
     def _remit_take_claim(self, thread: str, ckpt: str) -> bool:

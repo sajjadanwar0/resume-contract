@@ -31,6 +31,8 @@ Cells:
   G6   default off: cross_process_gate absent => no claims table touched,
        stock-plus-shim behavior bit for bit
   G7   core verdict surface: consume_view / consume_claim_check bindings
+  G9   fresh-database first-claim DDL race (Postgres catalog refusal
+       42P07/23505) absorbed as table-exists; claim proceeds
   PG*  G1/G2 on PostgresSaver when REMIT_TEST_PG_DSN is set, plus the
        loud refusal of a non-autocommit connection
 
@@ -302,6 +304,55 @@ def test_g8_gate_requires_a_connection_bearing_saver():
 
     with pytest.raises(RuntimeError, match="cross_process_gate"):
         remit.wrap(InMemorySaver, cross_process_gate=True)
+
+
+def test_g9_fresh_database_ddl_race_is_absorbed():
+    """G9: two processes' FIRST claims on a fresh Postgres database race the
+    ``CREATE TABLE IF NOT EXISTS`` itself; Postgres enforces catalog
+    uniqueness before the IF NOT EXISTS check settles and refuses one
+    creator with SQLSTATE 42P07/23505 — measured live at probe 159's PG
+    rep 0 on a fresh database (v0.1.1's one non-typed loser). The shim
+    absorbs that refusal as "the table exists" and proceeds to the claim;
+    any other SQLSTATE still propagates."""
+
+    class CatalogRace(Exception):
+        def __init__(self, sqlstate):
+            super().__init__("duplicate")
+            self.sqlstate = sqlstate
+
+    def make_conn(raise_state):
+        class Cur:
+            rowcount = 1
+
+        class Conn:
+            def __init__(self):
+                self.calls = []
+
+            def execute(self, sql, *a):
+                self.calls.append(sql)
+                if sql.lstrip().upper().startswith("CREATE TABLE") and raise_state:
+                    raise CatalogRace(raise_state)
+                return Cur()
+
+        Conn.__module__ = "psycopg"  # route through the Postgres branch
+        return Conn()
+
+    class Saver:
+        def __init__(self, conn):
+            self.conn = conn
+
+        def get_tuple(self, config):
+            return None
+
+    for state in ("42P07", "23505"):
+        s = remit.wrap(Saver, make_conn(state), cross_process_gate=True)
+        assert s._remit_take_claim("g9", "c9") is True
+        assert any("INSERT INTO" in c for c in s.conn.calls), \
+            "the claim INSERT must follow the absorbed DDL race"
+
+    s = remit.wrap(Saver, make_conn("55P03"), cross_process_gate=True)
+    with pytest.raises(CatalogRace):
+        s._remit_take_claim("g9", "c9")
 
 
 # ------------------------------------------------------------ PG variants
