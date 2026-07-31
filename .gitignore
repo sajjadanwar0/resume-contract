@@ -50,3 +50,5 @@ results/multiproc/window_100/
 remit_verus_cv_rd
 # prebuilt extension module (the wheel is the artifact; BUILD_AND_TEST rebuilds)
 remit-contract/python/remit/_core.abi3.so
+remit-contract/dist-local/
+remit-contract/dist-release/

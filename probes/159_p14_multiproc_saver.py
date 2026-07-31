@@ -56,6 +56,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
@@ -92,6 +93,13 @@ class S(TypedDict, total=False):
     x: int
     pre_out: str
     decision: bool
+
+
+RUN_NONCE = uuid.uuid4().hex[:6]    # isolates thread ids across invocations
+                                    # that share one Postgres database (the
+                                    # probe-165 convention; SQLite never
+                                    # collides because every rep gets a fresh
+                                    # tmpdir, Postgres reuses one database)
 
 
 # ------------------------------------------------------------------ ledger
@@ -132,6 +140,11 @@ def make_saver(ctx):
         saver = (_rls.wrap(PostgresSaver, conn,
                            cross_process_gate=bool(ctx.get("shim_gate")))
                  if ctx.get("shim") else PostgresSaver(conn))
+        saver.setup()    # Postgres does not create the checkpointer schema
+                         # lazily (probe 165 finding, 2026-07-27); without
+                         # this, every child dies UndefinedTable on a fresh
+                         # database -- reproduced by this probe 2026-07-31
+                         # as "contention workers never all parked"
         return saver, conn.close
     conn = sqlite3.connect(ctx["db"], check_same_thread=False, timeout=60)
     saver = (_rls.wrap(SqliteSaver, conn,
@@ -200,7 +213,7 @@ def racer_main(ctx):
 
 
 def worker_main(ctx):
-    thread = f"w{ctx['idx']}"
+    thread = f"{ctx['nonce']}-w{ctx['idx']}"
     app, closer = build(ctx, thread)
     res = _invoke(app, {"x": 1}, thread)
     Path(ctx["ready"]).write_text("1")
@@ -263,7 +276,7 @@ def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn,
     reps_out = []
     for i in range(reps):
         d0 = tempfile.mkdtemp(prefix=f"p159_{tag}_{i}_", dir=base)
-        thread = f"{tag}{i}"
+        thread = f"{RUN_NONCE}-{tag}{i}"
         ctx0 = {"db": f"{d0}/ckpt.sqlite", "ledger": f"{base}/ledger.sqlite",
                 "thread": thread, "shim": shim, "shim_gate": shim_gate,
                 "pg_dsn": pg_dsn}
@@ -278,9 +291,16 @@ def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn,
         deadline = time.time() + 60
         while not all(os.path.exists(f) for f in flags):
             if time.time() > deadline:
-                for r in racers:
+                tails = {}
+                for j, r in enumerate(racers):
                     r.kill()
-                raise SystemExit(f"{tag} rep {i}: racers never armed")
+                    try:
+                        _o, e = r.communicate(timeout=5)
+                        tails[j] = (e or "").strip().splitlines()[-3:]
+                    except Exception:
+                        tails[j] = ["<no stderr captured>"]
+                raise SystemExit(f"{tag} rep {i}: racers never armed; "
+                                 f"stderr tails: {json.dumps(tails)}")
             time.sleep(0.002)
         Path(f"{d0}/start").write_text("1")
         r_out = [_last_json(r, 120) for r in racers]
@@ -325,7 +345,7 @@ def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn,
 def run_contention(base, k, shim, pg_dsn):
     d0 = tempfile.mkdtemp(prefix="p159_cont_", dir=base)
     ctx0 = {"db": f"{d0}/ckpt.sqlite", "ledger": f"{base}/ledger.sqlite",
-            "shim": shim, "pg_dsn": pg_dsn}
+            "shim": shim, "pg_dsn": pg_dsn, "nonce": RUN_NONCE}
     workers = []
     for idx in range(k):
         ctx = dict(ctx0, idx=idx, victim=(idx == 0),
@@ -334,9 +354,18 @@ def run_contention(base, k, shim, pg_dsn):
     deadline = time.time() + 120
     while not all(os.path.exists(f"{d0}/ready{i}") for i in range(k)):
         if time.time() > deadline:
-            for _, w in workers:
+            tails = {}
+            for i, w in workers:
+                unready = not os.path.exists(f"{d0}/ready{i}")
                 w.kill()
-            raise SystemExit("contention workers never all parked")
+                if unready:
+                    try:
+                        _o, e = w.communicate(timeout=5)
+                        tails[i] = (e or "").strip().splitlines()[-3:]
+                    except Exception:
+                        tails[i] = ["<no stderr captured>"]
+            raise SystemExit("contention workers never all parked; "
+                             f"stderr tails: {json.dumps(tails)}")
         time.sleep(0.005)
 
     victim = workers[0][1]
@@ -344,10 +373,10 @@ def run_contention(base, k, shim, pg_dsn):
     victim.wait()
     Path(f"{d0}/go").write_text("1")
     surv = {i: _last_json(w, 180) for i, w in workers[1:]}
-    rec = _spawn("recover", dict(ctx0, thread="w0"))
+    rec = _spawn("recover", dict(ctx0, thread=f"{RUN_NONCE}-w0"))
     rec_out = _last_json(rec, 120)
 
-    per_thread = {f"w{i}": ledger_thread(ctx0["ledger"], f"w{i}")
+    per_thread = {f"w{i}": ledger_thread(ctx0["ledger"], f"{RUN_NONCE}-w{i}")
                   for i in range(k)}
     ok_threads = all(
         per_thread[t].get("pre", 0) == 1
