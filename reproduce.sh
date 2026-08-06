@@ -167,6 +167,31 @@ for cfg in R0_reference R1_replay R2_forkignore R3_invalidpersist \
     echo "  $cfg: FAIL -- expected: ${EXPECT[$cfg]}"; fail=1
   fi
 done
+
+# ------------------- [1b] single-worker minimal CE depths (2026-08-06) ------
+# Backs Table 2 row R8-F (68/68; 8) and the Sec. 3.4 deepening sentence
+# (fork 5 -> 8, double-consume 6 -> 13). The 161-matrix receipts log
+# 16-worker abort-time traces, which may exceed these BFS-minimal depths;
+# committed single-worker receipts: results/tla/singleworker_20260806/.
+note "[1b] single-worker minimal counterexample depths"
+declare -A DEPTH_SPEC=(
+  [R8_fork]="R8_scale_forkfault.cfg|ForkDeterminism|8"
+  [R8_dc]="independence_r8/IX8_doubleconsume__ConsumeOnce.cfg|ConsumeOnce|13"
+  [base_fork]="independence_ref_rerun/IX8_forkignore__ForkDeterminism.cfg|ForkDeterminism|5"
+  [base_dc]="independence_ref_rerun/IX8_doubleconsume__ConsumeOnce.cfg|ConsumeOnce|6"
+)
+for k in R8_fork R8_dc base_fork base_dc; do
+  IFS='|' read -r dcfg dinv ddepth <<< "${DEPTH_SPEC[$k]}"
+  $TLC -deadlock -config "$dcfg" -workers 1 ResumeContract.tla \
+       > "$k.depth.audit.out" 2>&1 || true
+  if grep -q "Invariant $dinv is violated" "$k.depth.audit.out" \
+     && grep -q "depth of the complete state graph search is $ddepth\." "$k.depth.audit.out" \
+     && [[ "$(grep -c '^State ' "$k.depth.audit.out")" -eq "$ddepth" ]]; then
+    echo "  $k: OK ($dinv violated; single-worker minimal depth $ddepth)"
+  else
+    echo "  $k: FAIL -- expected $dinv violated at single-worker depth $ddepth"; fail=1
+  fi
+done
 popd > /dev/null
 
 # ------------------------------------------------- [2] committed receipts ---

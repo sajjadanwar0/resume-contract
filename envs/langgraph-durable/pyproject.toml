@@ -1,7 +1,3 @@
-# Drop at: envs/langgraph-durable/pyproject.toml   (then: uv lock --project envs/langgraph-durable)
-# Commits the revision-durable-backends campaign environment (results/revision/
-# MANIFEST.json pins) as a reproducible env, so probes 126-130, 128, and 139
-# stop depending on an ad hoc container venv or --with layering.
 [project]
 name = "env-langgraph-durable"
 version = "0.0.0"

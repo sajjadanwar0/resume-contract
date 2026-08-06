@@ -163,7 +163,7 @@ verification results:: 15 verified, 0 errors
 ```
 
 *(Historical logs: `remit_verus_cv_rd.rs` was deleted and the fifteen-item
-composition superseded in the 2026-07-22 audit; standing tallies: core ten,
+composition superseded in audit; standing tallies: core ten,
 `remit_verus_all.rs` twelve.)*
 
 Comment-filtered `assume` count across all three proof files: `0, 0, 0`
@@ -173,7 +173,7 @@ without the accompanying grep. **[2026-07-22 supersession note.]** The
 tallies attested above predate the adoption commit; the files and numbers
 current after it are those of the status table at the top and the
 Post-adoption verification status section below.
-## Post-adoption verification status (2026-07-22)
+## Post-adoption verification status
 
 The definitional FD lemma (`lemma_fd_distinct_values_served_distinctly`,
 with its `served()` helper) and the RD congruence pair
@@ -218,7 +218,7 @@ standalone by design (they re-declare model types such as
 definition-sharing refactor and is deferred to the refinement work
 (N3). The composed file now covers the trimmed legacy core + CV only.
 
-## N3: verified executable cores (2026-07-22)
+## N3: verified executable cores
 | target | tally | bridge to shipped code |
 |---|---|---|
 | `proof/remit_verus_recover_exec.rs` | `verification results:: 7 verified, 0 errors` | `recover_core` in `src/lib.rs` is line-identical outside proof-only blocks; CI gate: `n3_sync_check.sh` |

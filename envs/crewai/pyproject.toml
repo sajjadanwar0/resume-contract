@@ -8,7 +8,6 @@ dependencies = [
 ]
 
 [tool.uv]
-# Environment container, not an installable package: nothing to build.
 package = false
 [[tool.uv.index]]
 name = "pypi"

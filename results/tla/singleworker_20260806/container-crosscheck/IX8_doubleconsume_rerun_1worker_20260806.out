@@ -1,0 +1,257 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Warning: Please run the Java VM which executes TLC with a throughput optimized garbage collector by passing the "-XX:+UseParallelGC" property.
+(Use the -nowarning option to disable this warning.)
+Running breadth-first search Model-Checking with fp 70 and seed -7522797512316236420 with 1 worker on 1 cores with 966MB heap and 64MB offheap memory [pid: 640] (Linux 6.18.5-fc-v18 amd64, Ubuntu 21.0.10 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/claude/work/tlc_rerun/ResumeContract.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module ResumeContract
+Starting... (2026-08-06 14:52:05)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-08-06 14:52:05.
+Error: Invariant ConsumeOnce is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+
+State 2: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 3: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 0, 0, 0, 0, 0, 0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 2
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 3
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 4: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 0, 0, 0, 0, 0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 3
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 4
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 5: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 0, 0, 0, 0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 4
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 5
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 6: <EmitInterrupt line 78, col 3 to line 83, col 72 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 0, 0, 0, 0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 4
+/\ crashes = 0
+/\ waiting = TRUE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 5
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 7: <Consume line 86, col 3 to line 96, col 62 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 1, 0, 0, 0, 0, 0>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 5
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 6
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE],
+   [idx |-> 5, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 8: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 1, 1, 0, 0, 0, 0>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 6
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 7
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE],
+   [idx |-> 5, valid |-> TRUE],
+   [idx |-> 6, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 9: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 1, 1, 1, 0, 0, 0>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 7
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 8
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE],
+   [idx |-> 5, valid |-> TRUE],
+   [idx |-> 6, valid |-> TRUE],
+   [idx |-> 7, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 10: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 1, 1, 1, 1, 0, 0>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 8
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 9
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE],
+   [idx |-> 5, valid |-> TRUE],
+   [idx |-> 6, valid |-> TRUE],
+   [idx |-> 7, valid |-> TRUE],
+   [idx |-> 8, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 11: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 1, 1, 1, 1, 1, 0>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 9
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 10
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE],
+   [idx |-> 5, valid |-> TRUE],
+   [idx |-> 6, valid |-> TRUE],
+   [idx |-> 7, valid |-> TRUE],
+   [idx |-> 8, valid |-> TRUE],
+   [idx |-> 9, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 12: <ExecTask line 63, col 3 to line 75, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 1, 1, 1, 1, 1, 1>>
+/\ consumedVal = va
+/\ extraResumes = 0
+/\ frontier = 10
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 11
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE],
+   [idx |-> 5, valid |-> TRUE],
+   [idx |-> 6, valid |-> TRUE],
+   [idx |-> 7, valid |-> TRUE],
+   [idx |-> 8, valid |-> TRUE],
+   [idx |-> 9, valid |-> TRUE],
+   [idx |-> 10, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+State 13: <ExtraResume line 129, col 3 to line 136, col 58 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1, 1, 2, 1, 1, 1, 1, 1>>
+/\ consumedVal = va
+/\ extraResumes = 1
+/\ frontier = 10
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<va>>
+/\ forkOuts = <<<<va>>>>
+/\ pc = 11
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE],
+   [idx |-> 4, valid |-> TRUE],
+   [idx |-> 5, valid |-> TRUE],
+   [idx |-> 6, valid |-> TRUE],
+   [idx |-> 7, valid |-> TRUE],
+   [idx |-> 8, valid |-> TRUE],
+   [idx |-> 9, valid |-> TRUE],
+   [idx |-> 10, valid |-> TRUE] >>
+/\ recHist = <<>>
+
+39209 states generated, 26889 distinct states found, 19507 states left on queue.
+The depth of the complete state graph search is 13.
+The average outdegree of the complete state graph is 4 (minimum is 1, the maximum 6 and the 95th percentile is 5).
+Finished in 02s at (2026-08-06 14:52:07)

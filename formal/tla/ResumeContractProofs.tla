@@ -1,43 +1,7 @@
 ------------------------- MODULE ResumeContractProofs -------------------------
-(***************************************************************************)
-(* TLAPS proof obligations for the REFERENCE configuration of              *)
-(* ResumeContract.tla.                                                     *)
-(*                                                                         *)
-(* STATUS -- read this before citing anything from this file.              *)
-(*                                                                         *)
-(*   Inv (below) is IDENTICAL to the predicate in IndCheck.tla, which was  *)
-(*   machine-checked INDUCTIVE by TLC at the reference constants           *)
-(*   (NTasks=3, IP=2, |Values|=2, MaxResumes=2, MaxCrashes=1,              *)
-(*   MaxExtraResumes=1): 8,610 distinct Inv-states enumerated as initial   *)
-(*   states, every successor checked, "Model checking completed. No error  *)
-(*   has been found."  That run also discharged InvImpliesContract and     *)
-(*   InitImpliesInv as state predicates.                                   *)
-(*                                                                         *)
-(*   The THEOREMs below are NOT YET DISCHARGED. Every proof body is a      *)
-(*   skeleton with OMITTED leaves. Do not cite this file as proved until   *)
-(*   `tlapm` reports every obligation closed and the tally is recorded in  *)
-(*   the artifact the way VERIFICATION.md records the Verus tallies.       *)
-(*                                                                         *)
-(* WHY THIS IS THE RIGHT TARGET.  TLC establishes the conjunction over the *)
-(* full reachable space AT STATED CONSTANTS and is silent beyond them --   *)
-(* the "bound-relative" half of Sec. 3.4.  Theorem RefSafety below is      *)
-(* quantified over the CONSTANTS, so discharging it converts the paper's   *)
-(* universal claim from bound-relative to unbounded in NTasks, IP,         *)
-(* |Values|, MaxResumes, MaxCrashes, and MaxExtraResumes.  That is the     *)
-(* single addition that answers "the authors rely on bounded model         *)
-(* checking without proving cut-off existence."                            *)
-(*                                                                         *)
-(* WHAT IT DOES NOT DO.  It does not generalize the SEPARATION witnesses   *)
-(* to parameterized families, and it should not: a separation claim is     *)
-(* existential and one exhaustively-checked finite witness settles it      *)
-(* outright.  Proving families would concede ground that does not need     *)
-(* conceding.                                                              *)
-(***************************************************************************)
+
 EXTENDS ResumeContract, TLAPS, SequenceTheorems, NaturalsInduction
 
-(***************************************************************************)
-(* The reference configuration: all six fault switches off.                *)
-(***************************************************************************)
 Reference ==
   /\ ~FaultReplay
   /\ ~FaultForkIgnore
@@ -46,11 +10,6 @@ Reference ==
   /\ ~FaultDoubleConsume
   /\ ~FaultPrefixReplay
 
-(***************************************************************************)
-(* Bounded type invariant. Identical in content to IndCheck.tla's TypeOKS  *)
-(* minus the sequence-domain bounds, which the counter conjuncts of Inv    *)
-(* now imply (that was the point of discovering them).                     *)
-(***************************************************************************)
 CkptRec == [idx : Tasks, valid : BOOLEAN]
 Decs    == {"skip", "replay", "reexec", "prefixreplay"}
 RecRec  == [dur : 0..NTasks, dec : Decs]
@@ -69,30 +28,7 @@ TypeOKS ==
   /\ forkOuts     \in Seq({f(v) : v \in Values})
   /\ recHist      \in Seq(RecRec)
 
-(***************************************************************************)
-(* THE INDUCTIVE INVARIANT.                                                *)
-(*                                                                         *)
-(* Three conjuncts carry the argument and two of them were found by TLC    *)
-(* REJECTING weaker candidates, not by inspection:                         *)
-(*                                                                         *)
-(*   frontier = pc - 1     the durable frontier trails the program counter *)
-(*                         by exactly one; this is what makes PC hold,     *)
-(*                         because ExecTask's sole write to pcRegress is   *)
-(*                         guarded by (pc <= frontier), which this forbids *)
-(*                                                                         *)
-(*   Len(ckpts) = frontier one completion record per completed task.       *)
-(*                         WITHOUT THIS the check fails: an Inv-state with *)
-(*                         a long ckpts and a small pc lets ExecTask push  *)
-(*                         ckpts past any a-priori bound.                  *)
-(*                                                                         *)
-(*   Len(recHist) = crashes one recovery record per crash.  WITHOUT THIS   *)
-(*                         the check fails the same way via CrashRecover.  *)
-(*                                                                         *)
-(* The effects conjunct is an EQUALITY, not the <= 1 the contract states.  *)
-(* That is deliberate: <= 1 is not inductive (nothing stops a second       *)
-(* increment of a task at 0), while the equality pins each counter to the  *)
-(* frontier and yields EO and CO-e as immediate consequences.              *)
-(***************************************************************************)
+
 Inv ==
   /\ TypeOKS
   /\ frontier = pc - 1

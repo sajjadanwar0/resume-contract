@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-"""dup_check.py -- search a GitHub repo's issues for potential duplicates
-before filing. Stdlib only (urllib), no token needed for light use
-(unauthenticated search API: ~10 requests/min).
 
-Usage:
-  python3 dup_check.py owner/repo "query one" "query two" ...
-  GITHUB_TOKEN=ghp_xxx python3 dup_check.py ...   (higher rate limits)
-
-Each query is searched in title+body across open AND closed issues
-(closed matters: your bug may already be fixed or rejected).
-"""
 import json
 import os
 import sys
@@ -39,6 +29,7 @@ def main() -> None:
     repo, queries = sys.argv[1], sys.argv[2:]
     seen: dict[int, dict] = {}
     hits_per_issue: dict[int, int] = {}
+    
     for q in queries:
         try:
             data = search(repo, q)
@@ -50,7 +41,7 @@ def main() -> None:
             n = item["number"]
             seen[n] = item
             hits_per_issue[n] = hits_per_issue.get(n, 0) + 1
-        time.sleep(7)  # stay under unauthenticated search rate limit
+        time.sleep(7)  
 
     print("\n== Candidates, ranked by how many of your queries they matched ==")
     ranked = sorted(seen.values(),

@@ -1,19 +1,3 @@
-// tests/n3_differential.rs -- N3 conformance bridge, executable side.
-//
-// Exhaustively cross-checks the shipped decision logic against naive
-// reference models over small key spaces:
-//   * recover(): every root/non-root log over tasks {0,1,2,5}, len <= 4,
-//     against max-of-root-tasks + 1  (the verified core's contract)
-//   * begin_effect(): every op sequence (2 branches x tasks {1,2,3},
-//     len <= 6) against a Vec-membership model -- the LINEAR-SCAN
-//     semantics remit_verus_ledger_exec.rs::admit verifies
-//   * commit_checkpoint(): every op sequence (2 branches x tasks {1..3} x
-//     valid bit, len <= 4) against a naive frontier-map model
-//
-// With remit_verus_ledger_exec.rs verified, this test is the bridge from
-// the verified linear-scan contract to the shipped HashSet implementation:
-// contract equivalence, exhaustively checked at these bounds.
-
 use remit::*;
 
 struct RejectMarker;
@@ -35,6 +19,7 @@ fn branch(i: u64) -> BranchKey {
 fn n3_recover_matches_verified_core_contract_exhaustively() {
     let vals: [u32; 4] = [0, 1, 2, 5];
     let mut cases = 0usize;
+    
     for len in 0..=4usize {
         let combos = 8usize.pow(len as u32); // 4 task values x 2 branch flags
         for c in 0..combos {
@@ -55,21 +40,24 @@ fn n3_recover_matches_verified_core_contract_exhaustively() {
             cases += 1;
         }
     }
+    
     assert!(cases > 4000, "exhaustiveness sanity: {} cases", cases);
 }
 
 #[test]
 fn n3_begin_effect_matches_linear_scan_model_exhaustively() {
-    // op alphabet: (branch in {0,1}, task in {1,2,3}) -> 6 ops
     let ops: Vec<(u64, u32)> =
         (0..2u64).flat_map(|b| (1..=3u32).map(move |t| (b, t))).collect();
+
     let mut seqs = 0usize;
+
     for len in 0..=6usize {
         let combos = 6usize.pow(len as u32);
         for c in 0..combos {
             let mut code = c;
             let mut r = Remit::new(AcceptAll);
             let mut model: Vec<(u64, u32)> = Vec::new();
+            
             for _ in 0..len {
                 let (b, t) = ops[code % 6];
                 code /= 6;
@@ -84,13 +72,14 @@ fn n3_begin_effect_matches_linear_scan_model_exhaustively() {
             seqs += 1;
         }
     }
+    
     assert!(seqs > 40_000, "exhaustiveness sanity: {} sequences", seqs);
 }
 
 #[test]
 fn n3_commit_gate_matches_frontier_model_exhaustively() {
-    // op alphabet: (branch in {0,1}, task in {1,2,3}, valid bit) -> 12 ops
     let mut alphabet: Vec<(u64, u32, bool)> = Vec::new();
+
     for b in 0..2u64 {
         for t in 1..=3u32 {
             for v in [true, false] {
@@ -98,7 +87,9 @@ fn n3_commit_gate_matches_frontier_model_exhaustively() {
             }
         }
     }
+    
     let mut seqs = 0usize;
+    
     for len in 0..=4usize {
         let combos = 12usize.pow(len as u32);
         for c in 0..combos {
