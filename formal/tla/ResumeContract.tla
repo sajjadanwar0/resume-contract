@@ -149,7 +149,6 @@ FairSpec == Init /\ [][Next]_vars /\ WF_vars(Next)
 EventuallyCompletes == <>(pc = NTasks + 1)
 
 --------------------------------------------------------------------------
-(* Type correctness *)
 TypeOK ==
   /\ pc \in 1..NTasks + 1
   /\ effects \in [Tasks -> Nat]

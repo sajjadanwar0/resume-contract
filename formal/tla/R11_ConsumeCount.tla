@@ -1,69 +1,15 @@
 -------------------------- MODULE R11_ConsumeCount --------------------------
-(***************************************************************************)
-(* Property 5 (CO) has TWO clauses:                                        *)
-(*                                                                         *)
-(*   (CO-c)  consumption count: an interrupt is consumed by at most one    *)
-(*           resume;                                                       *)
-(*   (CO-e)  effect inertness: a resume without fork intent addressed to   *)
-(*           a completed run or an already-consumed interrupt is inert     *)
-(*           with respect to effects.                                      *)
-(*                                                                         *)
-(* ResumeContract.tla formalizes CO as                                     *)
-(*                                                                         *)
-(*     ConsumeOnce == effects[IP] <= 1                                     *)
-(*                                                                         *)
-(* which is exactly EO restricted to the gated task -- CO-e alone, and     *)
-(* only its effect consequence. CO-c is not represented: the module has    *)
-(* no consumption counter, and Consume(v) atomically clears `waiting`, so  *)
-(* a second consumption of a LIVE parked interrupt is not a behavior the   *)
-(* transition relation admits. Proposition 2(iv)'s "EO => CO" is therefore *)
-(* a tautology of the two formulas rather than a discovered dependence,    *)
-(* and the measured cross-process failure (probe 159) -- two OS processes  *)
-(* consuming ONE live parked interrupt -- has no in-model shadow.          *)
-(* FaultDoubleConsume is not that shadow: it is enabled only at            *)
-(* pc = NTasks + 1, i.e. on a COMPLETED run, which is the sequential       *)
-(* stray-redelivery mechanism the probed plane refuses.                    *)
-(*                                                                         *)
-(* This module carries the two clauses as separate invariants and adds     *)
-(* the lost-update mechanism the measurement exhibits:                     *)
-(*                                                                         *)
-(*   FaultConcurrentConsume  a second racer read `waiting` before the      *)
-(*                           first racer's write cleared it, and consumes  *)
-(*                           the same live interrupt. Bounded to one       *)
-(*                           extra racer (raceUsed), which is exactly the  *)
-(*                           two-racer shape probe 159 measures. The       *)
-(*                           racer is served its OWN value (FD intact,     *)
-(*                           as measured) and appends no checkpoint (the   *)
-(*                           duplicate is invisible in framework state,    *)
-(*                           as measured).                                 *)
-(*                                                                         *)
-(*   FaultRaceEffect         whether the second consumption also fires     *)
-(*                           the gated effect. FALSE models an idempotent  *)
-(*                           gate whose effect is served from the durable  *)
-(*                           record; TRUE is the measured probe-159 shape. *)
-(*                                                                         *)
-(* The separation this module establishes:                                 *)
-(*                                                                         *)
-(*   C1 (FaultConcurrentConsume, ~FaultRaceEffect) violates CO-c while     *)
-(*   EO, PC, FD, CV, CO-e, and RD all hold over the entire reachable       *)
-(*   state space. Hence CO-c is independent of the conjunction of the      *)
-(*   other five properties AND of CO-e -- the dependence Proposition       *)
-(*   2(iv) reports holds for CO-e only.                                    *)
-(*                                                                         *)
-(* All invariant formulas other than the two CO clauses are                *)
-(* character-identical to ResumeContract.tla, so a "holds" cell here       *)
-(* concerns the same property.                                             *)
-(***************************************************************************)
+
 EXTENDS Naturals, Sequences
 
 CONSTANTS
-  NTasks,            \* number of tasks (e.g. 3)
-  IP,                \* index of the interrupt-gated task (e.g. 2)
-  Values,            \* resume-value domain (e.g. {"va","vb"})
-  NoVal,             \* model value: no resume value consumed yet
-  MaxResumes,        \* bound on resumes targeted at the interrupt ckpt
-  MaxCrashes,        \* bound on crash events
-  MaxExtraResumes,   \* bound on post-completion stray resumes
+  NTasks,
+  IP,
+  Values,
+  NoVal,
+  MaxResumes,
+  MaxCrashes,
+  MaxExtraResumes,
   FaultConcurrentConsume,
   FaultRaceEffect
 
@@ -77,8 +23,8 @@ Tasks == 1..NTasks
 VARIABLES
   pc, effects, ckpts, frontier, waiting, consumedVal,
   forkVals, forkOuts, crashes, recHist, extraResumes, pcRegress,
-  consumeCount,  \* number of resumes that CONSUMED the interrupt (CO-c)
-  raceUsed       \* TRUE once the single modeled extra racer has run
+  consumeCount,
+  raceUsed
 
 vars == << pc, effects, ckpts, frontier, waiting, consumedVal,
            forkVals, forkOuts, crashes, recHist, extraResumes, pcRegress,
@@ -139,12 +85,7 @@ Consume(v) ==
   /\ forkOuts'     = Append(forkOuts, f(v))
   /\ UNCHANGED << crashes, recHist, extraResumes, pcRegress, raceUsed >>
 
-(* The lost update. A second OS process read `waiting` = TRUE before the   *)
-(* first process's clearing write landed, and proceeds to consume the same *)
-(* live parked interrupt. Control state is already past the gate, so pc,   *)
-(* frontier and the durable log are untouched: the duplicate is invisible  *)
-(* in framework state, which is what probe 159 measures. The racer is      *)
-(* served its own value, so FD is untouched -- also as measured.           *)
+
 RaceConsume(v) ==
   /\ FaultConcurrentConsume
   /\ ~raceUsed
@@ -215,15 +156,15 @@ TypeOK ==
   /\ consumeCount \in Nat
   /\ raceUsed \in BOOLEAN
 
-EffectExactlyOnce   == \A t \in Tasks : effects[t] <= 1                 \* EO
-PrefixConsistency   == ~pcRegress                                       \* PC
+EffectExactlyOnce   == \A t \in Tasks : effects[t] <= 1
+PrefixConsistency   == ~pcRegress
 ForkDeterminism     == \A k \in 1..Len(forkOuts) :
-                          forkOuts[k] = f(forkVals[k])                  \* FD
-CheckpointValidity  == \A k \in 1..Len(ckpts) : ckpts[k].valid          \* CV
-ConsumeOnceEffect   == effects[IP] <= 1                                 \* CO-e
-ConsumeOnceCount    == consumeCount <= 1                                \* CO-c
+                          forkOuts[k] = f(forkVals[k])
+CheckpointValidity  == \A k \in 1..Len(ckpts) : ckpts[k].valid
+ConsumeOnceEffect   == effects[IP] <= 1
+ConsumeOnceCount    == consumeCount <= 1
 RecoveryDeterminism == \A i, j \in 1..Len(recHist) :
                           recHist[i].dur = recHist[j].dur
-                            => recHist[i].dec = recHist[j].dec          \* RD
+                            => recHist[i].dec = recHist[j].dec
 
 ===============================================================================

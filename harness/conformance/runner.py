@@ -1,20 +1,3 @@
-"""Conformance matrix runner.
-
-Executes each probe in matrix.toml inside its pinned uv environment
-(envs/<env>/), captures the probe's JSON verdict from stdout, and audits it
-against the committed baseline. Only *stable* fields are compared: violation
-verdicts, effect/execution counters, counter arithmetic, and package
-versions. Volatile fields (UUIDs, timestamped checkpoint filenames,
-tracebacks) are excluded by design, so the audit is deterministic.
-
-Usage:
-  uv run python -m conformance.runner --plan matrix.toml \\
-      --baseline results/pilot [--update]
-
-Exit status: 0 iff every probe ran and every stable field matches its
-baseline (or --update rewrote the baselines).
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -101,27 +84,17 @@ def run_probe(env: str, script: str) -> dict:
         "uv", "run", "--project", str(ROOT / "envs" / env),
         "python", str(ROOT / script),
     ]
-    # Inherit the full invoking environment (API keys for live probes,
-    # proxies, locale) and only ADD the telemetry opt-outs. An earlier
-    # version passed a minimal env dict, which silently stripped exported
-    # API keys and made live probes self-skip even on keyed shells.
+
     env = dict(subprocess.os.environ)
     env.setdefault("CREWAI_DISABLE_TELEMETRY", "true")
     env.setdefault("OTEL_SDK_DISABLED", "true")
     proc = subprocess.run(
         cmd, cwd=ROOT, capture_output=True, text=True, timeout=900, env=env,
     )
-    # Probes emit human-readable progress before their JSON document, and
-    # that progress may itself contain braces -- probe 171 prints Python dict
-    # reprs of its predicted/observed pairs, whose single quotes are not JSON.
-    # Taking the first "{" in stdout and parsing to EOF therefore fails on any
-    # probe whose prose mentions a brace, and fails LATE, mid-audit. Scan every
-    # candidate offset instead and accept the first that actually decodes,
-    # which is the earliest well-formed document and so the outermost one when
-    # objects nest. Trailing prose after the document is tolerated because
-    # raw_decode stops at the closing brace rather than requiring EOF.
+
     out = proc.stdout
     dec = json.JSONDecoder()
+
     for i, ch in enumerate(out):
         if ch != "{":
             continue
@@ -150,11 +123,7 @@ def main() -> int:
     basedir = ROOT / args.baseline
     basedir.mkdir(parents=True, exist_ok=True)
 
-    # Validate the whole plan before executing any of it. A missing key used
-    # to surface as a bare KeyError partway through the run, after minutes of
-    # probe execution and with no indication of which entry was malformed --
-    # and, because the crash came late, the entries after it were silently
-    # never audited at all. Report every offender at once, up front.
+
     malformed = []
     for i, probe in enumerate(plan["probe"]):
         gaps = [k for k in ("id", "env", "script") if k not in probe]

@@ -1,13 +1,13 @@
 TLC2 Version 2026.04.09.014118 (rev: 389440f)
-Running breadth-first search Model-Checking with fp 110 and seed 2651563558485029031 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 19008] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 18 and seed 4281220346473937570 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 62015] (Linux 6.8.0-137-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/R11_ConsumeCount.tla
-Parsing file /tmp/tlc-8046605276233150895/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-8046605276233150895/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-8046605276233150895/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-8046605276233150895/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-8046605276233150895/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
-Parsing file /tmp/tlc-8046605276233150895/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-8046605276233150895/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-12176404181868214422/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-12176404181868214422/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-12176404181868214422/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-12176404181868214422/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-12176404181868214422/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-12176404181868214422/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-12176404181868214422/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
@@ -19,9 +19,9 @@ Semantic processing of module R11_ConsumeCount
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module R11_ConsumeCount
-Starting... (2026-07-31 13:04:22)
+Starting... (2026-08-06 23:32:06)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-07-31 13:04:22.
+Finished computing initial states: 1 distinct state generated at 2026-08-06 23:32:07.
 Error: Invariant ConsumeOnceCount is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -40,7 +40,7 @@ State 1: <Initial predicate>
 /\ recHist = <<>>
 /\ raceUsed = FALSE
 
-State 2: <ExecTask line 108, col 3 to line 117, col 75 of module R11_ConsumeCount>
+State 2: <ExecTask line 54, col 3 to line 63, col 75 of module R11_ConsumeCount>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -56,7 +56,7 @@ State 2: <ExecTask line 108, col 3 to line 117, col 75 of module R11_ConsumeCoun
 /\ recHist = <<>>
 /\ raceUsed = FALSE
 
-State 3: <EmitInterrupt line 120, col 3 to line 126, col 43 of module R11_ConsumeCount>
+State 3: <EmitInterrupt line 66, col 3 to line 72, col 43 of module R11_ConsumeCount>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -72,7 +72,7 @@ State 3: <EmitInterrupt line 120, col 3 to line 126, col 43 of module R11_Consum
 /\ recHist = <<>>
 /\ raceUsed = FALSE
 
-State 4: <Consume(va) line 129, col 3 to line 140, col 72 of module R11_ConsumeCount>
+State 4: <Consume(va) line 75, col 3 to line 86, col 72 of module R11_ConsumeCount>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -88,7 +88,7 @@ State 4: <Consume(va) line 129, col 3 to line 140, col 72 of module R11_ConsumeC
 /\ recHist = <<>>
 /\ raceUsed = FALSE
 
-State 5: <RaceConsume(va) line 149, col 3 to line 162, col 62 of module R11_ConsumeCount>
+State 5: <RaceConsume(va) line 90, col 3 to line 103, col 62 of module R11_ConsumeCount>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -106,5 +106,5 @@ State 5: <RaceConsume(va) line 149, col 3 to line 162, col 62 of module R11_Cons
 
 9 states generated, 9 distinct states found, 3 states left on queue.
 The depth of the complete state graph search is 5.
-Finished in 00s at (2026-07-31 13:04:23)
-Trace exploration spec path: ./R11_ConsumeCount_TTrace_1785485062.tla
+Finished in 00s at (2026-08-06 23:32:07)
+Trace exploration spec path: ./R11_ConsumeCount_TTrace_1786041126.tla
