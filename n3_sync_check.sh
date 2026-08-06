@@ -23,7 +23,7 @@ extract "$LIB" | sed 's/[[:space:]]*$//' > "$A"
 extract "$VER" | sed '/VERUS-ONLY-BEGIN/,/VERUS-ONLY-END/d' \
                | sed 's/[[:space:]]*$//' > "$B"
 
-[[ -s "$A" && -s "$B" ]] || { echo "ERROR: core-body markers not found in one of the files (run n3_adopt.py first)"; exit 2; }
+[[ -s "$A" && -s "$B" ]] || { echo "ERROR: core-body markers not found in one of the files (the N3-CORE-BODY-BEGIN/END comments must delimit the core in BOTH files; see header)"; exit 2; }
 
 if diff -u "$A" "$B" > /tmp/n3_core.diff; then
   echo "IDENTICAL: lib.rs recover_core body == verified exec body (outside proof blocks)."

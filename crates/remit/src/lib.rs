@@ -62,9 +62,9 @@ pub fn recover(log: &[CheckpointRecord]) -> Decision {
 }
 
 fn recover_core(tasks: &[u32]) -> u32 {
+    // N3-CORE-BODY-BEGIN
     let mut f: u32 = 0;
     let mut i: usize = 0;
-
     while i < tasks.len()
     {
         let t = tasks[i];
@@ -73,8 +73,8 @@ fn recover_core(tasks: &[u32]) -> u32 {
         }
         i = i + 1;
     }
-
     f + 1
+    // N3-CORE-BODY-END
 }
 
 pub struct Remit<V: CheckpointValidator> {
