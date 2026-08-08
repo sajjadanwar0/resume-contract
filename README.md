@@ -1,19 +1,26 @@
 # resume-contract
 
 **Resume Means Resume: a conformance contract for checkpoint / interrupt /
-resume semantics in LLM-agent frameworks.**
+resume semantics in workflow persistence layers.**
 
-Six properties over the framework resume plane -- PC prefix consistency,
+Artifact for the paper *Resume Means Resume: A Machine-Checked Conformance
+Contract for Checkpoint, Interrupt, and Resume Semantics in Workflow
+Persistence Layers* (under review, ACM TOSEM, 2026).
+
+Six properties over the framework resume plane -- PC prefix continuation,
 EO effect exactly-once, FD fork determinism, CV checkpoint validity,
 CO consume-once, RD recovery determinism -- with (i) a machine-checked
 TLA+ model (TLC: reference and liveness configs clean on all six
 invariants; five single-fault configs each yield exactly the targeted
-counterexample; a two-config LangGraph-fork submodel), (ii) a
+counterexample; a two-config LangGraph-fork submodel; a consume-count
+companion, `R11_ConsumeCount.tla`; a per-invariant independence matrix;
+and the reference conjunction TLAPS-proved unbounded -- 196 obligations,
+zero failed, receipt under `formal/tla/tlaps/`), (ii) a
 deterministic, LLM-free, timing-free conformance harness spanning
-LangGraph, LlamaIndex Workflows, CrewAI, pydantic-graph, and the OpenAI
-Agents SDK at pinned releases, plus key-gated live cells and a
-release sweep across prior and post-pin framework versions
-(`results/sweep/`), and (iii) `remit`, the reference resume sequencer /
+LangGraph, LlamaIndex Workflows, CrewAI, AutoGen AgentChat, and
+pydantic-graph at pinned releases, plus key-gated live cells, cross-host
+race replication over a networked PostgreSQL server, and a release sweep
+across prior and post-pin framework versions (`results/sweep/`), and (iii) `remit`, the reference resume sequencer /
 effect ledger: a fully discharged Verus suite (35 spec-mode + 18
 exec-mode items, 0 errors; falsifiability certificates under
 `crates/remit/proof/negative/`), with the verified executable recover
@@ -24,11 +31,14 @@ core line-identical to the shipped Rust (`n3_sync_check.sh`, CI-gated).
 The repair artifact is published on PyPI:
 
 ```bash
-pip install remit-contract        # v0.1.0 = the exact build evaluated in the paper
+pip install remit-contract        # v0.1.2 = current build
 ```
 
-Prebuilt `abi3` wheel for CPython >= 3.9 on x86_64 manylinux2014; source
-distribution everywhere else. Published artifacts, sha256:
+v0.1.0 is the baseline build evaluated in the paper's main matrix; v0.1.2
+adds the opt-in cross-process consumption gate (default off) evaluated in
+the paper's cross-process sections. Prebuilt `abi3` wheel for
+CPython >= 3.9 on x86_64 manylinux2014; source distribution everywhere
+else. Published v0.1.0 artifacts, sha256:
 
 ```
 2aed2cbfc56e1725fbb0ac98a665d23058d518544642309d223759d0746fc58d  wheel
@@ -66,13 +76,18 @@ harness/conformance/       runner.py: executes matrix.toml through the env
                            projects, audits stable verdict fields vs
                            committed baselines
 matrix.toml                probe -> env plan
-probes/                    numbered probes, verbatim receipts (113..152;
-                           `_wip` marks unfinished templates)
-formal/tla/                ResumeContract.tla + LangGraphFork.tla and the
-                           TLC configurations reproduce.sh drives
+probes/                    numbered probes, verbatim receipts (113..174;
+                           exp* = experiment drivers, mutants.json = the
+                           harness-mutation operator manifest)
+formal/tla/                ResumeContract.tla, R11_ConsumeCount.tla,
+                           LangGraphFork.tla, IndCheck.tla, the TLC
+                           configurations reproduce.sh drives, the
+                           independence-matrix receipts, and tlaps/
+                           (ResumeContractProofs.tla + discharge receipt)
 results/                   committed evidence, one subdirectory per
                            campaign (pilot, matrix, live, regression,
-                           revision, r12, sweep, tla, ...), with
+                           revision, r12, sweep, tla, engines, mutation,
+                           multiproc, oracle, parkkill, sigkill), with
                            generated manifests
 sweep_nonlg.sh             release sweep of the non-LangGraph headline
                            cells (back- and forward-versions; receipts +
@@ -119,7 +134,8 @@ repository is a deployable service.
 ## Step-by-step setup
 
 ```bash
-git clone https://github.com/sajjadanwar0/resume-contract
+# anonymized review mirror (download the repository archive and unpack):
+#   https://anonymous.4open.science/r/resume-contract-CD2E
 cd resume-contract
 
 make setup            # uv sync for the root project and every matrix cell
