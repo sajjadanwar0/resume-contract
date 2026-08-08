@@ -5,7 +5,7 @@ resume semantics in workflow persistence layers.**
 
 Artifact for the paper *Resume Means Resume: A Machine-Checked Conformance
 Contract for Checkpoint, Interrupt, and Resume Semantics in Workflow
-Persistence Layers* (under review, ACM TOSEM, 2026).
+Persistence Layers*.
 
 Six properties over the framework resume plane -- PC prefix continuation,
 EO effect exactly-once, FD fork determinism, CV checkpoint validity,
