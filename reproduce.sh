@@ -1,55 +1,10 @@
 #!/usr/bin/env bash
-###############################################################################
-# reproduce.sh -- single-command audit for the Resume Contract artifact.
-#
-# Re-derives every headline number in the paper from committed inputs:
-#   [1] TLC verification matrix (Table 2 + Prop. 2 witnesses): R0 reference and
-#       R6 liveness = no error; R1-R5 = counterexample for exactly the targeted
-#       invariant; LGF_* = the fork model as implemented vs. keyed; SEP_* = the
-#       three conjunction-independence witnesses (R10_Separations.tla).
-#   [2] Committed matrix receipts, verified without re-running: the 39-cell
-#       per-invariant fault matrix (161, reference and R8 bounds) and the
-#       28-cell separations matrix (162). Seconds; the runs themselves are
-#       minutes and hours respectively, so this step audits their JSON.
-#   [3] Conformance plan (matrix.toml): every planned probe re-run inside its
-#       pinned per-framework env; stable verdict fields diffed against the
-#       committed baselines (live-keyed probes skip without API keys).
-#   [2c] IndCheck inductive-invariant matrix: Inv is checked INDUCTIVE (every
-#       invariant-state taken as an initial state, every successor checked --
-#       stronger than reachability, since it quantifies over unreachable
-#       states too) at three constant sets between which each of the six
-#       configuration bounds varies. Audits the committed receipt; --scaled
-#       re-runs all three (~5 min, R2 dominates).
-#   [0] Structural: every probe number the paper cites exists in the artifact
-#       (probe_inventory_gate.sh). Skipped, not failed, when the paper is not
-#       in the tree -- the artifact is distributable without it.
-#   [4] Remit skeleton invariants: cargo test (seven property-named tests).
-#   [5] Remit Verus proofs: every positive target must discharge with
-#       0 errors; every negative certificate must fail in exactly the
-#       expected shape (2 verified, 1 errors).
-# Modes:
-#   ./reproduce.sh            full audit ([1]..[5]); syncs envs on demand
-#   ./reproduce.sh --tlc-only [1]+[2] only (no Python env setup, no Rust)
+# Usage:
+#   ./reproduce.sh            full audit; syncs envs on demand
+#   ./reproduce.sh --tlc-only (no Python env setup, no Rust)
 #   ./reproduce.sh --scaled   re-runs 161 (both bound sets) and 162 first,
-#                             then [1]+[2] -- hours, not minutes
-#
-# WORKER COUNT IS LOAD-BEARING. TLC runs below are pinned to -workers 1. At
-# reference bounds this costs nothing; at scale it is the difference between a
-# reproducible receipt and an unstable one. Measured 2026-07-25: the R8 fork
-# fault reports a 9-state trace under 16 workers and an 8-state trace under
-# one, the longer trace carrying a CrashRecover step the shorter reaches the
-# same violation without -- parallel breadth-first search returns non-minimal
-# witnesses once levels stop draining before workers race ahead. Verdicts are
-# worker-invariant; depths are not. Every depth this artifact reports, and
-# every depth the paper cites, is a single-worker depth.
-#
-# TLC location (first match wins; shell aliases do not reach scripts):
-#   $TLC_CMD | $TLA_TOOLS_JAR | formal/tla/tla2tools.jar |
-#   $HOME/tla2tools.jar | download to $HOME.
-#
-# Requirements: uv >= 0.4, Java >= 11, Rust stable (cargo), network on first
-# run (env resolution; jar download if absent everywhere).
-###############################################################################
+#                             take hours, not minutes
+
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -75,12 +30,10 @@ resolve_tlc () {
       https://github.com/tlaplus/tlaplus/releases/latest/download/tla2tools.jar
     jar="$HOME/tla2tools.jar"
   fi
-  # jar path is made absolute: TLC runs from formal/tla below.
   case "$jar" in /*) : ;; *) jar="$PWD/$jar" ;; esac
   echo "java -XX:+UseParallelGC -cp $jar tlc2.TLC"
 }
 
-# ------------------------------------------------- [0] optional re-derive ---
 if [[ $SCALED -eq 1 ]]; then
   note "[--scaled] re-running the matrices before auditing their receipts"
   bash 162_separations_matrix.sh . || fail=1
@@ -137,7 +90,6 @@ for cfg in R0_reference R1_replay R2_forkignore R3_invalidpersist \
 done
 
 note "[1b] single-worker minimal counterexample depths"
-
 declare -A DEPTH_SPEC=(
   [R8_fork]="R8_scale_forkfault.cfg|ForkDeterminism|8"
   [R8_dc]="independence_r8/IX8_doubleconsume__ConsumeOnce.cfg|ConsumeOnce|13"
@@ -530,12 +482,66 @@ if m.get("matrix_audit") != "pass":
 sys.exit(rc)
 PYIND
 
+note "[2d/6] TLAPS reference-conjunction discharge (unbounded)"
+if grep -q "OMITTED" formal/tla/ResumeContractProofs.tla 2>/dev/null; then
+  echo "  FAIL -- OMITTED proof steps in ResumeContractProofs.tla"; fail=1
+elif [[ ! -f formal/tla/ResumeContractProofs.tla ]]; then
+  echo "  FAIL -- formal/tla/ResumeContractProofs.tla missing"; fail=1
+else
+  echo "  proofs file: OK (no OMITTED steps)"
+fi
+python3 - << 'PYTLAPS' || fail=1
+import hashlib, json, os, sys
+p = "formal/tla/tlaps/tlaps_receipt.json"
+if not os.path.exists(p):
+    print(f"  FAIL -- no receipt at {p} "
+          "(re-derive: ./175_tlaps_reference_conjunction.sh .)")
+    sys.exit(1)
+r = json.load(open(p))
+rc = 0
+if r.get("obligations_failed") != 0:
+    print(f"  FAIL -- receipt records failed obligations: "
+          f"{r.get('obligations_failed')}"); rc = 1
+if r.get("obligations_proved") != 196:
+    print(f"  FAIL -- expected 196 obligations proved, receipt says "
+          f"{r.get('obligations_proved')}"); rc = 1
+def sha(fp):
+    return hashlib.sha256(open(fp, "rb").read()).hexdigest()
+if r.get("spec_sha256") != sha("formal/tla/ResumeContract.tla"):
+    print("  FAIL -- receipt spec_sha256 does not match the live "
+          "ResumeContract.tla: the proved module differs from the "
+          "committed spec"); rc = 1
+if r.get("proofs_sha256") != sha("formal/tla/ResumeContractProofs.tla"):
+    print("  FAIL -- receipt proofs_sha256 does not match the live "
+          "ResumeContractProofs.tla"); rc = 1
+if rc == 0:
+    print(f"  receipt: OK (196 proved / 0 failed; tlapm "
+          f"{r.get('tlapm_version')}; spec and proofs SHA-256 match "
+          "the live files)")
+sys.exit(rc)
+PYTLAPS
+TLAPM_BIN="${TLAPM_CMD:-$(command -v tlapm || true)}"
+if [[ -n "$TLAPM_BIN" ]]; then
+  echo "  re-discharging with $($TLAPM_BIN --version 2>&1 | head -1) ..."
+  if (cd formal/tla && "$TLAPM_BIN" --cleanfp -I . ResumeContractProofs.tla) \
+       > /tmp/tlapm_audit.log 2>&1 \
+     && grep -q "All 196 obligations proved" /tmp/tlapm_audit.log; then
+    echo "  tlapm: OK (All 196 obligations proved; log /tmp/tlapm_audit.log)"
+  else
+    echo "  tlapm: FAIL -- see /tmp/tlapm_audit.log"; fail=1
+  fi
+else
+  echo "  tlapm not on PATH -- SKIP re-discharge (receipt integrity verified"
+  echo "  above; the spec-SHA link makes a stale receipt fail loudly)."
+  echo "  Install: https://github.com/tlaplus/tlapm/releases, then re-run,"
+  echo "  or set TLAPM_CMD=/path/to/tlapm."
+fi
+
 if [[ $TLC_ONLY -eq 1 ]]; then
   [[ $fail -eq 0 ]] && echo "TLC-only audit: CLEAN" || echo "TLC-only audit: FAILED"
   exit $fail
 fi
 
-# -------------------------------------------------- [3] conformance plan ---
 note "[3/6] Conformance plan (matrix.toml vs committed baselines)"
 uv sync --quiet
 
@@ -546,7 +552,6 @@ done
 uv run python -m conformance.runner \
   --plan matrix.toml --baseline results/pilot || fail=1
 
-# --------------------------------------------------------- [4] Remit tests ---
 note "[4/6] Remit invariants + line-identical core (cargo test + n3 gate)"
 
 if command -v cargo >/dev/null 2>&1; then
