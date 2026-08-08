@@ -28,7 +28,6 @@ TypeOKS ==
   /\ forkOuts     \in Seq({f(v) : v \in Values})
   /\ recHist      \in Seq(RecRec)
 
-
 Inv ==
   /\ TypeOKS
   /\ frontier = pc - 1
@@ -81,7 +80,6 @@ THEOREM RefSafety == ASSUME Reference PROVE Spec => []ContractConjunction
 <1>3. Spec => []Inv                      BY <1>1, <1>2, PTL DEF Spec
 <1>4. Inv => ContractConjunction         BY Sufficiency
 <1>5. QED                                BY <1>3, <1>4, PTL
-
 
 THEOREM ConsumeOnceFromEO ==
   ASSUME IP \in Tasks, EffectExactlyOnce PROVE ConsumeOnce

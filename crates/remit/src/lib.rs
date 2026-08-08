@@ -202,7 +202,7 @@ mod tests {
         let root = BranchKey::root();
 
         r.begin_effect(&root, 1, "s1").unwrap();
-        counter += 1; // s1 effect
+        counter += 1;
         r.commit_checkpoint(&root, 1, b"counter=1").unwrap();
         let d = recover(r.checkpoints());
         assert_eq!(d, Decision::SkipTo(2));
@@ -239,7 +239,7 @@ mod tests {
         
         assert_ne!(b1, b2);
         assert_eq!(r.outcome(&b1), Some("va"));
-        assert_eq!(r.outcome(&b2), Some("vb")); // never b1's outcome (#6663)
+        assert_eq!(r.outcome(&b2), Some("vb"));
     }
 
     #[test]

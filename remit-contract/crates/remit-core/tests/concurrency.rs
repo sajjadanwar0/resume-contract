@@ -1,12 +1,3 @@
-//! Concurrent stress suite.
-//!
-//! The reviewer objection this file answers: "concurrency anomalies are the
-//! primary failure mode of state coordination mechanisms; a single-threaded
-//! evaluation is unacceptable." Every test hammers `RemitCore` from many OS
-//! threads through the same entry points the PyO3 surface exposes, then
-//! re-checks the contract invariants on the resulting state.
-//!
-//! Set REMIT_STRESS_THREADS / REMIT_STRESS_OPS to scale the load.
 
 use remit_core::*;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -17,9 +8,6 @@ fn envn(var: &str, default: usize) -> usize {
     std::env::var(var).ok().and_then(|v| v.parse().ok()).unwrap_or(default)
 }
 
-/// EO under contention: T threads race to fire the same (branch, task)
-/// effect; exactly one admission succeeds, the ledger holds exactly one
-/// record, and the effect counter — the paper's oracle — reads exactly 1.
 #[test]
 fn eo_admission_is_exactly_once_under_contention() {
     let threads = envn("REMIT_STRESS_THREADS", 32);
@@ -48,9 +36,6 @@ fn eo_admission_is_exactly_once_under_contention() {
     core.with_plane("t", |p| assert_eq!(p.ledger().len(), 1));
 }
 
-/// FD under contention: T threads concurrently fork the same interrupt
-/// checkpoint with distinct values; every branch key is distinct, every
-/// outcome equals its supplied value, and ordinals form a contiguous range.
 #[test]
 fn fd_concurrent_forks_get_distinct_branches_and_correct_outcomes() {
     let threads = envn("REMIT_STRESS_THREADS", 32);
@@ -83,9 +68,6 @@ fn fd_concurrent_forks_get_distinct_branches_and_correct_outcomes() {
     assert_eq!(ordinals, expect, "FD: ordinals must be a contiguous, gap-free range");
 }
 
-/// Sequencer under contention: T threads x K ops journal persistence
-/// submissions; the journal's seq numbers are strictly increasing and
-/// gap-free, i.e. the plane's durable order is total.
 #[test]
 fn sequencer_total_order_is_gap_free_under_contention() {
     let threads = envn("REMIT_STRESS_THREADS", 16);
@@ -118,8 +100,6 @@ fn sequencer_total_order_is_gap_free_under_contention() {
     });
 }
 
-/// CO under contention: after consumption, T racing ordinary-address resumes
-/// are all inert; the gated effect count stays at 1.
 #[test]
 fn co_racing_stray_resumes_are_inert() {
     let threads = envn("REMIT_STRESS_THREADS", 32);
@@ -152,8 +132,6 @@ fn co_racing_stray_resumes_are_inert() {
     core.with_plane("t", |p| assert_eq!(p.ledger().len(), 1));
 }
 
-/// Cross-plane isolation: threads working distinct thread ids never observe
-/// each other's ledgers or frontiers.
 #[test]
 fn planes_are_isolated_per_thread_id() {
     let threads = envn("REMIT_STRESS_THREADS", 16);

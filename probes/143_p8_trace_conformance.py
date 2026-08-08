@@ -1,27 +1,4 @@
 #!/usr/bin/env python3
-"""
-143_p8_trace_conformance.py
-Answers "you verified your transcription, not the framework" with the
-strongest mechanical evidence short of extraction: RUNTIME TRACE
-CONFORMANCE. The LGF model of Sec. 4.3 (recorded-resume precedence at
-task preparation; incoming value otherwise; under the fork-intent filter,
-recorded resume writes invisible at explicit-checkpoint loads) is
-transliterated into ~20 lines of Python. Real executions are then run
-with an instrumented saver that logs the durable resume-write trace and
-the address kind of every load; the model consumes ONLY that trace plus
-the driver-supplied values and must predict the measured branch outcome
-of every invocation.
-
-Protocols checked (every invocation asserted):
-  P1 stock saver, bare fork, second value different   (LGF-A behavior)
-  P2 fork-intent shim, bare fork                      (LGF-B behavior)
-  P3 fork-intent shim, same-value re-fork
-  P4 stock saver, stray resume at the ordinary address after completion
-Verdict: all_invocations_conform -- model-predicted == measured for each.
-This checks the recorded executions are behaviors of the transliterated
-model; it is evidence for the mapping, not a refinement proof, and the
-paper says so.
-"""
 import json
 import sqlite3
 import tempfile
@@ -33,8 +10,7 @@ from langgraph.types import interrupt, Command
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 RESUME_CHANNEL = "__resume__"
-NULL_TASK = ""  # null-task writes carry empty-string task id in the writes table
-
+NULL_TASK = ""
 
 class TraceSaver(SqliteSaver):
     """Logs, per get_tuple load: address kind + the task-recorded resume
@@ -76,7 +52,6 @@ class TraceSaver(SqliteSaver):
             return bool(next(iter(val.values())))
         return bool(val)
 
-
 def model_predict(load_event, incoming, open_task, persisted):
     """The transliterated LGF rules. Inertness: if the loaded thread has
     no open task (public state API: get_state().next is empty), the
@@ -91,10 +66,8 @@ def model_predict(load_event, incoming, open_task, persisted):
     _, _, visible = load_event
     return visible[0] if visible else incoming
 
-
 class S(TypedDict):
     value: int
-
 
 def build(shim, log, path):
     conn = sqlite3.connect(path, check_same_thread=False)
@@ -107,7 +80,6 @@ def build(shim, log, path):
     return (StateGraph(S).add_node("node", node)
             .add_edge(START, "node").add_edge("node", END)
             .compile(checkpointer=saver))
-
 
 def run_protocol(name, shim, invocations):
     """invocations: list of (address_kind, value or None). First entry is
@@ -138,7 +110,6 @@ def run_protocol(name, shim, invocations):
     return {"protocol": name, "shim": shim, "invocations": pairs,
             "trace_events": len(log)}
 
-
 def main():
     protocols = [
         run_protocol("p1_stock_fork", False,
@@ -157,7 +128,6 @@ def main():
         "invocations_checked": sum(len(p["invocations"]) for p in protocols),
         "all_invocations_conform": all_ok,
     }, indent=2))
-
 
 if __name__ == "__main__":
     main()

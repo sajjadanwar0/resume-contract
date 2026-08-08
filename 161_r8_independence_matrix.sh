@@ -1,38 +1,5 @@
 #!/usr/bin/env bash
-# 161_r8_independence_matrix.sh -- per-invariant TLC fault matrix AT THE R8
-# SCALED BOUNDS (and, for self-validation, at the reference bounds).
-# ===========================================================================
-# Both reviews attack the same cell: Table tab:ix's "holds over the entire
-# reachable state space" separations are certified only at the reference
-# bounds (N=3, IP=2), because R8-F re-checks only ForkDeterminism at scale.
-# This script closes that cell: every fault model x every invariant at the
-# R8 constants (NTasks=10, IP=5, |Values|=4, MaxResumes=5, MaxCrashes=4,
-# MaxExtraResumes=4), plus the R7 StateRebuild module scaled to NTasks=10.
-#   * "holds" cells = full exploration of the faulty model's reachable space
-#     at the scaled constants (hours of compute total on a 16-core host),
-#     run with all workers;
-#   * "violated" cells = BFS counterexample, re-run with -workers 1. This is
-#     NOT belt-and-braces: at R8 scale parallel search returns non-minimal
-#     witnesses. Measured 2026-07-25 on IX8_forkignore__ForkDeterminism --
-#     16 workers reported a 9-state trace carrying a CrashRecover step that
-#     the 8-state single-worker trace reaches the same violation without.
-#     Verdicts are worker-invariant; depths are not, once levels stop
-#     draining before workers race ahead. Violated cells are seconds, so
-#     serializing them costs nothing and makes the depth a receipt.
-# The verdict pattern is diffed against the reference-bound footprints
-# (145_independence_matrix.sh). ANY divergence exits nonzero with a
-# FOOTPRINT-DIVERGENCE banner: that is a *finding to bring back*, not a bug.
-#
-# Usage:
-#   bash 161_r8_independence_matrix.sh [REPO_ROOT] [--bounds r8|reference] \
-#        [--only FAULT] [--resume]
-#   TLC_WORKERS=auto|N   TLC_JAVA_OPTS="-Xmx8g ..."   TLA_TOOLS_JAR=...
-# Output:
-#   REPO/formal/tla/independence_r8/  (or independence_ref_rerun/)
-#   {IX8_*.cfg, IX8_*.out, r8_matrix.json, r8_matrix.md}
-#   + a copy under REPO/results/tla/.
-# Self-validation path: `--bounds reference` must reproduce the committed
-# 145 verdict map exactly before anyone trusts an R8 run of this script.
+
 set -euo pipefail
 
 REPO="."; BOUNDS="r8"; ONLY=""; RESUME=0
@@ -44,6 +11,7 @@ while [[ $# -gt 0 ]]; do
     *)         REPO="$1";   shift   ;;
   esac
 done
+
 REPO="$(cd "$REPO" && pwd)"
 TLA_DIR="$REPO/formal/tla"
 [ -f "$TLA_DIR/ResumeContract.tla" ] || { echo "ERROR: $TLA_DIR/ResumeContract.tla not found -- pass the paper repo root"; exit 2; }
@@ -67,10 +35,10 @@ resolve_tlc () {
   fi
   echo "java $JOPTS -cp $jar tlc2.TLC"
 }
+
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC   (workers=$WORKERS, bounds=$BOUNDS)"
 
-# ---- 1. generate the 39 configs at the requested bounds ----
 python3 - "$IX_DIR" "$BOUNDS" << 'PYGEN'
 import sys, os
 ix, bounds = sys.argv[1], sys.argv[2]
@@ -135,8 +103,8 @@ for inv in ["TypeOK", "EffectExactlyOnce", "PrefixContinuation"]:
 print(f"wrote 39 configs at {bounds} bounds")
 PYGEN
 
-# ---- 2. run TLC per cell (violated cells fast; holds cells explore fully) ----
 cd "$IX_DIR"
+
 for cfg in IX8_*.cfg; do
   name="${cfg%.cfg}"
   [[ -n "$ONLY" && "$name" != IX8_${ONLY}__* ]] && continue
@@ -150,8 +118,7 @@ for cfg in IX8_*.cfg; do
   $TLC -deadlock -metadir "meta_$name" -config "$cfg" -workers "$WORKERS" \
     "../$mod.tla" > "$name.out" 2>&1 || true   # violation runs exit nonzero
   rm -rf "meta_$name"
-  # Violated cells: re-run serialized so the recorded depth is the minimal
-  # witness and reproduces across hosts (see header). Costs seconds.
+
   if grep -qE "Invariant [A-Za-z]+ is violated" "$name.out" && [[ "$WORKERS" != "1" ]]; then
     rm -rf "meta_${name}_w1"; mkdir -p "meta_${name}_w1"
     $TLC -deadlock -metadir "meta_${name}_w1" -config "$cfg" -workers 1 \
@@ -163,7 +130,6 @@ for cfg in IX8_*.cfg; do
   echo "$name :: ${v:-UNKNOWN} :: $((t1-t0))s"
 done
 
-# ---- 3. matrix + diff vs the reference-bound footprints ----
 python3 - "$IX_DIR" "$BOUNDS" << 'PYCHK'
 import sys, os, re, json, glob
 ix, bounds = sys.argv[1], sys.argv[2]

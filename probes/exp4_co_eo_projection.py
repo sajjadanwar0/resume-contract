@@ -1,32 +1,3 @@
-#!/usr/bin/env python3
-"""
-exp4_co_eo_projection.py
-========================
-Reviewer experiment 4 — "Are there really six INDEPENDENT properties, or
-five plus a corollary?"
-
-The abstract sells "six properties (... consume-once ...)". But in the model:
-
-    EffectExactlyOnce == \\A t \\in Tasks : effects[t] <= 1     (EO)
-    ConsumeOnce       == effects[IP] <= 1                       (CO)
-
-CO is EO with the universal quantifier instantiated at the single task IP.
-Therefore EO => CO is a syntactic tautology, every CO violation is an EO
-violation, and CO cannot be logically independent of EO. The paper concedes
-exactly this in Prop 2(iv) -- but Remark 1 simultaneously claims a framework
-"can satisfy CO while failing EO elsewhere (AND VICE VERSA)", and the second
-half ("satisfy EO while failing CO") is impossible under these definitions.
-That is an internal contradiction, and the abstract's "six properties" framing
-banks on the reader not noticing that one of the six is a projection of another.
-
-This script (1) extracts the two invariants straight from ResumeContract.tla
-and shows the projection, and (2) reads the committed per-invariant matrix
-receipt to confirm the one-way implication empirically:
-    DoubleConsume : CO violated  AND  EO violated      (CO fail => EO fail)
-    PrefixReplay  : EO violated  but  CO holds          (EO fail =/> CO fail)
-
-Pure standard library. Point $REPO / argv[1] at the repo root.
-"""
 import json
 import os
 import re
@@ -44,16 +15,13 @@ def find(root, rel):
             return cand
     return None
 
-
 def extract_inv(tla_text, name):
     m = re.search(name + r"\s*==\s*(.+?)(?:\n[A-Za-z]\w*\s*==|\Z)", tla_text, re.S)
     if not m:
         return None
     body = m.group(1)
-    # trim to the invariant expression (stop at a blank line / next def)
     body = body.split("\n\n")[0]
     return re.sub(r"\s+", " ", body).strip().rstrip("\\* EO CO ").strip()
-
 
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("REPO", ".")
@@ -77,7 +45,6 @@ def main():
     print("  Relationship: CO instantiates EO's \\A t at t == IP.")
     print(f"  => EO => CO is a tautology; CO is NOT independent of EO.  [{'CONFIRMED' if is_proj else 'CHECK'}]")
 
-    # Empirical one-way implication from the committed per-invariant matrix.
     mdpath = find(root, "results/tla/independence/independence_matrix.md")
 
     print()
@@ -123,7 +90,6 @@ def main():
     print("      count is five logically independent obligations + one corollary +")
     print("      one protocol obligation (FI). Prop 2 already says so; the abstract")
     print("      and intro should match it.")
-
 
 if __name__ == "__main__":
     main()

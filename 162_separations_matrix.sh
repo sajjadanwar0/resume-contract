@@ -1,34 +1,5 @@
 #!/usr/bin/env bash
-# 162_separations_matrix.sh -- conjunction-independence witnesses for RD, PC,
-# and EO (Proposition "Partial independence", clause (v)).
-# ===========================================================================
-# The reference fault set in ResumeContract.tla cannot separate RD, PC, or EO
-# from the conjunction of the other properties: nondeterministic recovery's
-# footprint is {EO, PC, CO, RD} because its replay branch re-executes the
-# prefix, and no switch isolates EO. R10_Separations.tla supplies the three
-# missing witnesses as effect-safe / control-safe variants of mechanisms the
-# study observed:
-#   regate    -- recovery re-arms the consumed gate, re-consumption served
-#                from the durable record          -> RD violated, five hold
-#   rebuild   -- deterministic restart with state from initial values,
-#                prefix effects memoized          -> PC violated, five hold
-#   redeliver -- at-least-once re-issue of the frontier task's effect,
-#                gated task excluded              -> EO violated, five hold
-# plus an all-switches-off reference cell in which all six hold (the module's
-# own sanity check).
-#
-# 4 configurations x 7 invariants (six properties + TypeOK) = 28 TLC runs,
-# each a full exploration at the reference bounds (NTasks=3, IP=2, |V|=2,
-# MaxResumes=2, MaxCrashes=2, MaxExtraResumes=1). Every cell's verdict is
-# diffed against the map established in the container on 2026-07-25
-# (OpenJDK 21, single worker); any mismatch exits nonzero.
-#
-# Usage:  bash 162_separations_matrix.sh [REPO_ROOT]
-# Output: REPO/formal/tla/separations/{SEP_*.cfg,SEP_*.out,
-#           separations_matrix.json, separations_matrix.md}
-#         and a copy under REPO/results/tla/separations/.
-# TLC:    resolved as in 145/161 ($TLC_CMD > $TLA_TOOLS_JAR > ./tla2tools.jar
-#         > $HOME/tla2tools.jar > download).
+
 set -euo pipefail
 REPO="$(cd "${1:-.}" && pwd)"
 TLA_DIR="$REPO/formal/tla"
@@ -85,7 +56,6 @@ for tag, (a, b, c) in switches.items():
 print("wrote 28 configs")
 PYGEN
 
-# ---- 2. run TLC per cell ----
 cd "$SEP_DIR"
 for cfg in SEP_*.cfg; do
   name="${cfg%.cfg}"
@@ -97,7 +67,6 @@ for cfg in SEP_*.cfg; do
     | head -1 | sed "s|^|$name :: |"
 done
 
-# ---- 3. matrix + diff against the established verdict map ----
 python3 - "$SEP_DIR" << 'PYCHK'
 import sys, os, re, json
 sep = sys.argv[1]

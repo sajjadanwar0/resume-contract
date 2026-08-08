@@ -1,28 +1,3 @@
-//! Exhaustive bounded conformance.
-//!
-//! Where `model_conformance.rs` explores the transliterated transition
-//! relation by seeded random walks, this test explores it **exhaustively**:
-//! breadth-first enumeration of the entire reachable state space of the
-//! implementation-level transition system under the reference (R0)
-//! configuration bounds --- N=3 tasks, interrupt at task 2, values
-//! {va, vb}, at most 2 fork resumes, 1 crash, 1 extra resume, plus at most
-//! 1 invalid-persist attempt --- deduplicating on the canonical serialized
-//! (core state, shadow state) pair, and re-checking all six contract
-//! invariants at **every** reachable state. This is the implementation-level
-//! analogue of TLC's exhaustive R0 run (87 states over the abstract
-//! variables): coverage of the bounded space is total, not sampled, so the
-//! "randomized harness, unknown coverage" objection does not apply at these
-//! bounds.
-//!
-//! The state count differs from TLC's 87 by design: the implementation
-//! state is finer (effect ids, journal records, branch outcome tables), so
-//! histories TLC merges remain distinct here. What is identical is the
-//! exhaustiveness claim: every state this transition system can reach under
-//! the bounds satisfies EO, PC, FD, CV, CO, and RD.
-//!
-//! Raise the bounds via REMIT_EXH_FORKS / REMIT_EXH_CRASHES /
-//! REMIT_EXH_EXTRAS / REMIT_EXH_INVALIDS to explore larger spaces (growth
-//! is combinatorial; the defaults finish in well under a second).
 
 use remit_core::*;
 use std::collections::{HashSet, VecDeque};
@@ -43,7 +18,6 @@ impl CheckpointValidator for RejectMarker {
     }
 }
 
-/// Shadow of the TLA+ variables, kept independent of the core.
 #[derive(Clone, Default)]
 struct Shadow {
     effects: std::collections::HashMap<(BranchKey, TaskId), u32>,
@@ -67,12 +41,6 @@ struct Node {
 }
 
 fn canonical_key(n: &Node) -> String {
-    // Manual canonical projection. The plane's private maps (fired,
-    // frontier, branch outcomes, interrupt records) are functions of the
-    // ordered ledger/checkpoint/journal vectors plus the shadow's consumed
-    // value and fork lists, so projecting those captures every bit of state
-    // that can influence future behavior; the Vec fields carry history
-    // order, which is part of the state by design.
     let mut eff: Vec<(String, TaskId, u32)> = n
         .sh
         .effects
@@ -116,13 +84,10 @@ fn check_invariants(p: &Plane, sh: &Shadow) {
     }
 }
 
-/// All successors of `n` under the enabled actions (deterministic per
-/// parameterized action, exactly like the TLA+ Next disjunction).
 fn successors(n: &Node, max_forks: u32, max_crashes: u32, max_extras: u32, max_invalids: u32) -> Vec<Node> {
     let root = BranchKey::root();
     let mut out = Vec::new();
 
-    // ExecTask
     {
         let next = n.pc + 1;
         let enabled = next <= N_TASKS
@@ -140,13 +105,11 @@ fn successors(n: &Node, max_forks: u32, max_crashes: u32, max_extras: u32, max_i
             out.push(m);
         }
     }
-    // EmitInterrupt
     if n.pc == 1 && !n.sh.interrupted {
         let mut m = n.clone();
         m.sh.interrupted = true;
         out.push(m);
     }
-    // Consume(v)
     if n.sh.interrupted && !n.sh.consumed {
         for v in VALUES {
             let mut m = n.clone();
@@ -161,7 +124,6 @@ fn successors(n: &Node, max_forks: u32, max_crashes: u32, max_extras: u32, max_i
             out.push(m);
         }
     }
-    // ForkResume(v)
     if n.sh.consumed && n.forks < max_forks {
         for v in VALUES {
             let mut m = n.clone();
@@ -179,7 +141,6 @@ fn successors(n: &Node, max_forks: u32, max_crashes: u32, max_extras: u32, max_i
             out.push(m);
         }
     }
-    // CrashRecover
     if n.crashes < max_crashes {
         let mut m = n.clone();
         let frontier = m.p.frontier(&root);
@@ -199,7 +160,6 @@ fn successors(n: &Node, max_forks: u32, max_crashes: u32, max_extras: u32, max_i
         m.crashes += 1;
         out.push(m);
     }
-    // ExtraResume(v)
     if n.sh.consumed && n.extras < max_extras {
         for v in VALUES {
             let mut m = n.clone();
@@ -211,7 +171,6 @@ fn successors(n: &Node, max_forks: u32, max_crashes: u32, max_extras: u32, max_i
             out.push(m);
         }
     }
-    // InvalidPersistAttempt
     if n.invalids < max_invalids {
         let mut m = n.clone();
         let attempted = m.p.frontier(&root) + 1;

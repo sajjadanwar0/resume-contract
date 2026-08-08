@@ -1,0 +1,251 @@
+{
+  "script": "166_parked_crash_matrix.sh",
+  "module": "formal/tla/ResumeContractParked.tla",
+  "utc": "2026-08-08T04:53:38+00:00",
+  "invocation": "tlc2.TLC -deadlock -config <cfg> -workers 1 ResumeContractParked.tla",
+  "audit_against": "container run 2026-07-26 (embedded)",
+  "audit_pass": true,
+  "r8": "P8_durable holds - advisory",
+  "cells": [
+    {
+      "run": "P0_durable",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "P0_volatile",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PLIVE_durable",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PLIVE_volatile",
+      "verdict": "temporal_violation",
+      "depth": "temporal",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_replay__EffectExactlyOnce",
+      "verdict": "violated",
+      "depth": "4",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_replay__PrefixConsistency",
+      "verdict": "violated",
+      "depth": "4",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_replay__ForkDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_replay__CheckpointValidity",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_replay__ConsumeOnce",
+      "verdict": "violated",
+      "depth": "7",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_replay__RecoveryDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_forkignore__EffectExactlyOnce",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_forkignore__PrefixConsistency",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_forkignore__ForkDeterminism",
+      "verdict": "violated",
+      "depth": "5",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_forkignore__CheckpointValidity",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_forkignore__ConsumeOnce",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_forkignore__RecoveryDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_invalidpersist__EffectExactlyOnce",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_invalidpersist__PrefixConsistency",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_invalidpersist__ForkDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_invalidpersist__CheckpointValidity",
+      "verdict": "violated",
+      "depth": "5",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_invalidpersist__ConsumeOnce",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_invalidpersist__RecoveryDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_nondetrec__EffectExactlyOnce",
+      "verdict": "violated",
+      "depth": "4",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_nondetrec__PrefixConsistency",
+      "verdict": "violated",
+      "depth": "4",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_nondetrec__ForkDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_nondetrec__CheckpointValidity",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_nondetrec__ConsumeOnce",
+      "verdict": "violated",
+      "depth": "6",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_nondetrec__RecoveryDeterminism",
+      "verdict": "violated",
+      "depth": "4",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_doubleconsume__EffectExactlyOnce",
+      "verdict": "violated",
+      "depth": "6",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_doubleconsume__PrefixConsistency",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_doubleconsume__ForkDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_doubleconsume__CheckpointValidity",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_doubleconsume__ConsumeOnce",
+      "verdict": "violated",
+      "depth": "6",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_doubleconsume__RecoveryDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_prefixreplay__EffectExactlyOnce",
+      "verdict": "violated",
+      "depth": "4",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_prefixreplay__PrefixConsistency",
+      "verdict": "violated",
+      "depth": "4",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_prefixreplay__ForkDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_prefixreplay__CheckpointValidity",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_prefixreplay__ConsumeOnce",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    },
+    {
+      "run": "PX_prefixreplay__RecoveryDeterminism",
+      "verdict": "holds",
+      "depth": "-",
+      "audit": "ok"
+    }
+  ]
+}

@@ -1,27 +1,3 @@
-//! Model-conformance harness.
-//!
-//! This file is `formal/tla/ResumeContract.tla`'s transition relation
-//! transliterated into an executable randomized explorer: the action
-//! alphabet is exactly the module's — ExecTask, EmitInterrupt, Consume(v),
-//! ForkResume(v), CrashRecover, ExtraResume(v) — plus the CV probe
-//! InvalidPersistAttempt, and after **every** action the six contract
-//! invariants (EO, FD, CV, CO, PC, RD) are re-checked against the core's
-//! state, mirroring how TLC checks the invariants at every reachable state
-//! of the reference configuration R0. Actions are gated by the module's
-//! enabling conditions; a disabled action is a no-op, exactly as TLC only
-//! explores enabled transitions.
-//!
-//! The harness carries its own xorshift64* PRNG so it has zero external
-//! dependencies and is bit-for-bit reproducible: every case's seed derives
-//! from REMIT_MODEL_SEED (default 0x5EED_2026) plus the case index, and a
-//! failing case prints its seed and full action trace before re-raising.
-//! Scale with REMIT_MODEL_CASES (default 512 sequences of up to 48 actions).
-//!
-//! What this does and does not establish: executable conformance of the
-//! production core to the model's transition relation under seeded
-//! randomized deep exploration. It is not a proof and is not claimed as
-//! one; the proofs live in the Verus files, and this harness is the bridge
-//! evidence between them and the shipped core.
 
 use remit_core::*;
 
@@ -76,9 +52,6 @@ impl CheckpointValidator for RejectMarker {
     }
 }
 
-/// Shadow model: the TLA+ variables, maintained independently of the core so
-/// the invariants are judged against the spec's own bookkeeping, not the
-/// implementation's.
 #[derive(Default)]
 struct Shadow {
     effects: std::collections::HashMap<(BranchKey, TaskId), u32>,
@@ -90,26 +63,19 @@ struct Shadow {
 }
 
 fn run_effect(p: &mut Plane, sh: &mut Shadow, b: &BranchKey, t: TaskId, id: &str) {
-    // The runtime under the contract only fires the effect if admission
-    // succeeds; the shadow counts what actually fired.
     if p.begin_effect(b, t, id).is_ok() {
         *sh.effects.entry((b.clone(), t)).or_insert(0) += 1;
     }
 }
 
 fn check_invariants(p: &Plane, sh: &Shadow) {
-    // EO: \A branch, t : effects[branch][t] <= 1
     for ((b, t), n) in &sh.effects {
         assert!(*n <= 1, "EO violated: effects[{b:?}][{t}] = {n}");
     }
-    // FD: \A k : forkOuts[k] = forkVals[k]
     assert_eq!(
         sh.fork_outs, sh.fork_vals,
         "FD violated: served outcomes differ from supplied values"
     );
-    // CV: rejected states never reach the durable log — every journal Put
-    // has a checkpoint record and vice versa, regardless of how many
-    // rejections were attempted.
     let puts: usize = p.journal().iter().filter(|o| o.kind == OpKind::Put).count();
     assert_eq!(
         puts,
@@ -117,21 +83,15 @@ fn check_invariants(p: &Plane, sh: &Shadow) {
         "CV bookkeeping violated: journal Puts ({puts}) != checkpoint log ({})",
         p.checkpoints().len()
     );
-    // CO: the gated task's effect count is <= 1 on the root branch even
-    // across stray/extra resumes.
     let gated = sh
         .effects
         .get(&(BranchKey::root(), INTERRUPT_TASK))
         .copied()
         .unwrap_or(0);
     assert!(gated <= 1, "CO violated: gated effect fired {gated} times on root");
-    // PC: recovery continues from the frontier — every recorded recovery
-    // decision equals SkipTo(frontier_at_recovery + 1).
     for (frontier, dec) in &sh.recoveries {
         assert_eq!(dec, &Decision::SkipTo(frontier + 1), "PC violated at recovery");
     }
-    // RD: equal durable logs -> equal decisions; functional purity and
-    // order-independence on the current log.
     let log = p.checkpoints().to_vec();
     assert_eq!(recover(&log), recover(&log), "RD violated: recover not functional");
     if log.len() >= 2 {
@@ -149,7 +109,7 @@ fn run_case(seed: u64, max_actions: usize, trace: &mut Vec<Action>) {
     let mut p = Plane::new();
     let mut sh = Shadow::default();
     let root = BranchKey::root();
-    let mut pc: TaskId = 0; // completed prefix over tasks 1..=N; interrupt point after task 1
+    let mut pc: TaskId = 0;
 
     let n_actions = 1 + (rng.below(max_actions as u64) as usize);
     for _ in 0..n_actions {
@@ -205,8 +165,6 @@ fn run_case(seed: u64, max_actions: usize, trace: &mut Vec<Action>) {
                             sh.fork_vals.push(v.to_string());
                             let out = p.outcome(&branch).unwrap_or("").to_string();
                             sh.fork_outs.push(out);
-                            // per-branch EO: the fork's gated effect fires
-                            // once on its branch; a duplicate is refused.
                             run_effect(&mut p, &mut sh, &branch, INTERRUPT_TASK, "gated");
                             run_effect(&mut p, &mut sh, &branch, INTERRUPT_TASK, "gated");
                         }
@@ -218,9 +176,6 @@ fn run_case(seed: u64, max_actions: usize, trace: &mut Vec<Action>) {
                 let frontier = p.frontier(&root);
                 let dec = recover(p.checkpoints());
                 sh.recoveries.push((frontier, dec.clone()));
-                // Replay of the prefix under memoization: every re-attempted
-                // prefix effect must be refused by the ledger (the shadow
-                // counter catches any re-fire as an EO violation).
                 for t in 1..=frontier {
                     run_effect(&mut p, &mut sh, &root, t, &format!("e{t}"));
                 }

@@ -1,32 +1,3 @@
-#!/usr/bin/env python3
-"""
-132_archaeology_retrieval.py  (rev 2, 2026-07-18)
-Candidate retrieval for the DEFERRED issue-archaeology study (paper Sec. 7).
-Produces the candidate pool only; it claims no counts and codes nothing.
-Coding requires two human raters + the codebook (archaeology/CODEBOOK.md).
-
-Usage (GITHUB_TOKEN effectively required: 30 search req/min vs 10, and the
-unauthenticated secondary limit WILL 403 partway through the 50-query frame):
-    export GITHUB_TOKEN=ghp_...
-    python3 probes/132_archaeology_retrieval.py --out archaeology/candidates.jsonl
-
-Rev 2 changes vs the run that produced the first 244-candidate pool:
-  * run-llama/workflows removed from the frame: the GitHub search API rejects
-    it with 422 ("resources do not exist or you do not have permission").
-    llama-index-workflows issue traffic is covered via run-llama/llama_index;
-    if you locate a searchable dedicated repo, add it with --repos.
-  * created:>= window (docstring promised it; query now implements it).
-  * Per-query pacing + 403/429 backoff honoring Retry-After / X-RateLimit-Reset
-    (the first run's CopilotKit 403s were the unauthenticated secondary limit).
-  A rev-2 run therefore SUPERSEDES the first pool; regenerate before coding.
-
-Retrieval frame (per protocol):
-  repos: langchain-ai/langgraph, crewAIInc/crewAI, run-llama/llama_index,
-         pydantic/pydantic-ai, CopilotKit/CopilotKit  (+ --repos extras)
-  query space: keyword hits on persistence/interrupt/resume terms
-  window: issues created --since (default 2024-01-01) .. run date
-  dedup: by issue node id; cross-linked duplicates kept, flagged
-"""
 import argparse
 import json
 import os
@@ -39,8 +10,6 @@ REPOS = [
     "langchain-ai/langgraph",
     "crewAIInc/crewAI",
     "run-llama/llama_index",
-    # "run-llama/workflows": rejected by the search API (422, unsearchable);
-    # see rev-2 note above. Add a corrected name via --repos if one exists.
     "pydantic/pydantic-ai",
     "CopilotKit/CopilotKit",
 ]
@@ -53,7 +22,6 @@ KEYWORDS = [
 SEEDS = ["6663", "6491", "6791", "6792", "7361", "7714", "8039", "2315"]
 API = "https://api.github.com/search/issues"
 TOKEN = os.environ.get("GITHUB_TOKEN")
-
 
 def gh(url, tries=4):
     for attempt in range(1, tries + 1):
@@ -73,12 +41,11 @@ def gh(url, tries=4):
                 elif reset:
                     wait = max(int(reset) - int(time.time()), 5) + 1
                 else:
-                    wait = 65  # secondary limit window
+                    wait = 65
                 print(f"[rate-limit] HTTP {e.code}; sleeping {wait}s (attempt {attempt}/{tries})")
                 time.sleep(wait)
                 continue
             raise
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -93,7 +60,7 @@ def main():
     if not TOKEN:
         print("[WARN] no GITHUB_TOKEN: 10 search req/min; the 50-query frame "
               "will crawl and may still 403. Export a token (no scopes needed).")
-    pace = 2.2 if TOKEN else 6.5  # stay under 30/min authed, 10/min unauthed
+    pace = 2.2 if TOKEN else 6.5
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     seen, rows, failures = set(), [], []
     for repo in repos:
@@ -143,7 +110,6 @@ def main():
         print("[WARN] frame INCOMPLETE: do not treat this pool as the protocol "
               "population until zero query failures.")
     print("Next: two-rater coding per archaeology/CODEBOOK.md; report kappa + CIs.")
-
 
 if __name__ == "__main__":
     main()

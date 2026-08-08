@@ -1,31 +1,10 @@
 #!/usr/bin/env python3
-"""
-113_p1_langgraph_regressions.py
-P1 - Regression liveness probe for the Resume Contract candidate (paper #5).
-
-Tests against CURRENT langgraph (unpinned install):
-  T1  (#7361)  resume from explicit checkpoint_id at interrupt -> does pre-interrupt
-               node re-execute? (resume-becomes-replay)
-  T1b control  resume with thread_id only (no checkpoint_id)
-  T2  (#6663)  two resumes from SAME (thread_id, checkpoint_id) with different
-               values -> is the second value honored (fork) or silently ignored?
-  T3  (#6792)  functional API (@task/@entrypoint), interrupt inside task ->
-               do completed tasks re-execute on resume? duplicated interrupts?
-               (sync + async variants)
-  T4  extra    interrupt consume-once: after successful resume+completion,
-               inject another Command(resume=...) on same thread -> does the
-               post-interrupt effect fire again?
-  T5  (#6491)  checkpoint validity: node output violating pydantic schema ->
-               is invalid state persisted? is history recoverable?
-
-Effect counters are process-local dicts -> observable exactly-once violations.
-Output: JSON verdict per test.
-"""
 import asyncio
 import json
 import traceback
 from typing import TypedDict, List, Annotated
 import operator
+from pydantic import BaseModel
 
 from importlib.metadata import version
 from langgraph.graph import StateGraph, START, END
@@ -35,13 +14,10 @@ from langgraph.func import entrypoint, task
 
 RESULTS = {"langgraph_version": version("langgraph")}
 
-
 def get_interrupt_checkpoint_id(app, config):
     snap = app.get_state(config)
     return snap.config["configurable"]["checkpoint_id"], snap
 
-
-# ------------------------------------------------------------------ T1 / T1b
 def t1_resume_from_checkpoint_id():
     eff = {"a": 0, "b_post": 0}
 
@@ -74,14 +50,14 @@ def t1_resume_from_checkpoint_id():
     resume_cfg = {"configurable": {"thread_id": "t1", "checkpoint_id": ckpt_id}}
     r2 = app.invoke(Command(resume="human-answer"), resume_cfg)
 
-    violation = eff["a"] != 1  # node a re-executed => resume-became-replay
+    violation = eff["a"] != 1
+
     return {
         "a_execs": eff["a"],
         "b_post_execs": eff["b_post"],
         "final": r2,
         "violation_resume_became_replay": violation,
     }
-
 
 def t1b_resume_thread_only():
     eff = {"a": 0, "b_post": 0}
@@ -109,6 +85,7 @@ def t1b_resume_thread_only():
     cfg = {"configurable": {"thread_id": "t1b"}}
     app.invoke({"val": ""}, cfg)
     r2 = app.invoke(Command(resume="ok"), cfg)
+
     return {
         "a_execs": eff["a"],
         "b_post_execs": eff["b_post"],
@@ -116,8 +93,6 @@ def t1b_resume_thread_only():
         "violation_resume_became_replay": eff["a"] != 1,
     }
 
-
-# ---------------------------------------------------------------------- T2
 def t2_fork_on_different_resume_values():
     class S(TypedDict):
         value: int
@@ -143,17 +118,14 @@ def t2_fork_on_different_resume_values():
 
     r_true = app.invoke(Command(resume=True), fork_cfg)
     r_false = app.invoke(Command(resume=False), fork_cfg)
-
-    # fork determinism expects r_true.value == 1 and r_false.value == 0
     violation = not (r_true.get("value") == 1 and r_false.get("value") == 0)
+
     return {
         "resume_true_value": r_true.get("value"),
         "resume_false_value": r_false.get("value"),
         "violation_second_resume_ignored": violation,
     }
 
-
-# ---------------------------------------------------------------------- T3
 def t3_functional_api_sync():
     eff = {"s1": 0, "s3": 0}
     ckpt = InMemorySaver()
@@ -184,6 +156,7 @@ def t3_functional_api_sync():
     r1 = wf.invoke("foo", cfg)
     n_interrupts_first = len(r1.get("__interrupt__", [])) if isinstance(r1, dict) else 0
     r2 = wf.invoke(Command(resume="HUMAN"), cfg)
+
     return {
         "s1_execs": eff["s1"],
         "s3_execs": eff["s3"],
@@ -191,7 +164,6 @@ def t3_functional_api_sync():
         "final": r2,
         "violation_completed_task_reexecuted": eff["s1"] != 1,
     }
-
 
 async def _t3_async():
     eff = {"s1": 0, "s3": 0}
@@ -237,17 +209,13 @@ async def _t3_async():
         "violation_completed_task_reexecuted": eff["s1"] != 1,
     }
 
-
 def t3_functional_api_async():
     return asyncio.run(_t3_async())
 
-
-# ---------------------------------------------------------------------- T4
 def t4_interrupt_consume_once():
     eff = {"b_post": 0}
 
     class S(TypedDict):
-        # reducer so repeated writes are observable in state too
         log: Annotated[List[str], operator.add]
 
     def node_a(state: S):
@@ -268,15 +236,16 @@ def t4_interrupt_consume_once():
 
     cfg = {"configurable": {"thread_id": "t4"}}
     app.invoke({"log": []}, cfg)
-    app.invoke(Command(resume="YES"), cfg)          # legitimate approval
+    app.invoke(Command(resume="YES"), cfg)
     post_first = eff["b_post"]
-    # replay attempt: same thread, inject another resume after completion
+
     try:
         r3 = app.invoke(Command(resume="YES-REPLAY"), cfg)
         replay_error = None
     except Exception as e:
         r3 = None
         replay_error = f"{type(e).__name__}: {e}"
+
     return {
         "b_post_after_first_resume": post_first,
         "b_post_after_replay_attempt": eff["b_post"],
@@ -285,16 +254,13 @@ def t4_interrupt_consume_once():
         "violation_effect_refired": eff["b_post"] > 1,
     }
 
-
-# ---------------------------------------------------------------------- T5
 def t5_checkpoint_validity():
-    from pydantic import BaseModel
 
     class S(BaseModel):
         items: List[str] = []
 
     def bad_node(state: S) -> S:
-        state.items.append(None)  # schema violation
+        state.items.append(None)
         return state
 
     g = StateGraph(S)
@@ -305,6 +271,7 @@ def t5_checkpoint_validity():
     cfg = {"configurable": {"thread_id": "t5"}}
 
     invoke_error = None
+
     try:
         app.invoke(S(items=["ok"]), cfg)
     except Exception as e:
@@ -313,6 +280,7 @@ def t5_checkpoint_validity():
     history_error = None
     n_ckpts = None
     invalid_persisted = None
+
     try:
         hist = list(app.get_state_history(cfg))
         n_ckpts = len(hist)
@@ -333,7 +301,6 @@ def t5_checkpoint_validity():
         "history_error": history_error,
         "violation_corrupt_checkpoint": bool(history_error) or bool(invalid_persisted),
     }
-
 
 TESTS = {
     "T1_resume_from_checkpoint_id_#7361": t1_resume_from_checkpoint_id,

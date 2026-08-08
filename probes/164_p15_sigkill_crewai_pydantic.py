@@ -1,57 +1,7 @@
 #!/usr/bin/env python3
-"""
-164_p15_sigkill_crewai_pydantic.py  (campaign p15)
-
-Extends the SIGKILL replication (probes 133/137/158/160 for LangGraph) to
-the two remaining crash-bearing matrix cells that were measured under
-exception-based crashes, answering the reviewer-shaped objection
-"exceptions are not crashes; interpreter state survives":
-
-  CREWAI (crash-resume duplication, probe 115 R2 under real process death)
-    A victim process runs an @persist Flow: s1 appends "s1" to an on-disk
-    ledger and completes (its state durably persisted by @persist); s2
-    then SIGKILLs the process before doing anything.  A FRESH process
-    restores via the documented entry point, kickoff(inputs={"id": ...}).
-    Probe 115's exception-based measurement: the restore re-runs the
-    COMPLETED s1 (effect duplicated), against the feature's written claim.
-    Expected here: identical under SIGKILL -- final ledger s1 = 2, s2 = 1.
-    No interpreter state can explain the duplication: the second effect is
-    fired by a process that did not exist when the first fired.
-
-  PYDANTIC-GRAPH (mid-node unrecoverability, probe 119 under real death)
-    A victim process runs Graph.iter with FileStatePersistence; NodeB
-    appends "b" to the ledger and SIGKILLs MID-NODE (before returning
-    End).  A fresh process calls the framework's own resume entry point,
-    iter_from_persistence.  Probe 119's finding: the mid-node snapshot
-    ('running') defeats resumption -- GraphRuntimeError.  Probe 158c
-    already showed the BETWEEN-node kill resumes cleanly; this probe is
-    its complement, so the pair brackets the boundary under SIGKILL from
-    both sides.  Expected: loud GraphRuntimeError; b remains 1 (no
-    silent re-execution, no silent completion).
-
-Both are matrix-verdict replications, not new cells: the deltas they close
-are "exception vs. process death" for CrewAI's crash-resume row and
-"exception vs. process death" for pydantic-graph's mid-node row.
-
-Pin gates: crewai == 1.15.2, pydantic-graph == 1.107.1 (per-half; a half
-whose pin fails is SKIPPED with a probe_refused record unless
-PROBE_ALLOW_OFFPIN=1).  Run each half from its own pinned venv via --only,
-or from one env that carries both.  Receipts MERGE across --only runs:
-if results/sigkill/164_results.json already exists, its other halves and
-stable keys are preserved and the new half is folded in (the merged
-receipt is marked "merged_from_previous_receipt"), so two sequential
-single-half runs from two venvs produce one complete receipt.  Delete
-the file to start a fresh receipt.
-
-Output: results/sigkill/164_results.json + 164_stable.json
-Usage:
-  .venv/bin/python3 probes/164_p15_sigkill_crewai_pydantic.py             # 3 reps
-  .venv/bin/python3 probes/164_p15_sigkill_crewai_pydantic.py --smoke     # 1 rep
-  .venv/bin/python3 probes/164_p15_sigkill_crewai_pydantic.py --only crewai
-  .venv/bin/python3 probes/164_p15_sigkill_crewai_pydantic.py --only pg
-Child modes (argv[1], internal): cw_victim | cw_resume | pg_victim | pg_resume
-"""
 import argparse
+import asyncio
+from dataclasses import dataclass
 import json
 import os
 import signal
@@ -70,7 +20,6 @@ os.environ.setdefault("OTEL_SDK_DISABLED", "true")
 
 REQUIRED = {"crewai": "1.15.2", "pydantic-graph": "1.107.1"}
 
-
 def _pin(dist):
     try:
         v = version(dist)
@@ -81,8 +30,6 @@ def _pin(dist):
                       f"(PROBE_ALLOW_OFFPIN=1 to override)")
     return v, None
 
-
-# ------------------------------------------------------------------ ledger
 def ledger_init(path):
     c = sqlite3.connect(path, timeout=60)
     c.execute("CREATE TABLE IF NOT EXISTS effects "
@@ -90,13 +37,11 @@ def ledger_init(path):
     c.commit()
     c.close()
 
-
 def ledger_write(path, task):
     c = sqlite3.connect(path, timeout=60)
     c.execute("INSERT INTO effects (task) VALUES (?)", (task,))
     c.commit()
     c.close()
-
 
 def ledger_counts(path):
     c = sqlite3.connect(path, timeout=60)
@@ -105,12 +50,9 @@ def ledger_counts(path):
     c.close()
     return dict(rows)
 
-
 def _die():
     os.kill(os.getpid(), signal.SIGKILL)
 
-
-# ------------------------------------------------------- CrewAI child modes
 def _crewai_flow(ctx, kill_in_s2):
     """Build the @persist Flow class inside the child so the decorator's
     SQLiteFlowPersistence binds to this run's isolated db path."""
@@ -140,12 +82,10 @@ def _crewai_flow(ctx, kill_in_s2):
 
     return F
 
-
 def cw_victim_main(ctx):
     F = _crewai_flow(ctx, kill_in_s2=True)
-    F().kickoff()                       # dies inside s2 via SIGKILL
+    F().kickoff()
     print(json.dumps({"unexpected": "victim survived"}))
-
 
 def cw_resume_main(ctx):
     F = _crewai_flow(ctx, kill_in_s2=False)
@@ -158,10 +98,7 @@ def cw_resume_main(ctx):
     print(json.dumps({"restored_id": fid, "error": err,
                       "error_type": err_type}))
 
-
-# ------------------------------------------- pydantic-graph child modes
 def _pg_graph(ctx, kill_in_b):
-    from dataclasses import dataclass
     from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 
     @dataclass
@@ -173,7 +110,7 @@ def _pg_graph(ctx, kill_in_b):
         async def run(self, ctx_: GraphRunContext[StateX]) -> End[int]:
             ledger_write(ctx["ledger"], "b")
             if kill_in_b:
-                _die()                  # mid-node: after effect, before End
+                _die()
             ctx_.state.total += 10
             return End(ctx_.state.total)
 
@@ -186,9 +123,7 @@ def _pg_graph(ctx, kill_in_b):
 
     return Graph(nodes=[NodeA, NodeB]), StateX, NodeA, End
 
-
 def pg_victim_main(ctx):
-    import asyncio
     from pydantic_graph.persistence.file import FileStatePersistence
     graph, StateX, NodeA, End = _pg_graph(ctx, kill_in_b=True)
 
@@ -196,15 +131,13 @@ def pg_victim_main(ctx):
         p = FileStatePersistence(Path(ctx["snap"]))
         async with graph.iter(NodeA(), state=StateX(),
                               persistence=p) as run:
-            node = await run.next()     # NodeA done; NodeB snapshot created
-            node = await run.next()     # dies inside NodeB
+            node = await run.next()
+            node = await run.next()
         print(json.dumps({"unexpected": "victim survived", "node": str(node)}))
 
     asyncio.run(go())
 
-
 def pg_resume_main(ctx):
-    import asyncio
     from pydantic_graph.persistence.file import FileStatePersistence
     graph, StateX, NodeA, End = _pg_graph(ctx, kill_in_b=False)
 
@@ -225,14 +158,11 @@ def pg_resume_main(ctx):
 
     asyncio.run(go())
 
-
-# ------------------------------------------------------------------ parent
 def _spawn(mode, ctx):
     env = dict(os.environ, PROBE164_CTX=json.dumps(ctx))
     return subprocess.Popen(
         [sys.executable, os.path.abspath(__file__), mode], env=env,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
 
 def _wait(proc, timeout):
     try:
@@ -250,7 +180,6 @@ def _wait(proc, timeout):
         parsed["_stderr_tail"] = err.strip().splitlines()[-1][:300]
     parsed["returncode"] = proc.returncode
     return parsed
-
 
 def run_crewai_rep(base, rep):
     d0 = tempfile.mkdtemp(prefix=f"p164_cw_{rep}_", dir=base)
@@ -274,7 +203,6 @@ def run_crewai_rep(base, rep):
                         and r.get("error") is None),
     }
 
-
 def run_pg_rep(base, rep):
     d0 = tempfile.mkdtemp(prefix=f"p164_pg_{rep}_", dir=base)
     ctx = {"ledger": f"{d0}/ledger.sqlite", "snap": f"{d0}/snap.json"}
@@ -293,7 +221,6 @@ def run_pg_rep(base, rep):
                         and r.get("error_type") == "GraphRuntimeError"
                         and final.get("b", 0) == 1),
     }
-
 
 def parent_main(args):
     base = tempfile.mkdtemp(prefix="probe164_")
@@ -349,7 +276,7 @@ def parent_main(args):
             stable = merged_stable
             result["merged_from_previous_receipt"] = True
         except Exception:
-            pass    # unreadable previous receipt: overwrite it
+            pass
     print(json.dumps(result, indent=2, default=str))
     (out / "164_results.json").write_text(
         json.dumps(result, indent=2, default=str) + "\n")
@@ -361,7 +288,6 @@ def parent_main(args):
          "stable": stable}, indent=2) + "\n")
     print(f"\nwrote {out}/164_results.json and 164_stable.json",
           file=sys.stderr)
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

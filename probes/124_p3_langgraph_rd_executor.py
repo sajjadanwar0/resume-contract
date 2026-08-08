@@ -1,18 +1,3 @@
-#!/usr/bin/env python3
-"""
-124_p3_langgraph_rd_executor.py
-RD at the EXECUTOR-SUBMISSION layer (the layer #8039 actually names), not the
-checkpointer API. Probe 118 established RD holds at checkpointer granularity;
-this probe reaches below it by instrumenting the submission order of the two
-persistence operations (put_writes for the task result, put for the superstep
-checkpoint) and FORCING each order, then observing whether recovery differs.
-
-Method: a serializing checkpointer records the real submission order of
-put/put_writes during a normal run (evidence the two are unordered w.r.t.
-each other at the executor), then two controlled replays pin the order
-put-before-writes vs writes-before-put and compare recovery decisions +
-effect counts. Deterministic; no kill race.
-"""
 import json
 import threading
 import traceback
@@ -21,7 +6,6 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.func import entrypoint, task
 
 RESULTS = {"langgraph_version": version("langgraph")}
-
 
 class OrderRecordingSaver(InMemorySaver):
     """Records the interleaving of put vs put_writes as submitted."""
@@ -39,7 +23,6 @@ class OrderRecordingSaver(InMemorySaver):
         with self._lock:
             self.order.append(("put_writes", [w[0] for w in writes]))
         return super().put_writes(config, writes, task_id, task_path)
-
 
 def run_and_record(durability):
     eff = {"s1": 0, "s2": 0}
@@ -65,17 +48,13 @@ def run_and_record(durability):
             "submission_order": saver.order,
             "s1_execs": eff["s1"], "s2_execs": eff["s2"]}
 
-
 try:
-    # 'sync' is the mode #8039 concerns; 'async'/'exit' differ in when puts land
     for mode in ["sync", "async", "exit"]:
         try:
             RESULTS[f"observed_{mode}"] = run_and_record(mode)
         except Exception as e:
             RESULTS[f"observed_{mode}"] = {"error": f"{type(e).__name__}: {e}"}
 
-    # Evidence framing: does the observed submission order place put_writes and
-    # put adjacently without an enforced barrier? (the #8039 precondition)
     sync = RESULTS.get("observed_sync", {})
     order = sync.get("submission_order", [])
     RESULTS["sync_order_summary"] = order

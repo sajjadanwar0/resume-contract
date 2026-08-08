@@ -1,33 +1,4 @@
 #!/usr/bin/env python3
-"""
-128_p6_langgraph_rd_sqlite.py
-P6 - RD (recovery determinism) on the DURABLE backend: probe 118's
-exhaustive two-interleaving construction ported from InMemorySaver to
-SqliteSaver. The #8039 hazard is that a task's put_writes and the superstep
-put are submitted without an ordering barrier, so a crash between them
-leaves one of two legal durable states. We construct both states on the
-real SQLite backend and compare recovery.
-
-  Order W: writes durable, superstep checkpoint dropped
-  Order C: checkpoint durable, writes dropped
-  Order N: control, nothing dropped
-
-Verdict: RD requires identical recovery decisions (s1 re-execution counts)
-from identical crash points regardless of which of the two ops landed. If
-W and C resume to different s1 counts, the recovery decision is a function
-of persistence-op order -- the divergence #8039 predicts, demonstrated
-deterministically on the durable saver without racing the pool.
-
-REFLEXIVE ARM (same-log double recovery, byte-identical). Property 6 as
-stated is determinism proper: two recoveries from IDENTICAL durable logs
-make identical decisions. On the durable backend the identical-log premise
-is realized literally: per order, the crashed durable state is constructed
-once, the SQLite file is WAL-checkpointed, closed, and copied twice; each
-recovery runs against its own byte-identical copy (sha256 recorded) with a
-plain SqliteSaver (no drops), a freshly built workflow, and fresh effect
-counters. Verdict field: rd_reflexive_same_log_identical_all -- recovery
-decisions (effect counts, result, error) must match within every pair.
-"""
 import hashlib
 import json
 import os
@@ -45,7 +16,6 @@ RESULTS = {
     "langgraph_checkpoint_sqlite_version": version("langgraph-checkpoint-sqlite"),
 }
 WORKDIR = tempfile.mkdtemp(prefix="probe128_")
-
 
 class DroppingSqliteSaver(SqliteSaver):
     """SqliteSaver that can drop designated persistence ops, constructing the
@@ -76,10 +46,8 @@ class DroppingSqliteSaver(SqliteSaver):
             return
         return super().put_writes(config, writes, task_id, task_path)
 
-
 class Crash(RuntimeError):
     pass
-
 
 def build(saver, eff, crash_in_s2):
     @task
@@ -103,7 +71,6 @@ def build(saver, eff, crash_in_s2):
 
     return wf
 
-
 def scenario(order: str):
     eff = {"s1": 0, "s2": 0}
     conn = sqlite3.connect(
@@ -115,9 +82,9 @@ def scenario(order: str):
     cfg = {"configurable": {"thread_id": f"t-{order}"}}
 
     if order == "W":
-        saver.drop_puts_after = 1  # keep input ckpt; drop superstep put
+        saver.drop_puts_after = 1
     elif order == "C":
-        saver.drop_writes_after = 0  # drop s1's put_writes; keep puts
+        saver.drop_writes_after = 0
 
     crashed = None
     try:
@@ -147,14 +114,12 @@ def scenario(order: str):
         "persistence_log": persistence_log,
     }
 
-
 def _sha256(path: str) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(65536), b""):
             h.update(chunk)
     return h.hexdigest()
-
 
 def scenario_same_log(order: str):
     """Reflexive RD: construct one crashed durable file, recover twice from
@@ -186,8 +151,6 @@ def scenario_same_log(order: str):
         "persistence_log": list(saver.log),
     }
 
-    # Flush and freeze the durable log: fold any WAL into the main file so a
-    # plain file copy is the complete durable state.
     try:
         conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
     except Exception:
@@ -208,7 +171,7 @@ def scenario_same_log(order: str):
         shutil.copyfile(db, db_k)
         copy_shas.append(_sha256(db_k))
         conn_k = sqlite3.connect(db_k, check_same_thread=False)
-        saver_k = SqliteSaver(conn_k)  # plain saver: recovery drops nothing
+        saver_k = SqliteSaver(conn_k)
         eff_k = {"s1": 0, "s2": 0}
         crash_k = {"armed": False}
         wf_k = build(saver_k, eff_k, crash_k)
@@ -236,7 +199,6 @@ def scenario_same_log(order: str):
         "identical": decisions[0] == decisions[1],
     }
 
-
 def main():
     for order in ("N", "W", "C"):
         try:
@@ -256,7 +218,6 @@ def main():
     except Exception:
         RESULTS["verdict"] = {"probe_error": traceback.format_exc()}
 
-    # Reflexive arm: Property 6 as written, on byte-identical durable files.
     try:
         refl = {order: scenario_same_log(order) for order in ("N", "W", "C")}
         RESULTS["rd_reflexive_same_log"] = refl
@@ -266,7 +227,6 @@ def main():
     except Exception:
         RESULTS["rd_reflexive_same_log"] = {"probe_error": traceback.format_exc()}
     print(json.dumps(RESULTS, indent=2, default=str))
-
 
 if __name__ == "__main__":
     main()

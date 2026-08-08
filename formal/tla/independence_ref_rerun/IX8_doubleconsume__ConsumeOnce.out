@@ -1,0 +1,148 @@
+TLC2 Version 2026.04.09.014118 (rev: 389440f)
+Running breadth-first search Model-Checking with fp 67 and seed 9008434985397701259 with 16 workers on 16 cores with 7282MB heap and 64MB offheap memory [pid: 126229] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/ResumeContract.tla (file:/home/neo/RustroverProjects/resume-contract/formal/tla/independence_ref_rerun/../ResumeContract.tla)
+Parsing file /tmp/tlc-6535646443462114216/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-6535646443462114216/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-6535646443462114216/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-6535646443462114216/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-6535646443462114216/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-6535646443462114216/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-6535646443462114216/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module ResumeContract
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module ResumeContract
+Starting... (2026-07-25 19:51:05)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-07-25 19:51:05.
+Error: Invariant ConsumeOnce is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+
+State 2: <ExecTask line 114, col 3 to line 126, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 3: <CrashRecover line 170, col 3 to line 188, col 64 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 4: <EmitInterrupt line 130, col 3 to line 135, col 72 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 1
+/\ waiting = TRUE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 5: <Consume(vb) line 140, col 3 to line 150, col 62 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 0>>
+/\ consumedVal = vb
+/\ extraResumes = 0
+/\ frontier = 2
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<vb>>
+/\ forkOuts = <<<<vb>>>>
+/\ pc = 3
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 6: <ExecTask line 114, col 3 to line 126, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1>>
+/\ consumedVal = vb
+/\ extraResumes = 0
+/\ frontier = 3
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<vb>>
+/\ forkOuts = <<<<vb>>>>
+/\ pc = 4
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE] >>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 7: <ForkResume(va) line 156, col 3 to line 162, col 62 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 1, 1>>
+/\ consumedVal = vb
+/\ extraResumes = 0
+/\ frontier = 3
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<vb, va>>
+/\ forkOuts = <<<<vb>>, <<va>>>>
+/\ pc = 4
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE] >>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 8: <ExtraResume line 193, col 3 to line 200, col 58 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 2, 1>>
+/\ consumedVal = vb
+/\ extraResumes = 1
+/\ frontier = 3
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<vb, va>>
+/\ forkOuts = <<<<vb>>, <<va>>>>
+/\ pc = 4
+/\ ckpts = << [idx |-> 1, valid |-> TRUE],
+   [idx |-> 2, valid |-> TRUE],
+   [idx |-> 3, valid |-> TRUE] >>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+73 states generated, 57 distinct states found, 2 states left on queue.
+The depth of the complete state graph search is 8.
+Finished in 00s at (2026-07-25 19:51:05)
+Trace exploration spec path: ../ResumeContract_TTrace_1784991065.tla

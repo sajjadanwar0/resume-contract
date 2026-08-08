@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-# n3_sync_check.sh -- CI gate for the N3 "line-identical core" claim.
-#
-# Extracts the N3-CORE-BODY region from BOTH crates/remit/src/lib.rs and
-# crates/remit/proof/remit_verus_recover_exec.rs, strips the VERUS-ONLY
-# proof blocks from the latter, and byte-compares. Exit 0 = identical (the
-# paper's claim holds); exit 1 = drift (fix one side before committing).
-#
-# Usage:  bash n3_sync_check.sh /path/to/repo
 
 set -u
 REPO="${1:?usage: n3_sync_check.sh /path/to/repo}"
@@ -14,7 +6,7 @@ LIB="$REPO/crates/remit/src/lib.rs"
 VER="$REPO/crates/remit/proof/remit_verus_recover_exec.rs"
 [[ -f "$LIB" && -f "$VER" ]] || { echo "ERROR: missing $LIB or $VER"; exit 2; }
 
-extract () {  # file -> core body region on stdout
+extract () {
   sed -n '/N3-CORE-BODY-BEGIN/,/N3-CORE-BODY-END/p' "$1"
 }
 

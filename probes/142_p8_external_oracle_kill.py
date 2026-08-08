@@ -1,22 +1,4 @@
 #!/usr/bin/env python3
-"""
-142_p8_external_oracle_kill.py
-Answers "both oracles are written by the process under test." The effect
-target here is an EXTERNAL SERVICE: a separate OS process running an HTTP
-server that records every effect in its own SQLite database. The workflow
-process never touches that database; it only POSTs. The service survives
-the workflow's SIGKILL, and the verdict is read from the service's own
-state.
-
-Protocol = probe 133's barrier-synchronized kill: s1's effect is
-POST /effect to the service; s1's result is durably recorded; the victim
-parks in s2 and is SIGKILLed; a fresh interpreter resumes. If the service
--- an independent state holder -- shows two recorded effects, the
-duplicated re-execution is confirmed by an oracle the tested process does
-not control. (A third-party remote API with its own failure modes remains
-out of scope; independence of the state holder is what this probe adds.)
-Modes: parent (default) | oracle | child | resume
-"""
 import json
 import os
 import signal
@@ -30,7 +12,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from importlib.metadata import version
 
 PORT = 8139
-
 
 def oracle_main(db_path):
     conn = sqlite3.connect(db_path, check_same_thread=False)
@@ -55,17 +36,14 @@ def oracle_main(db_path):
 
     HTTPServer(("127.0.0.1", PORT), H).serve_forever()
 
-
 def post_effect(tag):
     urllib.request.urlopen(
         urllib.request.Request(f"http://127.0.0.1:{PORT}/effect",
                                data=tag.encode(), method="POST"), timeout=10).read()
 
-
 def get_count():
     return int(urllib.request.urlopen(f"http://127.0.0.1:{PORT}/count",
                                       timeout=10).read())
-
 
 def build_wf(d):
     from langgraph.checkpoint.sqlite import SqliteSaver
@@ -75,7 +53,7 @@ def build_wf(d):
 
     @task
     def s1(x: int) -> int:
-        post_effect("s1")            # effect lives in ANOTHER process's DB
+        post_effect("s1")
         return x + 1
 
     @task
@@ -90,7 +68,6 @@ def build_wf(d):
     def wf(x: int) -> int:
         return s2(s1(x).result()).result()
     return wf
-
 
 def parent_main():
     d0 = tempfile.mkdtemp(prefix="probe142_")
@@ -125,7 +102,6 @@ def parent_main():
             resume_result = json.loads(line)["resume_result"]; break
         except Exception:
             continue
-    # read the oracle's OWN database directly, after killing the server too
     total = get_count()
     oracle.kill(); oracle.wait()
     oc = sqlite3.connect(d["oracle_db"])
@@ -142,7 +118,6 @@ def parent_main():
         "violation_confirmed_by_independent_state_holder":
             tags.count("s1") == 2 and count_at_kill == 1,
     }, indent=2))
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

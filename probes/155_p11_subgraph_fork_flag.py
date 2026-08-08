@@ -1,23 +1,4 @@
 #!/usr/bin/env python3
-"""
-155_p11_subgraph_fork_flag.py  (E-F1)  v3 -- pin-guarded; Part B REQUIRED (both backends) unless --part-a-only.
-Evaluates the FI deployment discriminator where the address heuristic
-cannot go: subgraph-internal checkpoint_id plumbing.
-
-Part A (self-contained): the probe-134 ADDRESS-BASED demonstrator filter
-(strip __resume__ pending writes when the caller config carries an explicit
-checkpoint_id) armed on a parent graph containing a CHECKPOINTED SUBGRAPH
-with an interrupt. Measures whether internal plumbing carries explicit
-checkpoint_ids into get_tuple and spuriously strips the legitimate resume
-(the failure mode the paper predicts the flag exists to avoid).
-Part B (gated on `import remit`): the packaged shim with
-fork_on_explicit_checkpoint=False + an explicit flag key. Three cells:
-  B1 subgraph interrupt->resume must be STOCK-IDENTICAL (differential vs A)
-  B2 caller-flagged fork at the parent gate must still repair #6663
-  B3 stray ordinary-address resume stays inert (CO preserved)
-Oracles: per-node effect counters + on-disk ledger (probe-126 pattern).
-Backends: InMemorySaver + SqliteSaver; two hosts.
-"""
 import json, os, sqlite3, sys, tempfile, traceback
 from typing import TypedDict
 from importlib.metadata import version
@@ -46,12 +27,12 @@ class AddressFilterSaver(InMemorySaver):
     def get_tuple(self, config):
         t = super().get_tuple(config)
         if t is None: return t
-        if config.get("configurable", {}).get("checkpoint_id"):  # explicit address
+        if config.get("configurable", {}).get("checkpoint_id"):
             pw = [w for w in (t.pending_writes or []) if w[1] != "__resume__"]
             if len(pw) != len(t.pending_writes or []):
                 self.strips += 1
             t = CheckpointTuple(t.config, t.checkpoint, t.metadata,
-                                t.parent_config, pw)  # VERIFY field order/name
+                                t.parent_config, pw)
         return t
 
 class Sub(TypedDict): x: str
@@ -65,7 +46,7 @@ def build(saver_cls):
         return {"x": str(ans)}
     sg = StateGraph(Sub); sg.add_node("gate", sub_gate)
     sg.add_edge(START, "gate"); sg.add_edge("gate", END)
-    sub = sg.compile(checkpointer=True)  # checkpointed subgraph: exercises internal checkpoint_id plumbing
+    sub = sg.compile(checkpointer=True)
     pg = StateGraph(Par); pg.add_node("sub", sub)
     pg.add_edge(START, "sub"); pg.add_edge("sub", END)
     saver = saver_cls()
@@ -96,7 +77,6 @@ def part_b_sqlite():
         db = tempfile.mktemp(suffix="_155.sqlite")
         conn = sqlite3.connect(db, check_same_thread=False)
         return _rls.wrap(SqliteSaver, conn, **kw), conn, db
-    # B1 differential
     def run_sub(saver):
         eff = {"sub_post": 0}
         def sub_gate(state: Sub):
@@ -123,7 +103,6 @@ def part_b_sqlite():
     shim, conn1, _ = mk(fork_on_explicit_checkpoint=False)
     out["B1_shim"] = run_sub(shim); conn1.close()
     out["B1_stock_identical"] = (out["B1_stock"] == out["B1_shim"])
-    # B2 + B3 on one wrapped saver
     eff = {"post": 0}
     def gate(state: Par):
         ans = interrupt("decision?")
@@ -154,7 +133,6 @@ def part_b_sqlite():
     conn2.close()
     return out
 
-
 RESULTS["PartA_address_demonstrator_under_subgraph"] = None
 try:
     RESULTS["PartA_address_demonstrator_under_subgraph"] = part_a()
@@ -165,7 +143,6 @@ except Exception:
 def part_b():
     from remit import langgraph_shim as _rls
     out = {}
-    # -- B1: subgraph resume must be stock-identical under the flag config --
     def run_sub(saver_factory):
         eff = {"sub_post": 0}
         def sub_gate(state: Sub):
@@ -193,7 +170,6 @@ def part_b():
     out["B1_shim"] = shim
     out["B1_stock_identical"] = (stock == shim)
 
-    # -- B2: caller-flagged fork at a parent gate still repairs #6663 --------
     eff = {"post": 0}
     def gate(state: Par):
         ans = interrupt("decision?")
@@ -217,7 +193,6 @@ def part_b():
     out["B2_fork_honors_supplied_value"] = (rb.get("x") == "B")
     out["B2_effects_total"] = eff["post"]
 
-    # -- B3: stray ordinary-address resume stays inert (CO) ------------------
     b3_err, before = None, eff["post"]
     try:
         app.invoke(Command(resume="C"), cfg)
@@ -231,7 +206,7 @@ if PART_A_ONLY:
     RESULTS["PartB"] = "not run: --part-a-only"
 else:
     try:
-        from remit import langgraph_shim  # noqa: F401  (import check up front)
+        from remit import langgraph_shim
     except Exception as e:
         print(json.dumps({"probe_refused":
                               f"remit shim not importable ({type(e).__name__}: {e}). Paper runs "

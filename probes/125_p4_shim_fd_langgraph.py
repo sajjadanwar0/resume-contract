@@ -1,39 +1,24 @@
-#!/usr/bin/env python3
-"""
-125_p4_shim_fd_langgraph.py
-Repair demonstration, FD leg: probe 113/T2's fork protocol re-run through
-harness/remit_shim.ForkKeyedSaver. Baseline on LangGraph 1.0.5-1.2.9: the
-second resume value addressed to the same (thread, checkpoint) is silently
-answered with the first branch's outcome (#6663; violated at every swept
-version). Target through the shim: resume(True) -> 1, resume(False) -> 0,
-and a repeated resume(True) still -> 1 (replay idempotence preserved).
-"""
 import json
 import sys
 import traceback
 from importlib.metadata import version
 from pathlib import Path
 from typing import TypedDict
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
-from remit_shim import ForkKeyedSaver  # noqa: E402
-
+from remit_shim import ForkKeyedSaver
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import interrupt, Command
 
 RESULTS = {"langgraph_version": version("langgraph")}
 
-
 class S(TypedDict):
     value: int
-
 
 def node(state: S):
     allow = interrupt("Allow to add?")
     if allow:
         return {"value": state["value"] + 1}
     return {"value": state["value"]}
-
 
 try:
     app = (

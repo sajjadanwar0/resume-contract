@@ -85,7 +85,6 @@ Consume(v) ==
   /\ forkOuts'     = Append(forkOuts, f(v))
   /\ UNCHANGED << crashes, recHist, extraResumes, pcRegress, raceUsed >>
 
-
 RaceConsume(v) ==
   /\ FaultConcurrentConsume
   /\ ~raceUsed

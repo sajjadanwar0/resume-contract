@@ -1,0 +1,24 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 113 and seed 8907575508979891738 with 1 worker on 1 cores with 889MB heap and 64MB offheap memory [pid: 4245] (Linux 6.18.5-fc-v20 amd64, Ubuntu 21.0.10 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/claude/work/repo/resume-contract/formal/tla/ResumeContractParked.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module ResumeContractParked
+Starting... (2026-08-08 04:50:31)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-08-08 04:50:32.
+Progress(13) at 2026-08-08 04:50:35: 64,936 states generated (64,936 s/min), 40,358 distinct states found (40,358 ds/min), 26,630 states left on queue.
+Progress(19) at 2026-08-08 04:51:35: 5,376,412 states generated (5,311,476 s/min), 2,745,077 distinct states found (2,704,719 ds/min), 892,167 states left on queue.
+Progress(21) at 2026-08-08 04:52:35: 9,995,268 states generated (4,618,856 s/min), 5,056,220 distinct states found (2,311,143 ds/min), 962,545 states left on queue.
+Progress(24) at 2026-08-08 04:53:35: 14,753,555 states generated (4,758,287 s/min), 7,435,360 distinct states found (2,379,140 ds/min), 288,552 states left on queue.
+Model checking completed. No error has been found.
+  Estimates of the probability that TLC did not check all reachable states
+  because two distinct states had the same fingerprint:
+  calculated (optimistic):  val = 2.9E-6
+  based on the actual fingerprints:  val = 4.6E-7
+14753555 states generated, 7435360 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 24.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 6 and the 95th percentile is 2).
+Finished in 03min 07s at (2026-08-08 04:53:37)

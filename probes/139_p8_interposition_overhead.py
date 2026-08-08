@@ -1,23 +1,4 @@
 #!/usr/bin/env python3
-"""
-139_p8_interposition_overhead.py
-Answers "no performance evaluation" at the level this paper can honestly
-claim: the runtime overhead of REMIT-style interposition at the
-checkpointer interface, measured on the exact probe workflow. Three saver
-configurations, identical protocol, N iterations each with fresh on-disk
-SQLite files per iteration:
-
-  stock        SqliteSaver, unmodified
-  fork_intent  the read-path FD shim (probe 134): get_tuple override only
-  validating   a CV gate: schema check on every checkpoint before commit
-
-Protocol per iteration: initial invoke (runs to the interrupt) then
-resume (fires the gated effect, completes). Reported per configuration
-and phase: p50 / p95 / p99 / mean wall-clock (ms), plus relative overhead
-vs stock. Scope stated in-paper: single host, microbenchmark of the
-interposition point, not a throughput-under-concurrency study and not a
-durable-execution-engine comparison.
-"""
 import json
 import sqlite3
 import statistics
@@ -33,7 +14,6 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 N = 200
 RESUME_CHANNEL = "__resume__"
 
-
 class ForkIntentSqliteSaver(SqliteSaver):
     def get_tuple(self, config):
         t = super().get_tuple(config)
@@ -44,7 +24,6 @@ class ForkIntentSqliteSaver(SqliteSaver):
                                            if w[1] != RESUME_CHANNEL])
         return t
 
-
 class ValidatingSqliteSaver(SqliteSaver):
     """CV gate: structural validity check on every checkpoint commit."""
     def put(self, config, checkpoint, metadata, new_versions):
@@ -54,10 +33,8 @@ class ValidatingSqliteSaver(SqliteSaver):
             raise ValueError("invalid checkpoint rejected by CV gate")
         return super().put(config, checkpoint, metadata, new_versions)
 
-
 class S(TypedDict):
     value: int
-
 
 def build(saver):
     def node(state: S):
@@ -67,12 +44,10 @@ def build(saver):
             .add_edge(START, "node").add_edge("node", END)
             .compile(checkpointer=saver))
 
-
 def pct(xs, q):
     xs = sorted(xs)
     k = max(0, min(len(xs) - 1, int(round(q / 100 * (len(xs) - 1)))))
     return xs[k]
-
 
 def bench(saver_cls, label):
     first, second = [], []
@@ -94,7 +69,6 @@ def bench(saver_cls, label):
                 "p99_ms": round(pct(xs, 99), 3), "mean_ms": round(statistics.mean(xs), 3)}
     return {"initial_invoke": stats(first), "resume": stats(second)}
 
-
 def main():
     out = {"langgraph_version": version("langgraph"),
            "langgraph_checkpoint_sqlite_version": version("langgraph-checkpoint-sqlite"),
@@ -110,7 +84,6 @@ def main():
             out["configs"][label][phase]["p50_overhead_vs_stock_pct"] = \
                 round((x - b) / b * 100, 2) if b else None
     print(json.dumps(out, indent=2))
-
 
 if __name__ == "__main__":
     main()

@@ -1,73 +1,3 @@
-"""Decision-free LangGraph checkpointer veneer over the REMIT Rust core.
-
-Design rule, stated once and enforced by review: **this module makes no
-contract decision.** Its job is mechanical:
-
-* ``get_tuple``/``aget_tuple`` — describe the invocation's addressing to the
-  core (:func:`remit._core.fork_view`) and apply the returned verdict:
-  ``"strip"`` removes recorded ``__resume__`` pending writes from the loaded
-  checkpoint view so a fork-intent invocation consults its own supplied
-  value (the read-path repair of LangGraph #6663, probe 134 of the paper's
-  artifact); ``"keep"`` leaves the tuple untouched, preserving
-  ordinary-address replay idempotence and consume-once. When the
-  cross-process gate is enabled, the same read then describes the loaded
-  tuple to :func:`remit._core.consume_view`; on ``"attempt"`` the veneer
-  takes the ``(thread, checkpoint)`` claim in the saver's own store with one
-  ``INSERT`` under a uniqueness constraint (SQLite primary key / Postgres
-  ``ON CONFLICT DO NOTHING`` — the compare-and-swap of probe 165) and
-  reports the outcome to :func:`remit._core.consume_claim_check`, which
-  serves the winner and raises
-  :class:`remit._core.RemitConsumeConflict` for the loser *before any node
-  executes* (contrast the stock plane's cross-process double consumption,
-  probe 159, 10/10 on both durable backends).
-* ``put``/``aput`` — report the user validator's answer to the core's
-  validity gate; the core journals it and, when the answer is "invalid",
-  raises :class:`remit._core.RemitValidityError` *before* anything is
-  delegated to the inner saver. Nothing invalid is ever persisted, and the
-  rejection is loud (contrast the silent persistence of schema-invalid
-  state, LangGraph #6491 class, probe 123).
-* ``put_writes``/``aput_writes`` — journal the submission in the core's
-  per-thread sequencer so the durable order of persistence operations is a
-  total order recoverable from the journal (the substrate RD relies on;
-  contrast LangGraph #8039). When the cross-process gate is enabled, a
-  ``__resume__`` submission additionally re-takes the same claim as a
-  secondary latch — idempotent for the winner, and a late loud stop for any
-  path that reaches the journal without the read (the falsified write-path
-  v1 of probe 165, retained exactly as the probe retains it: secondary,
-  never primary, because interposition below the decision point cannot veto
-  the decision).
-
-Cross-process gate scope, stated plainly (mirrors probe 165):
-
-* **Opt-in.** ``cross_process_gate`` defaults to ``False``; the default
-  wrap is bit-for-bit the shipped v0.1.0 behavior.
-* **Claim key and store.** ``(thread_id, checkpoint_id-of-the-loaded
-  parked checkpoint)`` in a ``remit_claims`` table created lazily in the
-  saver's own database — the shared store both racers already use, which
-  is what makes the ``INSERT`` a cross-process compare-and-swap.
-* **Read intent.** ``get_tuple`` carries no read-intent discriminator, so
-  a bare inspection of a parked thread would consume the claim; pass
-  ``{"configurable": {..., "remit_inspect": True}}`` on inspection reads.
-  This is the read-path analogue of the FI gap, exposed as an explicit
-  opt-out rather than left as an interface defect.
-* **Fork intent.** A fork-addressed delivery (explicit ``checkpoint_id``
-  under the default policy, or the fork flag) claims a fresh branch key
-  through the FD machinery instead; the consumption gate stands aside
-  (probe 155's composition).
-* **Backends.** Synchronous savers exposing ``.conn`` — the measured
-  ``SqliteSaver`` and ``PostgresSaver`` cells. Postgres connections must be
-  ``autocommit=True`` (the configuration LangGraph's own ``setup()`` path
-  and probes 159/165 use); the gate refuses a transactional connection
-  loudly rather than entangling the claim with the caller's transaction.
-  Async savers are refused loudly at first use, not silently degraded.
-
-The veneer works by dynamic subclassing of any ``BaseCheckpointSaver``
-implementation — the same interposition point probe 134 used with
-``SqliteSaver`` — so the inner saver's own storage behavior, version
-scheme, and serializer are inherited unchanged. This module deliberately
-imports nothing from ``langgraph``: it only subclasses what you hand it.
-"""
-
 from __future__ import annotations
 
 import inspect as _inspect
@@ -77,25 +7,17 @@ from typing import Any, Callable, Dict, Optional, Set, Tuple, Type
 
 from remit import _core
 
-#: LangGraph's resume channel: recorded ``Command(resume=...)`` payloads
-#: appear as pending writes on this channel of the interrupt checkpoint.
 RESUME_CHANNEL = "__resume__"
 
-#: LangGraph's interrupt channel: a parked run's consumable authority
-#: appears as a pending write on this channel of the latest checkpoint
-#: (paper Sec. 4.3; probe 165's primary interposition point).
 INTERRUPT_CHANNEL = "__interrupt__"
 
-#: The shared-store claims table taken by the cross-process gate.
 CLAIMS_TABLE = "remit_claims"
 
 Validator = Callable[[dict], None]
 
-
 def _thread_of(config: Optional[dict]) -> str:
     conf = (config or {}).get("configurable", {}) or {}
     return str(conf.get("thread_id", ""))
-
 
 class RemitSaverMixin:
     """Mixin installing REMIT's core-decided behavior on any saver class.
@@ -149,11 +71,6 @@ class RemitSaverMixin:
         self._remit_inspect_key = remit_inspect_key
         self._remit_claims_ready = False
         self._remit_claims_held: Set[Tuple[str, str]] = set()
-        #: thread -> checkpoint id claimed at the read; lets the secondary
-        #: latch re-take the *same* key idempotently for the winner instead
-        #: of opening a second key. A journal-only path (no prior read)
-        #: falls back to the "__latest__" domain — probe 165's stated
-        #: secondary-latch scope: late, and never a substitute for the read.
         self._remit_last_claim: Dict[str, str] = {}
         super().__init__(*args, **kwargs)
         if self._remit_gate_enabled and getattr(self, "conn", None) is None:
@@ -164,14 +81,10 @@ class RemitSaverMixin:
                 f"{type(self).__name__} exposes none"
             )
 
-    # -- core access -------------------------------------------------------
-
     @property
     def remit_core(self) -> _core.Core:
         """The Rust core taking every contract decision for this saver."""
         return self._remit_core
-
-    # -- addressing extraction (config fields only; no decisions) ----------
 
     def _remit_address(self, config: Optional[dict]) -> Tuple[bool, bool, bool]:
         conf = (config or {}).get("configurable", {}) or {}
@@ -179,8 +92,6 @@ class RemitSaverMixin:
         flag = bool(conf.get(self._remit_fork_flag_key))
         inspect_intent = bool(conf.get(self._remit_inspect_key))
         return explicit, flag, inspect_intent
-
-    # -- read path: FI / FD (probe-134 rule, decided by the core) ----------
 
     def _remit_fork_filter(self, config: Optional[dict], t: Any) -> Any:
         if t is None:
@@ -193,8 +104,6 @@ class RemitSaverMixin:
             kept = [w for w in pending if not (len(w) > 1 and w[1] == RESUME_CHANNEL)]
             t = t._replace(pending_writes=kept)
         return t
-
-    # -- read path: CO across processes (probe-165 rule, decided by core) --
 
     def _remit_is_postgres_conn(self, conn: Any) -> bool:
         return type(conn).__module__.split(".", 1)[0] == "psycopg"
@@ -212,15 +121,6 @@ class RemitSaverMixin:
             if not is_pg:
                 conn.commit()
         except Exception as exc:
-            # Two processes' FIRST claims on a fresh database can race the
-            # DDL itself: Postgres enforces catalog uniqueness before the
-            # IF NOT EXISTS check settles and refuses one creator with
-            # SQLSTATE 42P07 (duplicate_table) or 23505 (unique_violation
-            # on the pg_type row) -- measured live at probe 159's PG rep 0
-            # on a fresh database, 2026-07-31. Either code means the table
-            # exists, which is exactly this function's postcondition;
-            # absorb it and proceed to the claim (autocommit keeps the
-            # connection usable after the refused statement).
             if getattr(exc, "sqlstate", None) not in ("42P07", "23505"):
                 raise
         self._remit_claims_ready = True
@@ -235,7 +135,7 @@ class RemitSaverMixin:
         key = (str(thread), str(ckpt))
         if key in self._remit_claims_held:
             return True
-        conn = self.conn  # presence checked at construction
+        conn = self.conn
         exec_ = getattr(conn, "execute", None)
         if exec_ is None or _inspect.iscoroutinefunction(exec_):
             raise RuntimeError(
@@ -272,10 +172,6 @@ class RemitSaverMixin:
                     conn.commit()
                     won = True
                 except sqlite3.IntegrityError:
-                    # Release the implicit write transaction the failed
-                    # INSERT opened: left open, its lock starves the
-                    # WINNER's subsequent writes on a sibling connection
-                    # for the full busy timeout (G1 finding).
                     conn.rollback()
                     won = False
         if won:
@@ -306,15 +202,13 @@ class RemitSaverMixin:
             _core.consume_claim_check(won, thread, ckpt)
         return t
 
-    def get_tuple(self, config: dict) -> Any:  # type: ignore[override]
-        t = self._remit_fork_filter(config, super().get_tuple(config))  # type: ignore[misc]
+    def get_tuple(self, config: dict) -> Any:
+        t = self._remit_fork_filter(config, super().get_tuple(config))
         return self._remit_consume_gate(config, t)
 
-    async def aget_tuple(self, config: dict) -> Any:  # type: ignore[override]
-        t = self._remit_fork_filter(config, await super().aget_tuple(config))  # type: ignore[misc]
+    async def aget_tuple(self, config: dict) -> Any:
+        t = self._remit_fork_filter(config, await super().aget_tuple(config))
         return self._remit_consume_gate(config, t)
-
-    # -- write path: CV gate + RD sequencing (decided by the core) ---------
 
     def _remit_gate(self, config: Optional[dict], checkpoint: Any) -> str:
         thread = _thread_of(config)
@@ -324,10 +218,8 @@ class RemitSaverMixin:
             try:
                 self._remit_validator(checkpoint)
                 ok, reason = True, ""
-            except Exception as exc:  # the validator answered "invalid"
+            except Exception as exc:
                 ok, reason = False, f"{type(exc).__name__}: {exc}"
-        # The *decision* — invalid ⇒ loud error, nothing persisted — is the
-        # core's; RemitValidityError propagates from Rust when ok is False.
         self._remit_core.validity_gate(thread, ok, reason)
         return thread
 
@@ -365,31 +257,29 @@ class RemitSaverMixin:
             won = self._remit_take_claim(thread, ckpt)
             _core.consume_claim_check(won, thread, ckpt)
 
-    def put(self, config: dict, checkpoint: Any, metadata: Any, new_versions: Any, *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
+    def put(self, config: dict, checkpoint: Any, metadata: Any, new_versions: Any, *args: Any, **kwargs: Any) -> Any:
         thread = self._remit_gate(config, checkpoint)
         ckpt_id = str((checkpoint or {}).get("id", "")) if isinstance(checkpoint, dict) else ""
         self._remit_core.sequence_op(thread, "put", ckpt_id)
-        return super().put(config, checkpoint, metadata, new_versions, *args, **kwargs)  # type: ignore[misc]
+        return super().put(config, checkpoint, metadata, new_versions, *args, **kwargs)
 
-    async def aput(self, config: dict, checkpoint: Any, metadata: Any, new_versions: Any, *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
+    async def aput(self, config: dict, checkpoint: Any, metadata: Any, new_versions: Any, *args: Any, **kwargs: Any) -> Any:
         thread = self._remit_gate(config, checkpoint)
         ckpt_id = str((checkpoint or {}).get("id", "")) if isinstance(checkpoint, dict) else ""
         self._remit_core.sequence_op(thread, "put", ckpt_id)
-        return await super().aput(config, checkpoint, metadata, new_versions, *args, **kwargs)  # type: ignore[misc]
+        return await super().aput(config, checkpoint, metadata, new_versions, *args, **kwargs)
 
-    def put_writes(self, config: dict, writes: Any, task_id: Any, *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
+    def put_writes(self, config: dict, writes: Any, task_id: Any, *args: Any, **kwargs: Any) -> Any:
         self._remit_resume_latch(config, writes)
         self._remit_core.sequence_op(_thread_of(config), "put_writes", str(task_id))
-        return super().put_writes(config, writes, task_id, *args, **kwargs)  # type: ignore[misc]
+        return super().put_writes(config, writes, task_id, *args, **kwargs)
 
-    async def aput_writes(self, config: dict, writes: Any, task_id: Any, *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
+    async def aput_writes(self, config: dict, writes: Any, task_id: Any, *args: Any, **kwargs: Any) -> Any:
         self._remit_resume_latch(config, writes)
         self._remit_core.sequence_op(_thread_of(config), "put_writes", str(task_id))
-        return await super().aput_writes(config, writes, task_id, *args, **kwargs)  # type: ignore[misc]
-
+        return await super().aput_writes(config, writes, task_id, *args, **kwargs)
 
 _CLASS_CACHE: Dict[type, type] = {}
-
 
 def saver_class(inner_cls: Type) -> Type:
     """The REMIT-wrapped subclass of ``inner_cls`` (cached)."""
@@ -398,7 +288,6 @@ def saver_class(inner_cls: Type) -> Type:
         cls = type(f"Remit{inner_cls.__name__}", (RemitSaverMixin, inner_cls), {})
         _CLASS_CACHE[inner_cls] = cls
     return cls
-
 
 def wrap(
     inner_cls: Type,

@@ -1,52 +1,5 @@
 #!/usr/bin/env bash
-# 166_parked_crash_matrix.sh -- parked-crash companion module, full check
-# ===========================================================================
-# Runs TLC over formal/tla/ResumeContractParked.tla, the companion module
-# that removes the base model's stated scope bound "a crash while the run
-# is parked awaiting the human is outside the transition relation"
-# (paper Sec. 4.2).  The module is the base module verbatim plus one
-# constant (ParkDurable), one latch variable (emitted), and one action
-# (CrashWhileParked) that follows the SAME recovery-mode disjunction as
-# CrashRecover from the parked location.  Checks, in order:
-#
-#   1. P0_durable      reference semantics, ParkDurable=TRUE, all six
-#                      invariants + TypeOK        -> expected: no error
-#   2. P0_volatile     ParkDurable=FALSE, same     -> expected: no error
-#                      (safety holds either way: nothing fires, nothing
-#                      regresses)
-#   3. PLIVE_durable   FairSpec + EventuallyCompletes, ParkDurable=TRUE
-#                                                  -> expected: no error
-#   4. PLIVE_volatile  ParkDurable=FALSE           -> expected: TEMPORAL
-#                      VIOLATION (safety by deadness -- the pydantic-graph
-#                      disposition of Sec. 6.4 as a model-level
-#                      counterexample; its .out is the receipt)
-#   5. PX_* (36 cells) per-invariant single-fault matrix, ParkDurable=TRUE,
-#                      constants VERBATIM from 145_independence_matrix.sh
-#                      (nondetrec/prefixreplay rows keep MaxCrashes=2)
-#                      -> expected: verdict pattern AND counterexample
-#                      depths IDENTICAL to the base module's Table 3.
-#
-# The script diffs fresh verdicts against the expected matrix embedded
-# below (third-party container run 2026-07-26, OpenJDK 21, tla2tools
-# latest release; a host replication is the authoritative second
-# environment) and exits nonzero on any mismatch, so the replication is
-# self-auditing.
-#
-# Usage:   bash 166_parked_crash_matrix.sh [REPO_ROOT] [--r8]
-#          --r8 additionally runs the R8-scale durable reference check
-#          (NTasks=10, IP=5, 4 values, 5 resumes, 4 crashes, 4 extras;
-#          large -- expect a long single-worker run).  R8 is reported but
-#          not part of the embedded-expectation audit.  Container run
-#          2026-07-26 (16 workers): no error, 14,753,555 states generated,
-#          7,435,360 distinct -- against the base module's R8 receipt
-#          (results/tla/R8_scale.out: 14,753,520 / 7,435,360), the parked
-#          crash adds exactly 35 transitions and zero new distinct states.
-# Output:  REPO_ROOT/formal/tla/parked/{*.cfg,*.out,parked_matrix.json,
-#            parked_matrix.md} and a copy of the two artifacts under
-#            results/tla/parked/.
-# TLC:     resolved like 116_run_tlc.sh ($TLC_CMD > $TLA_TOOLS_JAR >
-#          ./tla2tools.jar > $HOME/tla2tools.jar > download from
-#          tlaplus/tlaplus releases).
+
 set -euo pipefail
 REPO="$(cd "${1:-.}" && pwd)"
 R8=0; [[ "${2:-}" == "--r8" || "${1:-}" == "--r8" ]] && R8=1
@@ -74,7 +27,6 @@ resolve_tlc () {
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC"
 
-# ---- 1. generate the configs ----------------------------------------------
 python3 - "$PK_DIR" << 'PYGEN'
 import sys, os
 pk = sys.argv[1]
@@ -145,10 +97,6 @@ open(os.path.join(pk, "P8_durable.cfg"), "w").write(r8)
 print("wrote 41 configs")
 PYGEN
 
-# ---- 2. expected verdicts (container run 2026-07-26) ----------------------
-# name verdict depth   (depth = number of "State N" lines in the TLC trace;
-#                       "-" for holds; liveness violation depth recorded as
-#                       "temporal")
 EXPECTED="
 P0_durable holds -
 P0_volatile holds -
@@ -192,7 +140,6 @@ PX_prefixreplay__ConsumeOnce holds -
 PX_prefixreplay__RecoveryDeterminism holds -
 "
 
-# ---- 3. run TLC per cell ---------------------------------------------------
 cd "$PK_DIR"
 run_one () {
   local name="$1"
@@ -201,9 +148,7 @@ run_one () {
     ../ResumeContractParked.tla > "$name.out" 2>&1
   local rc=$?
   set -e
-  # Classify by TLC exit status first (0 = OK, 12 = safety violation,
-  # 13 = liveness violation), message text second: the wording differs
-  # across tla2tools builds, the exit codes do not.
+
   if [[ $rc -eq 0 ]] && grep -q "No error has been found" "$name.out"; then
     echo "holds -"
   elif [[ $rc -eq 13 ]] || grep -q "Temporal properties were violated" "$name.out"; then
@@ -238,7 +183,6 @@ if [[ "$R8" == "1" ]]; then
   grep "states generated" P8_durable.out | tail -1 || true
 fi
 
-# ---- 5. artifacts ----------------------------------------------------------
 python3 - "$PK_DIR" "$RES_DIR" "$FAIL" "$R8_LINE" << 'PYART'
 import json, sys, datetime, subprocess, os
 pk, res, fail, r8line = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]

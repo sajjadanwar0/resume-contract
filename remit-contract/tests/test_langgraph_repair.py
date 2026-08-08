@@ -1,23 +1,3 @@
-"""Probe-134 protocol, replayed against the Rust-core-backed shim.
-
-These tests replicate, cell for cell, the paper artifact's probe 134 (the
-read-path fork-intent repair of LangGraph #6663) with the shim
-re-implemented over ``remit._core``: the veneer asks the Rust core for
-every decision and applies it mechanically.
-
-Cells:
-  T1   fork, bare-value form: True -> 1 then False -> 0 (FD repaired)
-  T1b  fork, resume-map form
-  T2   same-value re-invocation at the fork address: f(v) deterministic
-  T3   stray resume after completion at the latest address: inert (CO)
-  CV   validator raises -> RemitValidityError, nothing persisted
-  T0   differential control: the stock saver's fork violation (asserted only
-       on release lines the paper's version sweep covered)
-
-Requires ``langgraph`` (skipped otherwise); the SQLite variants additionally
-require ``langgraph-checkpoint-sqlite``.
-"""
-
 import sqlite3
 import tempfile
 
@@ -25,31 +5,29 @@ import pytest
 
 langgraph = pytest.importorskip("langgraph")
 
-from typing import TypedDict  # noqa: E402
+from typing import TypedDict
 
-from langgraph.graph import END, START, StateGraph  # noqa: E402
-from langgraph.types import Command, interrupt  # noqa: E402
+from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
 
-import remit  # noqa: E402
+import remit
 
 try:
     from langgraph.checkpoint.memory import InMemorySaver
-except ImportError:  # pragma: no cover - older releases
+except ImportError:
     from langgraph.checkpoint.memory import MemorySaver as InMemorySaver
 
 try:
     from importlib.metadata import version
 
     LG_VERSION = version("langgraph")
-except Exception:  # pragma: no cover
+except Exception:
     LG_VERSION = "unknown"
 
-SWEEP_LINES = ("1.0.", "1.1.", "1.2.")  # release lines the paper's sweep covered
-
+SWEEP_LINES = ("1.0.", "1.1.", "1.2.")
 
 class S(TypedDict):
     value: int
-
 
 def build(saver, ledger):
     def node(state: S):
@@ -66,7 +44,6 @@ def build(saver, ledger):
         .compile(checkpointer=saver)
     )
 
-
 def run_to_interrupt(app, tag):
     cfg = {"configurable": {"thread_id": tag}}
     r0 = app.invoke({"value": 0}, cfg)
@@ -75,7 +52,6 @@ def run_to_interrupt(app, tag):
     ckpt = app.get_state(cfg).config["configurable"]["checkpoint_id"]
     fork_cfg = {"configurable": {"thread_id": tag, "checkpoint_id": ckpt}}
     return cfg, fork_cfg, intr_id
-
 
 def fork_cells(saver, tag, use_map):
     ledger = []
@@ -91,7 +67,6 @@ def fork_cells(saver, tag, use_map):
     r2 = app.invoke(mk(False), fork_cfg)
     return r1.get("value"), r2.get("value"), ledger, app, cfg, fork_cfg, mk
 
-
 @pytest.mark.parametrize("use_map", [False, True], ids=["bare", "map"])
 def test_t1_fork_serves_second_value_under_remit(use_map):
     """T1 / T1b: under the Rust-core shim, the second fork with a different
@@ -101,7 +76,6 @@ def test_t1_fork_serves_second_value_under_remit(use_map):
     assert b1 == 1, f"branch1 must compute f(True)=1, got {b1}"
     assert b2 == 0, f"FD: branch2 must compute f(False)=0, got {b2} (#6663 behavior)"
     assert ledger == [1, 0], f"per-branch effect trail must be [1, 0], got {ledger}"
-
 
 def test_t2_same_value_refork_is_deterministic():
     """T2: re-answering the same value at the fork address recomputes f(v)
@@ -114,7 +88,6 @@ def test_t2_same_value_refork_is_deterministic():
     r2 = app.invoke(Command(resume=True), fork_cfg)
     assert r1.get("value") == r2.get("value") == 1
     assert ledger == [1, 1]
-
 
 def test_t3_stray_resume_after_completion_is_inert():
     """T3: an ordinary-address resume after completion neither re-executes
@@ -130,7 +103,6 @@ def test_t3_stray_resume_after_completion_is_inert():
     assert ledger == before, f"stray resume re-fired the effect: {ledger}"
     assert r2.get("value") == 1
 
-
 def test_cv_validator_rejection_is_loud_and_blocks_persistence():
     """CV: a schema validator raise surfaces as RemitValidityError before
     anything is persisted (the loud counterpart of the silent #6491 class)."""
@@ -144,7 +116,6 @@ def test_cv_validator_rejection_is_loud_and_blocks_persistence():
     with pytest.raises(remit.RemitValidityError):
         app.invoke({"value": 0}, {"configurable": {"thread_id": "cv"}})
     assert ledger == []
-
 
 def test_t0_stock_saver_exhibits_the_fork_violation():
     """T0 differential control: the *stock* saver serves branch2 the first
@@ -163,7 +134,6 @@ def test_t0_stock_saver_exhibits_the_fork_violation():
         f"got branch2={b2}"
     )
 
-
 def test_sqlite_backend_fork_repair():
     """Probe 134's original backend: SqliteSaver wrapped by the shim."""
     sqlite_mod = pytest.importorskip("langgraph.checkpoint.sqlite")
@@ -173,7 +143,6 @@ def test_sqlite_backend_fork_repair():
     b1, b2, ledger, *_ = fork_cells(saver, "sqlite", use_map=False)
     assert (b1, b2) == (1, 0)
     assert ledger == [1, 0]
-
 
 def test_core_journal_records_the_sequenced_ops():
     """RD substrate: the shim journals every put/put_writes submission in the

@@ -1,45 +1,13 @@
 #!/usr/bin/env python3
-"""
-172_p16_mutation_diff.py  (campaign p16)
-
-Stage 3 of the harness mutation study: run the load-bearing cells against
-each mutant tree produced by probe 170, diff the verdicts against the
-committed baseline, and compare the observed kill set to the operator's
-registered prediction.
-
-This exists because the shell loop it replaces failed silently three ways
-at once, and every one of them would have been reported as "the mutant
-survived":
-
-  1. probes redirected to /dev/null, so a probe that crashed on import
-     was indistinguishable from one that ran and changed nothing;
-  2. only three of the ten probes behind the fifteen load-bearing cells
-     were invoked, so twelve cells were absent rather than unchanged;
-  3. the report was truncated, so the absences never surfaced.
-
-A cell that did not RUN is not a cell that did not CHANGE. This driver
-keeps those two outcomes in separate columns and refuses to score a
-mutant whose probes failed.
-
-Each probe runs under the env matrix.toml assigns it, resolved against
-the ORIGINAL repo (already synced) while executing the MUTATED file --
-mutant trees carry pyproject.toml but no .venv by construction.
-
-Usage:
-  probes/172_p16_mutation_diff.py --mutants /tmp/mut --base .
-  probes/172_p16_mutation_diff.py --mutants /tmp/mut --base . --only M5,M7
-  probes/172_p16_mutation_diff.py --mutants /tmp/mut --base . --list-cells
-"""
 import argparse
 import json
+import importlib.util
 import os
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# cell -> (probe filename stem, env). Mirrors probe 169's LOADBEARING
-# table; a cell whose probe is absent here can never be scored.
 CELL_PROBES = {
     "LG.EO.crash":        ("118_p3_langgraph_rd_interleavings", "langgraph"),
     "LG.RD.reflexive":    ("118_p3_langgraph_rd_interleavings", "langgraph"),
@@ -52,22 +20,18 @@ CELL_PROBES = {
     "LG.killsweep":       ("160_p14_kill_point_sweep", "langgraph-durable"),
     "LG.killsweep.rec":   ("160_p14_kill_point_sweep", "langgraph-durable"),
     "CA.restore.dup":     ("115b_p2_crewai_checkpointconfig", "crewai"),
-    "AG.restore.EO":      ("140_p8_autogen_state_column", "autogen"),  # no envs/autogen: falls back to root project
+    "AG.restore.EO":      ("140_p8_autogen_state_column", "autogen"),
     "AG.doublerestore":   ("140_p8_autogen_state_column", "autogen"),
     "PG.parkkill.ok":     ("158c_p14_pydantic_graph_park_kill", "pydantic-graph"),
     "ORACLE.noovercount": ("163_p15_oracle_atomicity", "langgraph-durable"),
 }
 
 PREDICTED = {
-    "M1": ["LG.CO.concurrent"], "M2": [],  # reaches only an already-violated boolean; cannot flip it
+    "M1": ["LG.CO.concurrent"], "M2": [],
     "M3": ["LG.CO.concurrent"], "M4": ["LG.FD.6663"], "M5": [],
     "M6": ["LG.CO.concurrent"], "M7": [], "M8": ["__REFUSAL__"],
 }
 
-# Files each operator mutates. A cell is REACHABLE by an operator only if
-# the probe backing it appears here; predicting a kill in an unreachable
-# cell is a statement no run can satisfy, and scoring it as a miss blames
-# the harness for the prediction's incoherence.
 MUTATES = {
     "M1": {"159_p14_multiproc_saver", "126_p6_langgraph_sqlite_durable"},
     "M2": {"159_p14_multiproc_saver", "126_p6_langgraph_sqlite_durable"},
@@ -76,11 +40,9 @@ MUTATES = {
     "M7": {"159_p14_multiproc_saver"}, "M8": set(),
 }
 
-
 def resolve(tree, stem):
     hits = sorted(Path(tree, "probes").glob(f"{stem}*.py"))
     return hits[0] if hits else None
-
 
 def run_probe(tree, base, stem, env, timeout=900):
     """Execute one probe inside `tree` using `base`'s synced env.
@@ -90,9 +52,6 @@ def run_probe(tree, base, stem, env, timeout=900):
         return False, f"probe file {stem}*.py absent in mutant tree"
     proj = Path(base, "envs", env)
     if not proj.exists():
-        # Not every probe has a dedicated env; some run under the root
-        # project. Fall back rather than report a spurious env failure --
-        # which would land the cell in UNSCORED and look like an absence.
         root = Path(base)
         if (root / "pyproject.toml").exists():
             proj = root
@@ -108,24 +67,12 @@ def run_probe(tree, base, stem, env, timeout=900):
             cwd=str(tree), capture_output=True,
             text=True, timeout=timeout, env=penv)
     except subprocess.TimeoutExpired:
-        # Under M3 (crash_noop) a probe that waits on a kill will hang by
-        # construction. That is the operator working, not the driver
-        # failing -- but the cell is still unscored, because a hung probe
-        # produced no verdict to compare.
         return False, (f"timeout after {timeout}s (expected under "
                        f"crash_noop: the kill it waits on was disabled)")
     if r.returncode != 0:
         tail = (r.stderr or r.stdout).strip().splitlines()
         return False, f"rc={r.returncode}: {tail[-1] if tail else 'no output'}"
 
-    # Two probe classes exist in this suite and only one writes its own
-    # receipt. Probes 115/118/123/125/133 emit JSON on stdout and rely on
-    # harness/conformance/runner.py to persist it; probes 158c/159/160/163
-    # write files themselves. An earlier revision of this driver invoked
-    # probes directly, so the stdout class left nothing on disk, every one
-    # of their cells read back as None, and None-vs-baseline scored as a
-    # flipped verdict -- which is why all eight mutants reported the same
-    # eight kills. Persist stdout JSON here, exactly as the runner does.
     start = r.stdout.find("{")
     if start >= 0:
         try:
@@ -140,19 +87,16 @@ def run_probe(tree, base, stem, env, timeout=900):
             return True, f"ok (env {proj.name}, stdout persisted)"
     return True, f"ok (env {proj.name})"
 
-
 def read_cells(results_root, base):
     """Re-derive the fifteen cells from a results tree using probe 169's
     reader, so this driver and the baseline audit agree by construction."""
     sys.path.insert(0, str(Path(base, "probes")))
-    import importlib.util
     spec = importlib.util.spec_from_file_location(
         "p169", str(Path(base, "probes", "169_p16_harness_mutation.py")))
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
     return {c["cell"]: m.read_stable(results_root, c["probe"], c["key"])
             for c in m.LOADBEARING}, {c["cell"]: c["paper"] for c in m.LOADBEARING}
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -182,7 +126,6 @@ def main():
             print(f"{M}: tree absent at {tree} -- run 170 --apply-all first")
             continue
         print(f"=== {M} ===")
-        # run only the probes that back at least one scorable cell
         need = {}
         for cell, (stem, env) in CELL_PROBES.items():
             if baseline.get(cell) is not None:
@@ -203,12 +146,6 @@ def main():
             if stem is None or not runs.get(stem, {}).get("ok"):
                 unscored.append(cell)
             elif mut_v is None:
-                # The probe exited 0 but left no readable receipt for this
-                # cell. That is ABSENCE, not a flipped verdict. An earlier
-                # revision compared None against the baseline and scored
-                # every such cell as killed, which made all eight mutants
-                # report an identical kill set -- the tell that the number
-                # was an artifact rather than a measurement.
                 no_receipt.append(cell)
             elif mut_v != base_v:
                 killed.append(cell)
@@ -260,7 +197,6 @@ def main():
               f"means the cell is not reading what the paper says it reads.",
               file=sys.stderr)
     return 1 if (unsc or findings) else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,43 +1,27 @@
-#!/usr/bin/env python3
-"""
-123_p4_shim_cv_langgraph.py
-Repair demonstration: probe 113/T5's checkpoint-validity protocol re-run
-through the Remit CV shim (harness/remit_shim.py). Baseline behavior on
-LangGraph 1.2.9 (probe 113): schema-invalid state (None appended to a
-pydantic List[str]) persists silently across checkpoints with no error at
-write or read time. Target through the shim: the write is rejected loudly,
-nothing invalid is persisted, and the durable history stays readable.
-"""
 import json
 import sys
 import traceback
 from importlib.metadata import version
 from pathlib import Path
 from typing import List
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
-from remit_shim import ValidatingSaver, InvalidCheckpointError  # noqa: E402
-
+from remit_shim import ValidatingSaver, InvalidCheckpointError
 from pydantic import BaseModel
 from langgraph.graph import StateGraph, START, END
 
 RESULTS = {"langgraph_version": version("langgraph")}
 
-
 class S(BaseModel):
     items: List[str] = []
-
 
 def validator(channel_values: dict) -> None:
     items = channel_values.get("items")
     if items is not None and any(not isinstance(x, str) for x in items):
         raise ValueError("items must be List[str]")
 
-
 def bad_node(state: S) -> S:
-    state.items.append(None)  # schema violation, exactly as probe 113/T5
+    state.items.append(None)
     return state
-
 
 try:
     g = StateGraph(S)
@@ -57,6 +41,7 @@ try:
     hist_error = None
     invalid_persisted = None
     n_ckpts = None
+
     try:
         hist = list(app.get_state_history(cfg))
         n_ckpts = len(hist)

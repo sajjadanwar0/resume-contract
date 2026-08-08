@@ -1,0 +1,86 @@
+TLC2 Version 2026.04.09.014118 (rev: 389440f)
+Running breadth-first search Model-Checking with fp 128 and seed -8470826201378773273 with 16 workers on 16 cores with 7282MB heap and 64MB offheap memory [pid: 127588] (Linux 6.8.0-136-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/ResumeContract.tla (file:/home/neo/RustroverProjects/resume-contract/formal/tla/independence_ref_rerun/../ResumeContract.tla)
+Parsing file /tmp/tlc-16790709856678684710/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-16790709856678684710/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-16790709856678684710/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-16790709856678684710/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-16790709856678684710/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-16790709856678684710/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-16790709856678684710/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module ResumeContract
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module ResumeContract
+Starting... (2026-07-25 19:51:26)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-07-25 19:51:26.
+Error: Invariant RecoveryDeterminism is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+
+State 2: <ExecTask line 114, col 3 to line 126, col 51 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 3: <CrashRecover line 170, col 3 to line 188, col 64 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 4: <CrashRecover line 170, col 3 to line 188, col 64 of module ResumeContract>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 2
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"], [dur |-> 1, dec |-> "reexec"]>>
+
+211 states generated, 162 distinct states found, 58 states left on queue.
+The depth of the complete state graph search is 9.
+Finished in 00s at (2026-07-25 19:51:26)
+Trace exploration spec path: ../ResumeContract_TTrace_1784991085.tla

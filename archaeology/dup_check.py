@@ -9,7 +9,6 @@ import urllib.request
 
 API = "https://api.github.com/search/issues"
 
-
 def search(repo: str, query: str):
     q = f"repo:{repo} is:issue {query}"
     url = f"{API}?q={urllib.parse.quote(q)}&per_page=20&sort=updated"
@@ -21,7 +20,6 @@ def search(repo: str, query: str):
     })
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.load(r)
-
 
 def main() -> None:
     if len(sys.argv) < 3:
@@ -52,7 +50,6 @@ def main() -> None:
               f"{item['title'][:90]}\n         {item['html_url']}")
     if not seen:
         print("(no candidates found)")
-
 
 if __name__ == "__main__":
     main()

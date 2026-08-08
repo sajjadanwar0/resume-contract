@@ -1,24 +1,5 @@
 #!/usr/bin/env bash
-# sweep_nonlg.sh -- v3.1. Back- and forward-sweep of the non-LangGraph
-# headline cells. Changes vs v2: the v3 summary-splice corruption is gone
-# (file regenerated whole); summary auto-salvages JSON embedded in polluted
-# stdout (CrewAI >=1.15.3 prints rich console boxes to stdout) and, for a
-# truly empty receipt, prints the stderr sidecar's last line; `--summary`
-# re-runs adjudication without touching any cell; release dates for the
-# three packages are dumped to results/sweep/release_dates.json as the
-# receipt for pin-currency claims; crewai gains 1.15.6, pydantic-graph
-# gains a 2.x forward cell (a crash there is an API-break scope statement,
-# not a failure).
-#
-# Modes:
-#   ./sweep_nonlg.sh                 run missing cells, dump dates, summarize
-#   ./sweep_nonlg.sh --summary       adjudicate existing receipts only
-#   ./sweep_nonlg.sh --versions PKG  final releases of PKG, numeric order
-#
-# Reporting rules: verdicts reproduce -> Sec 2 comparability sentence; a
-# verdict FLIP -> new regression pair for Sec 6.6(iii); a key absent at an
-# older release with a leg error -> feature-introduction boundary; a crash
-# at a newer MAJOR -> API-break scope statement.
+
 set -euo pipefail
 OUT="results/sweep"
 
@@ -139,8 +120,9 @@ sweep() {
     done
     if [[ $todo -eq 0 ]]; then echo "  receipts present -- skipping"; continue; fi
     uv venv "$env" --python 3.12 >/dev/null
-    # shellcheck disable=SC1090
+
     source "$env/bin/activate"
+
     if ! uv pip install -q "$pkg==$v" 2>"$OUT/install_$tag.stderr.log"; then
       echo "  install failed for $pkg==$v (recorded)"
       echo "{\"skipped\": \"install failed\", \"package\": \"$pkg\", \"version\": \"$v\"}" \
@@ -159,22 +141,16 @@ sweep() {
   done
 }
 
-# --- back-sweep (prior releases) + forward-sweep (post-pin finals) ----------
-# crewai pin 1.15.2 (2026-07-08). Prior minor: 1.14.1 (restore API absent
-# there -- feature boundary, expected leg error). Forward finals: 1.15.3
-# (2026-07-16, pin day), 1.15.4, 1.15.5, 1.15.6 (2026-07-24).
+
 sweep "crewai" \
   "probes/115_p2_conformance_crewai.py probes/115b_p2_crewai_checkpointconfig.py" \
   1.14.1 1.15.2 1.15.3 1.15.4 1.15.5 1.15.6
 
-# llama-index-workflows pin 2.22.2 == newest final: pin is current.
 sweep "llama-index-workflows" \
   "probes/114_p2_conformance_llamaindex.py" \
   2.20.0 2.21.0 2.22.2
 
-# pydantic-graph pin 1.107.1; the 2.x line post-dates it (releases daily,
-# 2.14-2.18 over 2026-07-21..25). One forward cell at a 2.x final: a crash
-# is an API-break scope statement, not a failure.
+
 sweep "pydantic-graph" \
   "probes/119_p2_conformance_pydantic_graph.py" \
   1.105.0 1.106.0 1.107.1 2.18.0

@@ -1,29 +1,5 @@
 #!/usr/bin/env bash
-# 145_independence_matrix.sh -- per-invariant TLC fault matrix (Table tab:ix)
-# ===========================================================================
-# Builds and runs the 39-cell independence matrix behind the paper's
-# Proposition "Partial independence, machine-checked":
-#   * 6 single-fault models on ResumeContract.tla x 6 invariants each,
-#     using the artifact's R1-R5/R9 constants VERBATIM (the R4/nondetrec
-#     and R9/prefixreplay rows keep MaxCrashes=2, without which RD is
-#     vacuously clean);
-#   * the R7_StateRebuild module x its 3 invariants.
-# Each cell is ONE TLC run checking ONE invariant, so a "holds" cell means
-# the invariant holds over the faulty model's ENTIRE reachable state space
-# (TLC complete, no error) -- the separating-model evidence -- and a
-# "violated" cell reports the counterexample depth.
-#
-# The script then diffs the fresh verdicts against the expected matrix
-# (embedded below; container runs 2026-07-18 [33 cells] and 2026-07-21\n# [prefixreplay row + legacy re-verification], OpenJDK 21)
-# and exits nonzero on any mismatch, so a host replication is self-auditing.
-#
-# Usage:   bash 145_independence_matrix.sh [REPO_ROOT]   # default: .
-# Output:  REPO_ROOT/formal/tla/independence/{IX_*.cfg,IX_*.out,
-#            independence_matrix.json, independence_matrix.md}
-#          and a copy of the two artifacts under results/tla/independence/.
-# TLC:     resolved like 116_run_tlc.sh ($TLC_CMD > $TLA_TOOLS_JAR >
-#          ./tla2tools.jar > $HOME/tla2tools.jar > download from
-#          tlaplus/tlaplus releases).
+
 set -euo pipefail
 REPO="$(cd "${1:-.}" && pwd)"
 TLA_DIR="$REPO/formal/tla"
@@ -49,7 +25,6 @@ resolve_tlc () {
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC"
 
-# ---- 1. generate the 39 configs (constants verbatim from R1-R5/R9 / R7) ----
 python3 - "$IX_DIR" << 'PYGEN'
 import sys, os
 ix = sys.argv[1]
@@ -106,8 +81,8 @@ for inv in ["TypeOK", "EffectExactlyOnce", "PrefixContinuation"]:
 print("wrote 39 configs")
 PYGEN
 
-# ---- 2. run TLC per cell ----
 cd "$IX_DIR"
+
 for cfg in IX_*.cfg; do
   name="${cfg%.cfg}"
   mod=ResumeContract; [[ "$name" == IX_staterebuild__* ]] && mod=R7_StateRebuild
@@ -119,7 +94,6 @@ for cfg in IX_*.cfg; do
     | sed "s|^|$name :: |"
 done
 
-# ---- 3. build matrix json/md and diff against the expected verdicts ----
 python3 - "$IX_DIR" << 'PYCHK'
 import sys, os, re, json, glob
 ix = sys.argv[1]

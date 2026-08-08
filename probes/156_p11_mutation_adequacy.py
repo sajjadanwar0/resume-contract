@@ -1,32 +1,4 @@
 #!/usr/bin/env python3
-"""
-156_p11_mutation_adequacy.py  (E-S1)
-Source-level mutation adequacy of the conformance harness.
-
-Answers the reviewer charge that the harness is tuned to known bugs / that
-the fault space should be derived from the program: apply first-order
-mutants to the resume-serving region of the ACTUAL framework source
-(vendored copy; system install untouched) and check that the UNCHANGED
-probe suite detects each one via divergent stable fields.
-
-A mutant is KILLED if any non-version JSON field of any probe diverges from
-the same-probe baseline run in the same vendored (unmutated) environment.
-Survivors are the interesting output: each is either argued equivalent in
-the manifest or is a harness hole to close (and say so in the paper).
-
-Usage:
-  python3 156_p11_mutation_adequacy.py --verify-anchors      # anchors exist & unique
-  python3 156_p11_mutation_adequacy.py                       # full study
-  python3 156_p11_mutation_adequacy.py --mutants M1,M6       # subset
-Probes run per mutant (edit PROBES for your layout): 113, 118, 127.
-Add 126/134/138/141 for the full study (SQLite probes need the sqlite pkg
-in the vendor dir: pip install --target vendor langgraph-checkpoint-sqlite==3.1.0).
-
-Demonstrated kill (container, 2026-07-21, pins 1.2.9/4.1.1): M1 flips
-  T2_fork_on_resume_values_#6663.violation_second_resume_ignored True->False
-i.e. a one-line change at the paper's located binding site is caught by the
-suite -- the verdict is causally coupled to the mechanism account.
-"""
 import argparse, json, os, shutil, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 VENDOR = os.path.join(HERE, "vendor")

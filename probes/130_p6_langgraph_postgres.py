@@ -1,21 +1,4 @@
 #!/usr/bin/env python3
-"""
-130_p6_langgraph_postgres.py
-P6 - Production-backend conformance on a LIVE PostgreSQL server via
-PostgresSaver (langgraph-checkpoint-postgres): the deployment-relevant cells.
-
-  T1 (#6663)     FD bare-value form: two resumes, different values, same
-                 (thread_id, checkpoint_id)
-  T1b            FD resume-map form (Command(resume={interrupt_id: v}))
-  T2 (#6491 cls) CV: schema-invalid node output -> persisted silently?
-  T3             CO: stray resume after completion
-  T4             EO crash-path: functional API, s1 durably recorded, crash in
-                 s2, resume -> does s1 re-execute?
-
-Requires: a reachable Postgres (default postgresql://postgres:pg@localhost:5432/postgres,
-override with PROBE_PG_DSN). Each test uses a fresh database-level namespace
-by dropping/creating the saver tables per scenario id.
-"""
 import json
 import os
 import traceback
@@ -37,7 +20,6 @@ RESULTS = {
     "dsn_host": DSN.split("@")[-1],
 }
 
-
 def fresh_saver(tag):
     dbname = f"probe130_{tag}"
     admin = psycopg.connect(DSN, autocommit=True)
@@ -50,10 +32,8 @@ def fresh_saver(tag):
     saver.setup()
     return saver, conn
 
-
 class S(TypedDict):
     value: int
-
 
 def fork_graph(saver):
     def node(state: S):
@@ -69,7 +49,6 @@ def fork_graph(saver):
         .add_edge("node", END)
         .compile(checkpointer=saver)
     )
-
 
 def t1_fork(use_map):
     saver, conn = fresh_saver("t1m" if use_map else "t1")
@@ -101,7 +80,6 @@ def t1_fork(use_map):
             r_true.get("value") == 1 and r_false.get("value") == 0
         ),
     }
-
 
 def t2_cv():
     class P(BaseModel):
@@ -143,7 +121,6 @@ def t2_cv():
         ),
     }
 
-
 def t3_co():
     eff = {"post": 0}
 
@@ -173,10 +150,8 @@ def t3_co():
         "violation_stray_resume_refired_effect": eff["post"] != 1,
     }
 
-
 class Crash(RuntimeError):
     pass
-
 
 def t4_eo_crash():
     eff = {"s1": 0, "s2": 0}
@@ -229,7 +204,6 @@ def t4_eo_crash():
         "violation_completed_task_reexecuted_on_crash_resume": eff["s1"] > 1,
     }
 
-
 def main():
     for name, fn in [
         ("t1_fd_fork_bare", lambda: t1_fork(False)),
@@ -243,7 +217,6 @@ def main():
         except Exception:
             RESULTS[name] = {"probe_error": traceback.format_exc()}
     print(json.dumps(RESULTS, indent=2, default=str))
-
 
 if __name__ == "__main__":
     main()

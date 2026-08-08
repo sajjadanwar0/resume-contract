@@ -1,34 +1,20 @@
-#!/usr/bin/env python3
-"""
-122_p5_live_langgraph_anthropic_interrupt.py
-Live ecological probe (requires ANTHROPIC_API_KEY): with a REAL model in the
-loop, LangGraph interrupt->resume must not re-invoke completed tools, and a
-stray second resume must stay inert (EO/CO under ecological conditions --
-the cell the Threats section's abstraction caveat asks for).
-
-Protocol: prebuilt ReAct agent, charge() tool with an effect counter,
-interrupt_before=["tools"]; approve once (resume None), then inject a stray
-second resume. Stable verdicts are the counters.
-"""
 import json
 import os
 import sys
 import traceback
 from importlib.metadata import version
-
-if not os.environ.get("ANTHROPIC_API_KEY"):
-    print(json.dumps({"skipped": "ANTHROPIC_API_KEY not set"}))
-    sys.exit(0)
-
 from langchain_anthropic import ChatAnthropic
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
 
+if not os.environ.get("ANTHROPIC_API_KEY"):
+    print(json.dumps({"skipped": "ANTHROPIC_API_KEY not set"}))
+    sys.exit(0)
+
 RESULTS = {"langgraph_version": version("langgraph"),
            "model": os.environ.get("PROBE_MODEL", "claude-haiku-4-5")}
 EFF = {"charge": 0}
-
 
 @tool
 def charge(amount_usd: int) -> str:
@@ -46,12 +32,13 @@ try:
     agent.invoke({"messages": [("user",
                   "Charge exactly 5 dollars once using the charge tool, "
                   "then say DONE.")]}, cfg)
-    charges_at_interrupt = EFF["charge"]      # expected 0: paused pre-tool
-    agent.invoke(None, cfg)                    # approval resume
-    charges_after_approval = EFF["charge"]     # expected 1
+    charges_at_interrupt = EFF["charge"]
+    agent.invoke(None, cfg)
+    charges_after_approval = EFF["charge"]
     stray_error = None
+
     try:
-        agent.invoke(None, cfg)                # stray second resume
+        agent.invoke(None, cfg)
     except Exception as e:
         stray_error = type(e).__name__
     RESULTS.update({

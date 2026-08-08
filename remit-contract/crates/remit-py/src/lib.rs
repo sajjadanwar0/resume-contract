@@ -1,13 +1,3 @@
-//! PyO3 surface for `remit-core`, published as the extension module
-//! `remit._core`.
-//!
-//! Design rule, stated once and enforced by review: **this file makes no
-//! contract decision.** It translates Python types to `remit-core` types,
-//! calls the core, and translates results and errors back. If a semantic
-//! question ("is this a fork?", "may this effect fire?", "is this state
-//! persistable?", "what does recovery do?") appears to be answered here,
-//! that is a bug — the answer must come from `remit-core`, whose abstract
-//! model is the Verus-verified one.
 
 use pyo3::create_exception;
 use pyo3::exceptions::PyException;
@@ -53,8 +43,6 @@ impl core::CheckpointValidator for PyValidator {
     }
 }
 
-/// Thread-safe handle over the Rust core. One `Core` serves any number of
-/// Python threads and any number of resume planes (keyed by thread id).
 #[pyclass(name = "Core", module = "remit._core")]
 struct PyCore {
     inner: core::RemitCore,
@@ -67,9 +55,6 @@ impl PyCore {
         PyCore { inner: core::RemitCore::new() }
     }
 
-    /// EO/CO admission. Returns the ledger sequence number on the first
-    /// admission; raises `RemitDuplicateEffect` on any repeat for the same
-    /// (branch, task) — the duplicate fires nothing and records nothing.
     #[pyo3(signature = (thread, task, effect_id, checkpoint_id="root", resume_index=0))]
     fn begin_effect(
         &self,
@@ -88,9 +73,6 @@ impl PyCore {
             .map_err(raise)
     }
 
-    /// PC + CV commit. `valid`/`reason` carry the framework-side validator's
-    /// answer; the enforcement decision (invalid ⇒ loud error, nothing
-    /// persisted; frontier advances by exactly one) is the core's.
     #[pyo3(signature = (thread, task, state, valid=true, reason="", checkpoint_id="root", resume_index=0))]
     #[allow(clippy::too_many_arguments)]
     fn commit_checkpoint(
@@ -113,10 +95,6 @@ impl PyCore {
             .map_err(raise)
     }
 
-    /// CV gate for adapters that cannot map framework checkpoints onto
-    /// contract task numbers (the LangGraph shim's `put`). Raises
-    /// `RemitValidityError` when `valid` is false, after journaling the loud
-    /// rejection; returns the journal sequence number when valid.
     #[pyo3(signature = (thread, valid, reason=""))]
     fn validity_gate(&self, thread: &str, valid: bool, reason: &str) -> PyResult<u64> {
         self.inner
@@ -124,14 +102,11 @@ impl PyCore {
             .map_err(raise)
     }
 
-    /// FD: open a fork branch for `checkpoint_id` with the supplied value;
-    /// returns `{"checkpoint_id", "resume_index"}` of the fresh branch.
     fn fork<'py>(&self, py: Python<'py>, thread: &str, checkpoint_id: &str, value: &str) -> PyResult<Bound<'py, PyDict>> {
         let b = self.inner.with_plane(thread, |p| p.fork(checkpoint_id, value));
         branch_dict(py, &b)
     }
 
-    /// The branch outcome source: the value the branch actually consumed.
     #[pyo3(signature = (thread, checkpoint_id, resume_index))]
     fn outcome(&self, thread: &str, checkpoint_id: &str, resume_index: u32) -> Option<String> {
         let b = core::BranchKey {
@@ -141,9 +116,6 @@ impl PyCore {
         self.inner.with_plane(thread, |p| p.outcome(&b).map(|s| s.to_string()))
     }
 
-    /// The interrupt lifecycle, decided in one place. `kind` is one of
-    /// `"ordinary"`, `"explicit_checkpoint"`, `"fork_flag"`. Returns
-    /// `{"decision": "serve_supplied"|"serve_recorded"|"inert", ...}`.
     #[pyo3(signature = (thread, checkpoint_id, supplied=None, kind="ordinary"))]
     fn resolve_resume<'py>(
         &self,
@@ -183,8 +155,6 @@ impl PyCore {
         Ok(out)
     }
 
-    /// PC's memoized-replay clause: serve a consumed interrupt's recorded
-    /// value during recovery re-traversal.
     fn recovery_replay<'py>(&self, py: Python<'py>, thread: &str, checkpoint_id: &str) -> PyResult<Bound<'py, PyDict>> {
         let d = self.inner.with_plane(thread, |p| p.recovery_replay(checkpoint_id));
         let out = PyDict::new(py);
@@ -200,9 +170,6 @@ impl PyCore {
         Ok(out)
     }
 
-    /// RD sequencer: journal a persistence submission (`kind` is
-    /// `"put_writes"` or `"put"`) and return its position in the plane's
-    /// total order.
     fn sequence_op(&self, thread: &str, kind: &str, ref_id: &str) -> PyResult<u64> {
         let k = match kind {
             "put_writes" => core::OpKind::PutWrites,
@@ -216,21 +183,14 @@ impl PyCore {
         Ok(self.inner.with_plane(thread, |p| p.sequence_op(k, ref_id)))
     }
 
-    /// Declare that superstep `s` will submit task-result writes; a
-    /// checkpoint commit for `s` before those writes are sequenced is refused
-    /// (`RemitOrderViolation`) instead of raced.
     fn declare_writes(&self, thread: &str, superstep: u32) {
         self.inner.with_plane(thread, |p| p.declare_writes(superstep));
     }
 
-    /// Mark the run completed: subsequent ordinary-address resumes are inert
-    /// (CO); fork-intent resumes still open branches (FD).
     fn complete(&self, thread: &str) {
         self.inner.with_plane(thread, |p| p.complete());
     }
 
-    /// RD: the recovery decision, a pure function of the durable log.
-    /// Returns the task index to continue from (`SkipTo`).
     fn recover(&self, thread: &str) -> u32 {
         self.inner.with_plane(thread, |p| {
             let core::Decision::SkipTo(t) = core::recover(p.checkpoints());
@@ -238,8 +198,6 @@ impl PyCore {
         })
     }
 
-    /// Per-task recovery plan over tasks `1..=total_tasks`:
-    /// `[("skip"|"execute", task), ...]`.
     fn recovery_plan(&self, thread: &str, total_tasks: u32) -> Vec<(String, u32)> {
         self.inner.with_plane(thread, |p| {
             core::recovery_plan(p.checkpoints(), total_tasks)
@@ -252,8 +210,6 @@ impl PyCore {
         })
     }
 
-    /// The append-only effect ledger, as `[(checkpoint_id, resume_index,
-    /// task, effect_id, seq), ...]` — the paper's audit oracle.
     fn ledger(&self, thread: &str) -> Vec<(String, u32, u32, String, u64)> {
         self.inner.with_plane(thread, |p| {
             p.ledger()
@@ -271,7 +227,6 @@ impl PyCore {
         })
     }
 
-    /// The sequencer journal, as `[(seq, kind, ref_id), ...]`.
     fn journal(&self, thread: &str) -> Vec<(u64, String, String)> {
         self.inner.with_plane(thread, |p| {
             p.journal()
@@ -289,27 +244,19 @@ impl PyCore {
         })
     }
 
-    /// Recorded resume values for an interrupt checkpoint, in ordinal order.
     fn recorded_resumes(&self, thread: &str, checkpoint_id: &str) -> Vec<String> {
         self.inner.with_plane(thread, |p| p.recorded_resumes(checkpoint_id))
     }
 
-    /// Root-branch durable frontier for the plane.
     fn frontier(&self, thread: &str) -> u32 {
         self.inner.with_plane(thread, |p| p.frontier(&core::BranchKey::root()))
     }
 
-    /// JSON snapshot of every plane, for audit and debugging.
     fn snapshot_json(&self) -> String {
         self.inner.snapshot_json()
     }
 }
 
-/// FI / probe-134 rule as a pure module-level function: given how the
-/// invocation is addressed and whether the loaded checkpoint carries recorded
-/// resume writes, return `"strip"` (fork intent: recorded resumes must not
-/// shadow the supplied value) or `"keep"` (ordinary address: replay
-/// idempotence and consume-once untouched).
 #[pyfunction]
 #[pyo3(signature = (explicit_checkpoint_address, fork_flag, has_recorded_resumes))]
 fn fork_view(explicit_checkpoint_address: bool, fork_flag: bool, has_recorded_resumes: bool) -> &'static str {
@@ -319,15 +266,6 @@ fn fork_view(explicit_checkpoint_address: bool, fork_flag: bool, has_recorded_re
     }
 }
 
-/// CO (cross-process) / probe-165 rule as a pure module-level function:
-/// given whether the loaded checkpoint carries a pending `__interrupt__`
-/// write, whether the cross-process gate is enabled, and whether the
-/// invocation carries fork or read (inspection) intent, return `"attempt"`
-/// (take the `(thread, checkpoint)` claim in the shared store before any
-/// node executes) or `"pass"` (the gate does not engage: fork intent claims
-/// a fresh branch key instead, inspection must not consume, an
-/// interrupt-free checkpoint has nothing to claim, and a disabled gate
-/// preserves stock behavior).
 #[pyfunction]
 #[pyo3(signature = (has_pending_interrupt, gate_enabled, fork_intent, inspect_intent))]
 fn consume_view(
@@ -342,11 +280,6 @@ fn consume_view(
     }
 }
 
-/// The claim outcome, decided by the core: the compare-and-swap winner is
-/// served (`Ok`); the loser is refused loudly with `RemitConsumeConflict`
-/// *before any node executes*. The adapter reports `claim_won` and applies
-/// this verdict mechanically — it holds no branch of its own on the
-/// outcome.
 #[pyfunction]
 #[pyo3(signature = (claim_won, thread, checkpoint_id))]
 fn consume_claim_check(claim_won: bool, thread: &str, checkpoint_id: &str) -> PyResult<()> {
@@ -360,8 +293,6 @@ fn consume_claim_check(claim_won: bool, thread: &str, checkpoint_id: &str) -> Py
     }
 }
 
-/// RD, standalone: recovery over an explicit log `[(task, seq), ...]` is a
-/// pure, order-independent function; returns the `SkipTo` task.
 #[pyfunction]
 fn recover_from_log(log: Vec<(u32, u64)>) -> u32 {
     let recs: Vec<core::CheckpointRecord> = log

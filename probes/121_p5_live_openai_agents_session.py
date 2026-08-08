@@ -1,32 +1,18 @@
-#!/usr/bin/env python3
-"""
-121_p5_live_openai_agents_session.py
-Live ecological probe (requires OPENAI_API_KEY): OpenAI Agents SDK session
-restore must not re-invoke completed tools. A real model is in the loop, so
-prose output varies; the STABLE verdict fields are the tool-effect counters.
-
-Protocol: agent with a side-effecting charge() tool and a file-backed
-SQLiteSession. Run 1 instructs exactly one charge. Run 2 opens the SAME
-session in a FRESH runner ("session restore") and instructs a summary with
-no tool use. EO across restore: charge count stays 1.
-"""
 import json
 import os
 import sys
 import tempfile
 import traceback
 from importlib.metadata import version
+from agents import Agent, Runner, SQLiteSession, function_tool, ModelSettings
 
 if not os.environ.get("OPENAI_API_KEY"):
     print(json.dumps({"skipped": "OPENAI_API_KEY not set"}))
     sys.exit(0)
 
-from agents import Agent, Runner, SQLiteSession, function_tool, ModelSettings
-
 RESULTS = {"openai_agents_version": version("openai-agents"),
            "model": os.environ.get("PROBE_MODEL", "sdk-default")}
 EFF = {"charge": 0}
-
 
 @function_tool
 def charge(amount_usd: int) -> str:
@@ -49,7 +35,7 @@ try:
                          session=s1)
     charges_after_run1 = EFF["charge"]
 
-    s2 = SQLiteSession("thread-1", db)  # fresh handle = session restore
+    s2 = SQLiteSession("thread-1", db)
     r2 = Runner.run_sync(agent,
                          "Do not call any tools. Summarize what was charged.",
                          session=s2)

@@ -1,60 +1,14 @@
 ---------------------------- MODULE FDStrengthened ----------------------------
-(***************************************************************************)
-(* The Resume Contract: checkpoint / interrupt / resume semantics for      *)
-(* agent-framework persistence planes.                                     *)
-(*                                                                         *)
-(* A workflow of NTasks sequential tasks, each with one non-idempotent     *)
-(* external effect. Task IP is interrupt-gated: its effect fires only      *)
-(* after a human resume value is consumed. Completion of each task writes  *)
-(* a checkpoint record advancing the durable frontier.                     *)
-(*                                                                         *)
-(* Six contract properties (invariants):                                   *)
-(*   EO  EffectExactlyOnce    effects fire at most once across             *)
-(*                            interrupt / crash / resume                   *)
-(*   PC  PrefixConsistency    execution never re-enters the durable        *)
-(*                            prefix                                       *)
-(*   FD  ForkDeterminism      resume value k from the interrupt            *)
-(*                            checkpoint yields the outcome of value k     *)
-(*   CV  CheckpointValidity   only valid states are durably persisted      *)
-(*   CO  ConsumeOnce          the interrupt-gated effect fires at most     *)
-(*                            once                                         *)
-(*   RD  RecoveryDeterminism  identical durable state yields identical     *)
-(*                            recovery decisions                           *)
-(*                                                                         *)
-(* Six fault switches model the violation classes observed live in the   *)
-(* pilot conformance study:                                                *)
-(*   FaultReplay          resume re-executes the completed prefix          *)
-(*                        (CrewAI @persist / from_checkpoint, probes       *)
-(*                        115/115b; LangGraph #7361 regression class)      *)
-(*   FaultForkIgnore      2nd resume value from the same checkpoint is     *)
-(*                        silently replaced by the 1st (LangGraph #6663)   *)
-(*   FaultInvalidPersist  a schema-invalid completion record is persisted  *)
-(*                        silently (LangGraph #6491 class)                 *)
-(*   FaultNondetRecovery  replay-vs-re-execute decided nondeterministic-   *)
-(*                        ally at equal durable state (LangGraph #8039)    *)
-(*   FaultDoubleConsume   a stray resume on a completed thread re-fires    *)
-(*                        the gated effect (CopilotKit #2315 class)        *)
-(*   FaultPrefixReplay    recovery restarts from task 1 but serves the     *)
-(*                        gated task's effect from the durable record --   *)
-(*                        memoized-gate prefix replay, the LangGraph       *)
-(*                        1.2.9 crash-path class (probes 118/133):         *)
-(*                        completed non-gated tasks re-execute while the   *)
-(*                        interrupt lifecycle stays exactly-once           *)
-(*                                                                         *)
-(* With all switches FALSE the module is the reference (gated) semantics;  *)
-(* TLC verifies all six invariants. With exactly one switch TRUE, TLC      *)
-(* produces a violation trace for the corresponding invariant.             *)
-(***************************************************************************)
 EXTENDS Naturals, Sequences
 
 CONSTANTS
-  NTasks,            \* number of tasks (e.g. 3)
-  IP,                \* index of the interrupt-gated task (e.g. 2)
-  Values,            \* resume-value domain (e.g. {"va","vb"})
-  NoVal,             \* model value: no resume value consumed yet
-  MaxResumes,        \* bound on resumes targeted at the interrupt ckpt
-  MaxCrashes,        \* bound on crash events
-  MaxExtraResumes,   \* bound on post-completion stray resumes
+  NTasks,
+  IP,
+  Values,
+  NoVal,
+  MaxResumes,
+  MaxCrashes,
+  MaxExtraResumes,
   FaultReplay,
   FaultForkIgnore,
   FaultInvalidPersist,
@@ -70,30 +24,22 @@ ASSUME /\ NTasks \in Nat \ {0}
 Tasks == 1..NTasks
 
 VARIABLES
-  pc,            \* next task index on the primary branch, in 1..NTasks+1
-  effects,       \* [Tasks -> Nat] : external-effect execution counts
-  ckpts,         \* Seq([idx : Tasks, valid : BOOLEAN]) : durable log
-  frontier,      \* highest task index with a durable completion record
-  waiting,       \* TRUE iff the interrupt is emitted and unconsumed
-  consumedVal,   \* Values \cup {NoVal} : value consumed on primary branch
-  forkVals,      \* Seq(Values) : values supplied at the interrupt ckpt
-  forkOuts,      \* Seq(Values) : outcome each such resume actually observed
-  crashes,       \* number of crash events so far
-  recHist,       \* Seq([dur : Nat, dec : STRING]) : recovery decisions
-  extraResumes,  \* stray resumes injected after completion
-  pcRegress      \* TRUE once execution re-enters the durable prefix
+  pc,
+  effects,
+  ckpts,
+  frontier,
+  waiting,
+  consumedVal,
+  forkVals,
+  forkOuts,
+  crashes,
+  recHist,
+  extraResumes,
+  pcRegress
 
 vars == << pc, effects, ckpts, frontier, waiting, consumedVal,
            forkVals, forkOuts, crashes, recHist, extraResumes, pcRegress >>
 
-(* ----------------------------------------------------------------------- *)
-(* Injective, NON-identity branch semantics. In the original module the    *)
-(* decision function f of Property 3 is hard-wired to the identity (the    *)
-(* actions append v itself), so ForkDeterminism reduces to v = v. Here f   *)
-(* is explicit and non-identity (tuple wrap: injective), making FD a       *)
-(* statement about ROUTING through a computation, i.e. falsifiable by any  *)
-(* serving rule that does not apply f to the supplied value.               *)
-(* ----------------------------------------------------------------------- *)
 f(v) == <<v>>
 
 --------------------------------------------------------------------------
@@ -112,12 +58,10 @@ Init ==
   /\ pcRegress    = FALSE
 
 --------------------------------------------------------------------------
-(* Execute a non-gated task (or re-execute IP during a faulty replay      *)
-(* when its value was already consumed). Writes the completion record.    *)
 ExecTask ==
   /\ pc \in Tasks
   /\ ~waiting
-  /\ (pc = IP) => (consumedVal # NoVal)   \* IP first executes via Consume
+  /\ (pc = IP) => (consumedVal # NoVal)
   /\ effects'   = [effects EXCEPT ![pc] =
                      IF FaultPrefixReplay /\ pc = IP THEN @ ELSE @ + 1]
   /\ ckpts'     = Append(ckpts,
@@ -129,7 +73,6 @@ ExecTask ==
   /\ UNCHANGED << waiting, consumedVal, forkVals, forkOuts,
                   crashes, recHist, extraResumes >>
 
-(* Reaching the gated task emits the interrupt and parks the branch.      *)
 EmitInterrupt ==
   /\ pc = IP
   /\ ~waiting
@@ -138,8 +81,6 @@ EmitInterrupt ==
   /\ UNCHANGED << pc, effects, ckpts, frontier, consumedVal, forkVals,
                   forkOuts, crashes, recHist, extraResumes, pcRegress >>
 
-(* First resume: consumes the interrupt, fires the gated effect once,     *)
-(* records the branch outcome for the supplied value.                     *)
 Consume(v) ==
   /\ waiting
   /\ Len(forkVals) < MaxResumes
@@ -153,9 +94,6 @@ Consume(v) ==
   /\ forkOuts'    = Append(forkOuts, f(v))
   /\ UNCHANGED << crashes, recHist, extraResumes, pcRegress >>
 
-(* A further resume targeted at the SAME (thread, interrupt-checkpoint):  *)
-(* the contract requires a fork whose outcome reflects the new value.     *)
-(* FaultForkIgnore silently substitutes the first branch's outcome.       *)
 ForkResume(v) ==
   /\ consumedVal # NoVal
   /\ Len(forkVals) < MaxResumes
@@ -165,11 +103,6 @@ ForkResume(v) ==
   /\ UNCHANGED << pc, effects, ckpts, frontier, waiting, consumedVal,
                   crashes, recHist, extraResumes, pcRegress >>
 
-(* Crash strictly inside the run, then recover according to the mode.     *)
-(* Reference: continue from the durable frontier (skip completed work).   *)
-(* FaultReplay: restart from task 1 over restored state.                  *)
-(* FaultNondetRecovery: at identical durable state the decision between   *)
-(* skipping and re-executing the frontier task is unconstrained.          *)
 CrashRecover ==
   /\ crashes < MaxCrashes
   /\ pc \in 2..NTasks
@@ -191,8 +124,6 @@ CrashRecover ==
   /\ UNCHANGED << effects, ckpts, frontier, waiting, consumedVal,
                   forkVals, forkOuts, extraResumes, pcRegress >>
 
-(* A stray resume delivered to a completed thread. The contract requires  *)
-(* it to be inert; FaultDoubleConsume re-fires the gated effect.          *)
 ExtraResume ==
   /\ pc = NTasks + 1
   /\ extraResumes < MaxExtraResumes
@@ -213,15 +144,10 @@ Next ==
 
 Spec == Init /\ [][Next]_vars
 
-(* Liveness (checked on the reference configuration): under weak fairness
-   the run eventually completes -- a framework that refuses every resume
-   satisfies all six safety invariants vacuously, so the contract pairs
-   them with this progress obligation. *)
 FairSpec == Init /\ [][Next]_vars /\ WF_vars(Next)
 EventuallyCompletes == <>(pc = NTasks + 1)
 
 --------------------------------------------------------------------------
-(* Type correctness *)
 TypeOK ==
   /\ pc \in 1..NTasks + 1
   /\ effects \in [Tasks -> Nat]
@@ -232,17 +158,16 @@ TypeOK ==
   /\ extraResumes \in 0..MaxExtraResumes
   /\ pcRegress \in BOOLEAN
 
-(* The six contract properties *)
-EffectExactlyOnce   == \A t \in Tasks : effects[t] <= 1                 \* EO
-PrefixConsistency   == ~pcRegress                                       \* PC
+EffectExactlyOnce   == \A t \in Tasks : effects[t] <= 1
+PrefixConsistency   == ~pcRegress
 ForkDeterminism     == \A k \in 1..Len(forkOuts) :
-                          forkOuts[k] = f(forkVals[k])                     \* FD
+                          forkOuts[k] = f(forkVals[k])
 FDWrongIdentity     == \A k \in 1..Len(forkOuts) :
-                          forkOuts[k] = forkVals[k]  \* the ORIGINAL FD: an identity check
-CheckpointValidity  == \A k \in 1..Len(ckpts) : ckpts[k].valid          \* CV
-ConsumeOnce         == effects[IP] <= 1                                 \* CO
+                          forkOuts[k] = forkVals[k]
+CheckpointValidity  == \A k \in 1..Len(ckpts) : ckpts[k].valid
+ConsumeOnce         == effects[IP] <= 1
 RecoveryDeterminism == \A i, j \in 1..Len(recHist) :
                           recHist[i].dur = recHist[j].dur
-                            => recHist[i].dec = recHist[j].dec          \* RD
+                            => recHist[i].dec = recHist[j].dec
 
 ===============================================================================

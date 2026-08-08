@@ -1,78 +1,4 @@
 #!/usr/bin/env python3
-"""
-169_p16_harness_mutation.py  (campaign p16)
-
-The check probe 156 is claimed to be, but structurally cannot be.
-
-Probe 156 mutates the FRAMEWORK source at the resume-serving sites the
-mechanism accounts already name, then reports that all eight mutants were
-killed.  That is a causal-coupling check and Sec. 9 should claim no more:
-mutants hand-placed where the harness is known to look cannot answer
-"is the harness tuned to the known bugs," because a harness tuned to a
-fixed expected output would kill exactly those mutants too.
-
-The complementary and much sharper question is the inverse: mutate the
-HARNESS and confirm that each mutation flips at least one committed
-verdict.  A harness mutant that changes no verdict identifies a cell that
-is not load-bearing -- a check the paper performs whose outcome nothing
-depends on.  A harness mutant that flips a verdict the paper reports as
-robust identifies a cell whose verdict is an artifact of one oracle choice.
-Either outcome is a finding.  Only "every mutant flips something, and each
-flips what its semantics predicts" supports the determinism claim.
-
-MUTATION OPERATORS (each is a semantic change to the ORACLE or the
-PROTOCOL, never to the framework):
-
-  M1  effect_undercount   ledger append is skipped on the 2nd+ fire within
-                          a run.  PREDICTS: every EO-crash and CO-concurrent
-                          violation cell flips to conformant.  If any stays
-                          violated, that cell is not reading the ledger.
-  M2  effect_overcount    ledger append is duplicated on the 1st fire.
-                          PREDICTS: every conformant EO cell flips to
-                          violated.  If a conformant cell stays conformant,
-                          it is not actually checking effect multiplicity.
-  M3  crash_noop          the SIGKILL / exception injection is replaced by
-                          a no-op.  PREDICTS: all crash-path cells flip to
-                          conformant.  A crash-path cell that survives M3
-                          never depended on the crash.
-  M4  fork_value_ignore   the FD comparison compares outcome-to-outcome
-                          instead of outcome-to-supplied-value.  PREDICTS:
-                          #6663 flips to conformant.  This is the mutant
-                          that would catch an FD oracle that only checks
-                          self-consistency.
-  M5  label_rule_invert   the U/X classification rule is inverted.
-                          PREDICTS: CrewAI @persist cells move U -> X and
-                          NO pairwise separation in observation (i) changes
-                          -- the sensitivity claim Table 5 note b asserts
-                          in prose but never runs.  M5 runs it.
-  M6  state_only_oracle   verdicts read framework-visible state instead of
-                          the external ledger.  PREDICTS: the CrewAI
-                          CheckpointConfig duplicate and the probe-159
-                          duplicate both become INVISIBLE (both are
-                          reported as invisible in framework state), i.e.
-                          two headline violations flip to conformant.  This
-                          is the mutant that justifies the external oracle;
-                          if the cells survive it, the external oracle
-                          bought nothing and Sec. 5.1 overstates.
-  M7  barrier_removed     the filesystem barrier synchronizing the kill is
-                          replaced by a fixed sleep.  PREDICTS: verdicts
-                          unchanged but repetition-to-repetition stability
-                          degrades -- the mechanical form of the
-                          "timing-free" claim.
-  M8  pin_drift           a framework pin is relaxed to the newest release.
-                          PREDICTS: nothing about the contract; this mutant
-                          exists to confirm reproduce.sh's lockfile audit
-                          REFUSES the run rather than silently reporting a
-                          verdict from a different resolution.
-
-Each mutant is applied to a COPY of the harness, one at a time, with the
-framework source byte-unchanged (the exact inverse of probe 156).
-
-Usage:
-  .venv/bin/python3 probes/169_p16_harness_mutation.py --baseline
-  .venv/bin/python3 probes/169_p16_harness_mutation.py --run-all
-  .venv/bin/python3 probes/169_p16_harness_mutation.py --mutant M4
-"""
 import argparse
 import json
 import os
@@ -83,13 +9,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-# --------------------------------------------------------------------------
-# Cells this study treats as load-bearing.  Each entry: the probe that
-# decides it, the committed stable-view key, and the verdict the paper
-# reports.  A mutant "kills" a cell when the re-run verdict differs.
-# --------------------------------------------------------------------------
 LOADBEARING = [
-    # cell                  probe   committed stable-view key                                  paper reports
     {"cell": "LG.EO.crash",      "probe": "118",  "key": "violation_EO_crash_resume_reexecutes_durable_task", "paper": True},
     {"cell": "LG.EO.sigkill",    "probe": "133",  "key": "violation_completed_durable_task_reexecuted_after_real_kill", "paper": True},
     {"cell": "LG.FD.6663",       "probe": "125",  "key": "violation_FD_through_shim",           "paper": True},
@@ -108,19 +28,15 @@ LOADBEARING = [
 ]
 
 MUTANTS = {
-    # Predictions name only cells the operator can REACH -- cells whose
-    # backing probe it mutates. Probe 172 scores these and refuses any
-    # prediction naming an unreachable cell.
     "M1": ("effect_undercount",  ["LG.CO.concurrent"]),
     "M2": ("effect_overcount",   ["LG.CO.concurrent"]),
     "M3": ("crash_noop",         ["LG.CO.concurrent"]),
     "M4": ("fork_value_ignore",  ["LG.FD.6663"]),
-    "M5": ("label_rule_invert",  []),            # no mechanical site
+    "M5": ("label_rule_invert",  []),
     "M6": ("state_only_oracle",  ["LG.CO.concurrent"]),
-    "M7": ("barrier_removed",    []),            # predicts NO kills
-    "M8": ("pin_drift",          ["__REFUSAL__"]),  # lockfile audit
+    "M7": ("barrier_removed",    []),
+    "M8": ("pin_drift",          ["__REFUSAL__"]),
 }
-
 
 def read_stable(results_root, probe, key):
     """Read one committed stable-view field.  Returns None when absent so a
@@ -130,7 +46,7 @@ def read_stable(results_root, probe, key):
     for p in cands:
         try:
             d = json.loads(p.read_text())
-        except Exception:                                     # noqa: BLE001
+        except Exception:
             continue
         blob = d.get("stable", d)
         if key in blob:
@@ -139,7 +55,6 @@ def read_stable(results_root, probe, key):
             if isinstance(v, dict) and key in v:
                 return v[key]
     return None
-
 
 def baseline(results_root):
     out = {}
@@ -150,7 +65,6 @@ def baseline(results_root):
                           "agrees_with_paper": (got == c["paper"])
                           if got is not None else None}
     return out
-
 
 def apply_mutant(harness_root, work, mutant):
     """Copy the harness to `work` and apply one mutation operator.
@@ -171,7 +85,6 @@ def apply_mutant(harness_root, work, mutant):
     r = subprocess.run(["git", "apply", "--directory", str(work), str(patch)],
                        capture_output=True, text=True)
     return {"applied": r.returncode == 0, "stderr": r.stderr.strip()[:400]}
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -231,7 +144,6 @@ def main():
           "M7 predicting an EMPTY kill set are the two cells that discharge "
           "Table 5 note b's sensitivity claim and the timing-free claim "
           "mechanically rather than in prose.")
-
 
 if __name__ == "__main__":
     main()

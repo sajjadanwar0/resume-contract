@@ -1,25 +1,4 @@
 #!/usr/bin/env bash
-# 173_indcheck_matrix.sh -- inductive-invariant matrix for ResumeContract.tla
-#
-# Runs IndCheck.tla at three constant sets, extracts ONLY the stable verdict
-# fields, writes a stable-view receipt, and self-audits every field against
-# the values committed below. Exits nonzero on any mismatch.
-#
-# WHY THE FIELD SELECTION MATTERS. TLC prints a fresh seed and fresh
-# fingerprint-collision estimates on every invocation; both are
-# invocation-dependent and neither is a verdict. A cross-environment guard
-# that diffs whole TLC logs will read those as divergence. This script
-# extracts the verdict line, the generated/distinct counts, and the search
-# depth -- and nothing else.
-#
-# Worker count does not affect these counts: the run enumerates all states
-# satisfying the invariant as initial states rather than racing a BFS to a
-# counterexample, so there is no parallel-search nondeterminism to control
-# for. The repository's single-worker convention for counterexample depths
-# does not apply to this module.
-#
-# Idempotent. Safe to re-run. Usage:  ./173_indcheck_matrix.sh [workers]
-
 set -euo pipefail
 
 WORKERS="${1:-4}"
@@ -33,7 +12,6 @@ JAR="${TLA2TOOLS:-$HOME/tla2tools.jar}"
 
 mkdir -p "$RAW_DIR" "$OUT_DIR"
 
-# cfg | label | expected generated | expected distinct | constants (for the receipt)
 CELLS=(
   "IndCheck.cfg|R0|19659|8610|N=3 IP=2 |V|=2 MaxResumes=2 MaxCrashes=1 MaxExtraResumes=1"
   "IndCheck_R2.cfg|R2|1009076|450926|N=4 IP=3 |V|=2 MaxResumes=2 MaxCrashes=2 MaxExtraResumes=1"
@@ -49,10 +27,6 @@ for cell in "${CELLS[@]}"; do
   cfg_path="${TLA_DIR}/${cfg}"
   [[ -f "$cfg_path" ]] || { echo "FATAL: ${cfg_path} missing"; exit 2; }
 
-  # CHECK_DEADLOCK FALSE is mandatory here: an invariant-state with no
-  # enabled action is normal (e.g. waiting with the resume budget spent) and
-  # is not a defect. With deadlock checking on, TLC errors at depth 1 and
-  # the run establishes nothing.
   grep -q "CHECK_DEADLOCK FALSE" "$cfg_path" || {
     echo "FATAL: ${cfg} lacks CHECK_DEADLOCK FALSE -- run would be meaningless"; exit 2; }
 
@@ -66,7 +40,6 @@ for cell in "${CELLS[@]}"; do
       -config "$cfg" IndCheck.tla ) > "$raw" 2>&1 || true
   rm -rf "$meta"
 
-  # ---- stable fields only ------------------------------------------------
   if grep -q "Model checking completed. No error has been found." "$raw"; then
     verdict="no_error"
   elif grep -q "Error: Invariant" "$raw"; then
@@ -98,10 +71,6 @@ for cell in "${CELLS[@]}"; do
   json_cells="${json_cells}\"audit\":\"$([[ $ok -eq 1 ]] && echo pass || echo FAIL)\"},\n"
 done
 
-# ---- stable-view receipt -------------------------------------------------
-# Deliberately omits seed and fingerprint-collision estimates: both are
-# invocation-dependent and would make a cross-host comparison of this file
-# report divergence where there is none.
 {
   echo "{"
   echo "  \"artifact\": \"IndCheck.tla inductive-invariant matrix\","

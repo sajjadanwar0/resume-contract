@@ -1,25 +1,4 @@
 #!/usr/bin/env python3
-"""
-135_p5_live_replication_harness.py
-Statistical replication for the live ecological cells (reviewer demand:
-"single executions are anecdotes"). This harness does not reimplement the
-cells: it re-executes the EXISTING probe scripts as subprocesses N times
-each, so the replicated protocol is byte-identical to the single-execution
-cells reported in the paper, and aggregates ONLY the audited boolean
-verdict fields (model nondeterminism makes free text unstable by design).
-
-Usage (key-gated; run on a host with ANTHROPIC_API_KEY / OPENAI_API_KEY):
-    PROBE135_N=20 python3 probes/135_p5_live_replication_harness.py
-Env:
-    PROBE135_N        repetitions per probe (default 20)
-    PROBE135_TARGETS  comma list of probe file prefixes (default: 121,122,131)
-    PROBE135_MODELS   optional comma list; exported one at a time as
-                      ANTHROPIC_MODEL / PROBE_MODEL for probes that honor it
-                      (probes that ignore the variable replicate their
-                      default model; the manifest records which)
-Output: JSON to stdout; per probe x model: runs, errors, and for every
-boolean verdict field the true-count, proportion, and 95% Wilson interval.
-"""
 import json
 import math
 import os
@@ -34,8 +13,7 @@ TARGETS = os.environ.get("PROBE135_TARGETS", "121,122,131").split(",")
 MODELS = [m for m in os.environ.get("PROBE135_MODELS", "").split(",") if m]
 
 if not MODELS:
-    MODELS = [None]  # probe defaults
-
+    MODELS = [None]
 
 def wilson(k, n, z=1.96):
     if n == 0:
@@ -46,11 +24,9 @@ def wilson(k, n, z=1.96):
     h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
     return [round(max(0.0, c - h), 4), round(min(1.0, c + h), 4)]
 
-
 def find_probe(prefix):
     hits = sorted(HERE.glob(f"{prefix}_*.py"))
     return hits[0] if hits else None
-
 
 def last_json(text):
     for line in reversed(text.strip().splitlines()):
@@ -60,7 +36,6 @@ def last_json(text):
                 return json.loads(line)
             except Exception:
                 continue
-    # multi-line pretty JSON: try from first '{'
     i = text.find("{")
     if i >= 0:
         try:
@@ -68,7 +43,6 @@ def last_json(text):
         except Exception:
             return None
     return None
-
 
 def run_cell(script, model):
     env = dict(os.environ)
@@ -87,9 +61,8 @@ def run_cell(script, model):
         return doc
     except subprocess.TimeoutExpired:
         return {"error": "timeout"}
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         return {"error": repr(e)}
-
 
 def main():
     report = {"n_per_cell": N, "targets": TARGETS,
@@ -132,7 +105,6 @@ def main():
                 "verdict_fields": agg,
             }
     print(json.dumps(report, indent=2))
-
 
 if __name__ == "__main__":
     main()

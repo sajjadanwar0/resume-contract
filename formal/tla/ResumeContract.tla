@@ -62,7 +62,7 @@ Init ==
 ExecTask ==
   /\ pc \in Tasks
   /\ ~waiting
-  /\ (pc = IP) => (consumedVal # NoVal)   \* IP first executes via Consume
+  /\ (pc = IP) => (consumedVal # NoVal)
   /\ effects'   = [effects EXCEPT ![pc] =
                      IF FaultPrefixReplay /\ pc = IP THEN @ ELSE @ + 1]
   /\ ckpts'     = Append(ckpts,

@@ -1,21 +1,3 @@
-#!/usr/bin/env python3
-"""
-126_p6_langgraph_sqlite_durable.py
-P6 - Durable-backend conformance: the pilot's LangGraph probes ported from
-InMemorySaver to SqliteSaver (langgraph-checkpoint-sqlite), answering the
-"production plane is untested" threat. Adds a DURABLE EXTERNAL EFFECT LEDGER
-(an on-disk SQLite file, separate from the checkpointer DB) as a second
-oracle alongside the process-local counter: every effect increments both;
-verdicts require the two oracles to agree.
-
-  T1 (#6663)      FD: two resumes, different values, same (thread, checkpoint_id)
-  T2 (#6491 cls)  CV: schema-invalid node output -> persisted silently?
-  T3              CO: stray Command(resume=...) after completion
-  T4 (probe-118   EO crash-path: functional API, s1 result durably recorded via
-      control)    put_writes, crash in s2, resume -> does s1 re-execute?
-
-Output: JSON verdict per test, plus oracle-agreement fields.
-"""
 import json
 import os
 import sqlite3
@@ -23,7 +5,6 @@ import tempfile
 import traceback
 from typing import TypedDict, List
 from importlib.metadata import version
-
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import interrupt, Command
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -37,7 +18,6 @@ RESULTS = {
 }
 
 WORKDIR = tempfile.mkdtemp(prefix="probe126_")
-
 
 class DurableLedger:
     """On-disk effect ledger, independent of the checkpointer DB and of
@@ -65,19 +45,15 @@ class DurableLedger:
         con.close()
         return n
 
-
 def fresh_saver(tag):
     db = os.path.join(WORKDIR, f"ckpt_{tag}.sqlite")
     conn = sqlite3.connect(db, check_same_thread=False)
     return SqliteSaver(conn), db
 
-
 def get_interrupt_checkpoint_id(app, config):
     snap = app.get_state(config)
     return snap.config["configurable"]["checkpoint_id"], snap
 
-
-# ---------------------------------------------------------------- T1: FD
 def t1_fork_sqlite():
     ledger = DurableLedger(os.path.join(WORKDIR, "ledger_t1.sqlite"))
 
@@ -116,14 +92,12 @@ def t1_fork_sqlite():
         "ledger_branch_decisions": ledger.count("branch_decided"),
     }
 
-
-# ---------------------------------------------------------------- T2: CV
 def t2_cv_sqlite():
     class S(BaseModel):
         items: List[str] = []
 
     def bad_node(state: S):
-        return {"items": state.items + [None]}  # schema-invalid append
+        return {"items": state.items + [None]}
 
     saver, db = fresh_saver("t2")
     app = (
@@ -150,10 +124,11 @@ def t2_cv_sqlite():
                 n_records_with_invalid += 1
     except Exception as e:
         history_error = f"{type(e).__name__}: {e}"
-    # Also read the raw checkpoint rows out of the sqlite file itself.
+
     con = sqlite3.connect(db)
     raw_rows = con.execute("SELECT COUNT(*) FROM checkpoints").fetchone()[0]
     con.close()
+
     return {
         "backend": "SqliteSaver",
         "invoke_error": invoke_error,
@@ -166,8 +141,6 @@ def t2_cv_sqlite():
         ),
     }
 
-
-# ---------------------------------------------------------------- T3: CO
 def t3_co_sqlite():
     ledger = DurableLedger(os.path.join(WORKDIR, "ledger_t3.sqlite"))
     eff = {"post": 0}
@@ -207,11 +180,8 @@ def t3_co_sqlite():
         "violation_stray_resume_refired_effect": eff["post"] != 1,
     }
 
-
-# ---------------------------------------------------------------- T4: EO crash split
 class Crash(RuntimeError):
     pass
-
 
 def t4_eo_crash_sqlite():
     ledger = DurableLedger(os.path.join(WORKDIR, "ledger_t4.sqlite"))
@@ -249,16 +219,17 @@ def t4_eo_crash_sqlite():
     except Exception as e:
         crashed = type(e).__name__
     s1_at_crash = eff["s1"]
-    # count durable writes rows for the thread before resume
     con = sqlite3.connect(db)
     writes_rows = con.execute("SELECT COUNT(*) FROM writes").fetchone()[0]
     con.close()
     result = resume_error = None
+
     try:
         result = wf.invoke(1, cfg, durability="sync")
     except Exception as e:
         resume_error = f"{type(e).__name__}: {e}"
     agree = (eff["s1"] == ledger.count("s1")) and (eff["s2"] == ledger.count("s2"))
+
     return {
         "backend": "SqliteSaver",
         "crashed_as": crashed,
@@ -273,7 +244,6 @@ def t4_eo_crash_sqlite():
         "violation_completed_task_reexecuted_on_crash_resume": eff["s1"] > 1,
     }
 
-
 def main():
     for name, fn in [
         ("t1_fd_fork_sqlite", t1_fork_sqlite),
@@ -286,7 +256,6 @@ def main():
         except Exception:
             RESULTS[name] = {"probe_error": traceback.format_exc()}
     print(json.dumps(RESULTS, indent=2, default=str))
-
 
 if __name__ == "__main__":
     main()

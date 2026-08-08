@@ -1,0 +1,77 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 121 and seed 8232617163510754294 with 1 worker on 1 cores with 889MB heap and 64MB offheap memory [pid: 2400] (Linux 6.18.5-fc-v20 amd64, Ubuntu 21.0.10 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/claude/work/repo/resume-contract/formal/tla/ResumeContractParked.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module ResumeContractParked
+Starting... (2026-08-08 04:48:30)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-08-08 04:48:31.
+Error: Invariant EffectExactlyOnce is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+
+State 2: <ExecTask line 68, col 3 to line 80, col 60 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 3: <CrashRecover line 115, col 3 to line 133, col 73 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "replay"]>>
+
+State 4: <ExecTask line 68, col 3 to line 80, col 60 of module ResumeContractParked>
+/\ pcRegress = TRUE
+/\ effects = <<2, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "replay"]>>
+
+8 states generated, 8 distinct states found, 3 states left on queue.
+The depth of the complete state graph search is 4.
+The average outdegree of the complete state graph is 2 (minimum is 1, the maximum 3 and the 95th percentile is 3).
+Finished in 03s at (2026-08-08 04:48:31)

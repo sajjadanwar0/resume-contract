@@ -1,51 +1,4 @@
 #!/usr/bin/env python3
-"""
-159_p14_multiproc_saver.py  (campaign p14)
-
-Multi-PROCESS evidence for the cell probe 157 cannot reach: 157's own
-diagnosis is that its concurrency is GIL-bound (threads in one interpreter),
-while the deployment the live-Postgres cells gesture at is multiple worker
-processes sharing one durable saver.  Three arms, all with separate OS
-processes over one on-disk checkpointer database:
-
-  A. race_same   -- one thread parked at the interrupt; TWO processes issue
-                    Command(resume=True) simultaneously (spin-barrier start).
-                    Discovery cell: does the gated effect fire once or twice
-                    under a genuine cross-process duplicate-delivery race?
-  B. race_diff   -- same race, values True vs False: which value(s) fire,
-                    and is either racer served the other's branch?
-  C. contention_kill -- k worker processes, distinct threads, ONE shared db;
-                    the victim worker is SIGKILLed while parked at its
-                    interrupt; survivors resume concurrently; a fresh process
-                    recovers the victim's thread.  Per-thread EO/CO under
-                    cross-process contention + park-kill recovery (158's cell
-                    replicated under load).
-  D. race_same under the packaged REMIT shim (one shim instance PER PROCESS
-                    over the same db) -- does per-process interposition
-                    change or break the race behavior?  (Scope probe: the
-                    shim's sequencer is per-process by construction.
-                    RETAINED as the ungated differential now that the shim
-                    ships an opt-in gate: default wrap must still race.)
-  E. race_same under the shim's CROSS-PROCESS GATE (v0.1.1+,
-                    wrap(..., cross_process_gate=True)): probe 165's
-                    read-path claim, promoted into the package.  Expected:
-                    exactly one racer fires; the loser raises
-                    RemitConsumeConflict inside get_tuple, before any node.
-  F. race_diff under the gate: the loser with the other value is refused,
-                    not served the winner's branch.
-
-Oracle: on-disk SQLite effect ledger, rows tagged by thread, written by the
-node bodies, read by the parent (cross-process, kill-surviving).
-
-Backends: SQLite (default); --pg-dsn adds the same arms on PostgresSaver
-(unique thread ids per rep; saver.setup() once).
-
-Usage:
-  .venv/bin/python3 probes/159_p14_multiproc_saver.py            # reps=10 k=4
-  .venv/bin/python3 probes/159_p14_multiproc_saver.py --smoke    # reps=3 k=2
-  .venv/bin/python3 probes/159_p14_multiproc_saver.py --pg-dsn "postgresql://..."
-Child modes (argv[1], internal): park | racer | worker | recover
-"""
 import argparse
 import json
 import os
@@ -63,12 +16,10 @@ from pathlib import Path
 
 REQUIRED_LANGGRAPH = "1.2.9"
 
-
 def _fail(msg):
     print(json.dumps({"probe_refused": msg, "interpreter": sys.executable}),
           file=sys.stderr)
     sys.exit(3)
-
 
 _lg = version("langgraph")
 if _lg != REQUIRED_LANGGRAPH and not os.environ.get("PROBE_ALLOW_OFFPIN"):
@@ -76,33 +27,25 @@ if _lg != REQUIRED_LANGGRAPH and not os.environ.get("PROBE_ALLOW_OFFPIN"):
           f"Interpreter: {sys.executable}. Launch with envs/langgraph-durable "
           f"or set PROBE_ALLOW_OFFPIN=1.")
 
-from typing import TypedDict                          # noqa: E402
-from langgraph.graph import StateGraph, START, END    # noqa: E402
-from langgraph.types import interrupt, Command        # noqa: E402
-from langgraph.checkpoint.sqlite import SqliteSaver   # noqa: E402
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import interrupt, Command
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 try:
     from remit import langgraph_shim as _rls
     HAVE_REMIT = True
-except Exception as _e:                               # pragma: no cover
+except Exception as _e:
     HAVE_REMIT = False
     _REMIT_ERR = f"{type(_e).__name__}: {_e}"
-
 
 class S(TypedDict, total=False):
     x: int
     pre_out: str
     decision: bool
 
+RUN_NONCE = uuid.uuid4().hex[:6]
 
-RUN_NONCE = uuid.uuid4().hex[:6]    # isolates thread ids across invocations
-                                    # that share one Postgres database (the
-                                    # probe-165 convention; SQLite never
-                                    # collides because every rep gets a fresh
-                                    # tmpdir, Postgres reuses one database)
-
-
-# ------------------------------------------------------------------ ledger
 def ledger_init(path):
     c = sqlite3.connect(path, timeout=60)
     c.execute("CREATE TABLE IF NOT EXISTS effects "
@@ -110,14 +53,12 @@ def ledger_init(path):
     c.commit()
     c.close()
 
-
 def ledger_write(path, thread, task):
     c = sqlite3.connect(path, timeout=60)
     c.execute("INSERT INTO effects (thread, task) VALUES (?, ?)",
               (thread, task))
     c.commit()
     c.close()
-
 
 def ledger_thread(path, thread):
     c = sqlite3.connect(path, timeout=60)
@@ -127,8 +68,6 @@ def ledger_thread(path, thread):
     c.close()
     return dict(rows)
 
-
-# ------------------------------------------------------------------ savers
 def make_saver(ctx):
     """Return (saver, closer) for this process, per ctx backend/shim."""
     if ctx.get("pg_dsn"):
@@ -140,18 +79,13 @@ def make_saver(ctx):
         saver = (_rls.wrap(PostgresSaver, conn,
                            cross_process_gate=bool(ctx.get("shim_gate")))
                  if ctx.get("shim") else PostgresSaver(conn))
-        saver.setup()    # Postgres does not create the checkpointer schema
-                         # lazily (probe 165 finding, 2026-07-27); without
-                         # this, every child dies UndefinedTable on a fresh
-                         # database -- reproduced by this probe 2026-07-31
-                         # as "contention workers never all parked"
+        saver.setup()
         return saver, conn.close
     conn = sqlite3.connect(ctx["db"], check_same_thread=False, timeout=60)
     saver = (_rls.wrap(SqliteSaver, conn,
                        cross_process_gate=bool(ctx.get("shim_gate")))
              if ctx.get("shim") else SqliteSaver(conn))
     return saver, conn.close
-
 
 def build(ctx, thread):
     saver, closer = make_saver(ctx)
@@ -174,10 +108,8 @@ def build(ctx, thread):
     g.add_edge("gate", END)
     return g.compile(checkpointer=saver), closer
 
-
 def _cfg(thread):
     return {"configurable": {"thread_id": thread}}
-
 
 def _invoke(app, payload, thread):
     try:
@@ -185,14 +117,11 @@ def _invoke(app, payload, thread):
     except TypeError:
         return app.invoke(payload, _cfg(thread))
 
-
-# ------------------------------------------------------------ child modes
 def park_main(ctx):
     app, closer = build(ctx, ctx["thread"])
     res = _invoke(app, {"x": 1}, ctx["thread"])
     closer()
     print(json.dumps({"interrupted": "__interrupt__" in res}))
-
 
 def racer_main(ctx):
     app, closer = build(ctx, ctx["thread"])
@@ -211,14 +140,13 @@ def racer_main(ctx):
                       "result": res, "error": err,
                       "dt_ms": round(dt, 1)}, default=str))
 
-
 def worker_main(ctx):
     thread = f"{ctx['nonce']}-w{ctx['idx']}"
     app, closer = build(ctx, thread)
     res = _invoke(app, {"x": 1}, thread)
     Path(ctx["ready"]).write_text("1")
     if ctx["victim"]:
-        time.sleep(600)                      # parked; parent SIGKILLs
+        time.sleep(600)
     while not os.path.exists(ctx["go"]):
         time.sleep(0.002)
     out = None
@@ -232,7 +160,6 @@ def worker_main(ctx):
                       "__interrupt__" in res, "result": out, "error": err},
                      default=str))
 
-
 def recover_main(ctx):
     app, closer = build(ctx, ctx["thread"])
     err, res = None, None
@@ -243,14 +170,12 @@ def recover_main(ctx):
     closer()
     print(json.dumps({"result": res, "error": err}, default=str))
 
-
 def _spawn(mode, ctx, capture=True):
     env = dict(os.environ, PROBE159_CTX=json.dumps(ctx))
     return subprocess.Popen(
         [sys.executable, os.path.abspath(__file__), mode], env=env,
         stdout=subprocess.PIPE if capture else subprocess.DEVNULL,
         stderr=subprocess.PIPE if capture else subprocess.DEVNULL, text=True)
-
 
 def _last_json(proc, timeout):
     try:
@@ -269,8 +194,6 @@ def _last_json(proc, timeout):
         parsed["_stderr_tail"] = err.strip().splitlines()[-1]
     return parsed
 
-
-# ------------------------------------------------------------ parent arms
 def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn,
              shim_gate=False):
     reps_out = []
@@ -341,7 +264,6 @@ def run_race(base, tag, value_a, value_b, reps, shim, pg_dsn,
         "per_rep": reps_out,
     }
 
-
 def run_contention(base, k, shim, pg_dsn):
     d0 = tempfile.mkdtemp(prefix="p159_cont_", dir=base)
     ctx0 = {"db": f"{d0}/ckpt.sqlite", "ledger": f"{base}/ledger.sqlite",
@@ -394,7 +316,6 @@ def run_contention(base, k, shim, pg_dsn):
         "victim_recovered_ok": rec_out.get("error") is None
         and isinstance(rec_out.get("result"), dict),
     }
-
 
 def parent_main(args):
     base = tempfile.mkdtemp(prefix="probe159_")
@@ -484,7 +405,6 @@ def parent_main(args):
          "pins": result["pins"], "stable": result["stable"]}, indent=2) + "\n")
     print(f"\nwrote {out}/159_results{suffix}.json and 159_stable{suffix}.json",
           file=sys.stderr)
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

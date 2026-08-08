@@ -25,7 +25,7 @@ set -euo pipefail
 TEX="${1:?usage: probe_inventory_gate.sh <paper.tex> [probes_dir] [drivers_dir]}"
 PROBES="${2:-probes}"
 DRIVERS="${3:-.}"
-WHITELIST="132 144 145 146 149"   # archaeology (132) + repo tooling .sh
+WHITELIST="145"   # repo tooling .sh (161 embeds its verdict map)
 
 [ -f "$TEX" ] || { echo "FATAL: paper not found: $TEX" >&2; exit 2; }
 [ -d "$PROBES" ] || { echo "FATAL: probes dir not found: $PROBES" >&2; exit 2; }
@@ -37,11 +37,11 @@ tex = re.sub(r"(?m)%.*$", "", tex)          # strip comments
 nums = set()
 
 # probe~N / probes~N, M / probes~N/M
-for m in re.finditer(r"probes?~([0-9]+(?:[,/ ]+[0-9]+)*)", tex):
+for m in re.finditer(r"[Pp]robes?~([0-9]+(?:[,/ ]+[0-9]+)*)", tex):
     nums.update(int(x) for x in re.findall(r"[0-9]+", m.group(1)))
 
 # prose "probe N" (no tilde), e.g. table cells
-for m in re.finditer(r"probes?\s+([0-9]{3})\b", tex):
+for m in re.finditer(r"[Pp]robes?\s+([0-9]{3})\b", tex):
     nums.add(int(m.group(1)))
 
 # campaign catalogs: parenthesized lists of 3-digit numbers with ranges,

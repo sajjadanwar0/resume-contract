@@ -1,29 +1,4 @@
 #!/usr/bin/env python3
-"""
-158b_p14_llamaindex_park_kill.py  (campaign p14: park-kill matrix)
-
-LlamaIndex Workflows arm of the park-kill location (see 158 for the framing):
-the two-step HITL run reaches InputRequiredEvent, the Context snapshot is
-written to disk (the plane's durable artifact), and the process is SIGKILLed
-while the original run is still live-parked -- no cancel_run(), no graceful
-teardown.  A FRESH interpreter restores Context.from_dict and answers.  A
-second fresh restore of the same snapshot answers differently (the fork cell
-probe 114/a2 measured in-process, here across process death).
-
-Oracle: on-disk SQLite effect ledger written by the step bodies (survives the
-kill; probes 114's in-memory counters cannot cross the process boundary).
-
-Verdict fields (stable):
-  snapshot_survives_process_death   fresh-process restore + answer completes
-  eo_prefix_across_park_kill        pre fired exactly once across kill and
-                                    BOTH restores (a restore replays no prefix)
-  post_per_branch_exactly_once      one post per answered branch, each with
-                                    its own value (YES branch, NO branch)
-  fd_second_restore_own_answer      the NO restore's result carries NO
-
-Usage:  .venv/bin/python3 probes/158b_p14_llamaindex_park_kill.py
-Modes (argv[1]): parent (default) | park | resume:<ANSWER>
-"""
 import asyncio
 import json
 import os
@@ -40,12 +15,10 @@ from pathlib import Path
 
 REQUIRED_WORKFLOWS = "2.22.2"
 
-
 def _fail(msg):
     print(json.dumps({"probe_refused": msg, "interpreter": sys.executable}),
           file=sys.stderr)
     sys.exit(3)
-
 
 _wfv = version("llama-index-workflows")
 if _wfv != REQUIRED_WORKFLOWS and not os.environ.get("PROBE_ALLOW_OFFPIN"):
@@ -53,12 +26,10 @@ if _wfv != REQUIRED_WORKFLOWS and not os.environ.get("PROBE_ALLOW_OFFPIN"):
           f"{REQUIRED_WORKFLOWS}. Interpreter: {sys.executable}. Launch with "
           f"envs/llamaindex, or set PROBE_ALLOW_OFFPIN=1.")
 
-from workflows import Workflow, Context, step          # noqa: E402
-from workflows.events import (                          # noqa: E402
+from workflows import Workflow, Context, step
+from workflows.events import (
     StartEvent, StopEvent, InputRequiredEvent, HumanResponseEvent)
 
-
-# ------------------------------------------------------------------ ledger
 def ledger_init(path):
     c = sqlite3.connect(path, timeout=30)
     c.execute("CREATE TABLE IF NOT EXISTS effects "
@@ -66,13 +37,11 @@ def ledger_init(path):
     c.commit()
     c.close()
 
-
 def ledger_write(path, task):
     c = sqlite3.connect(path, timeout=30)
     c.execute("INSERT INTO effects (task) VALUES (?)", (task,))
     c.commit()
     c.close()
-
 
 def ledger_counts(path):
     c = sqlite3.connect(path, timeout=30)
@@ -81,8 +50,6 @@ def ledger_counts(path):
     c.close()
     return dict(rows)
 
-
-# ---------------------------------------------------------------- workflow
 def make_wf(ledger_path):
     class WA(Workflow):
         @step
@@ -97,8 +64,6 @@ def make_wf(ledger_path):
 
     return WA(timeout=30)
 
-
-# ------------------------------------------------------------------ lives
 async def _park(d):
     ledger_init(d["ledger"])
     wf = make_wf(d["ledger"])
@@ -109,8 +74,7 @@ async def _park(d):
             Path(d["snap"]).write_text(json.dumps(snap))
             break
     Path(d["ready"]).write_text(json.dumps({"pid": os.getpid()}))
-    await asyncio.sleep(600)             # parked, run live; SIGKILL lands here
-
+    await asyncio.sleep(600)
 
 async def _resume(d, answer):
     ledger_init(d["ledger"])
@@ -121,7 +85,6 @@ async def _resume(d, answer):
     handler.ctx.send_event(HumanResponseEvent(response=answer))
     res = await asyncio.wait_for(handler, timeout=25)
     print(json.dumps({"answer": answer, "result": str(res)}))
-
 
 def _run_mode(mode, env, timeout=120):
     p = subprocess.run([sys.executable, os.path.abspath(__file__), mode],
@@ -137,8 +100,6 @@ def _run_mode(mode, env, timeout=120):
                            if p.stderr.strip() else None)
     return out
 
-
-# ------------------------------------------------------------------ parent
 def parent_main(out_dir):
     d0 = tempfile.mkdtemp(prefix="probe158b_")
     d = {"ledger": f"{d0}/ledger.sqlite", "snap": f"{d0}/ctx.json",
@@ -211,7 +172,6 @@ def parent_main(out_dir):
                         "stable": result["stable"]}, indent=2) + "\n")
         print(f"\nwrote {out}/158b_results.json and 158b_stable.json",
               file=sys.stderr)
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

@@ -1,30 +1,4 @@
 #!/usr/bin/env python3
-"""
-157_p11_concurrent_bench.py  (E-P1)  v3
-End-to-end concurrent benchmark: the full interrupt protocol per thread,
-k threads over one shared saver, stock vs. the packaged REMIT shim, on
-SQLite and (optionally) Postgres.
-
-v3 changes, after two off-pin runs slipped through silently:
-  * PIN GUARD: refuses to run unless langgraph == 1.2.9, printing the
-    interpreter path so a wrong-venv launch is diagnosed in one line.
-    (Override for exploratory runs only: PROBE_ALLOW_OFFPIN=1.)
-  * REMIT REQUIRED by default: a paper run without the shim arm is not a
-    paper run. `--stock-only` permits its absence, explicitly.
-  * POSTGRES ARMS built in (`--pg-dsn` or PROBE_PG_DSN): fresh database per
-    (arm, k) cell via the probe-130 pattern (admin conn, DROP/CREATE,
-    autocommit conn, PostgresSaver(conn).setup()).
-
-Usage:
-  .venv/bin/python3 probes/157_p11_concurrent_bench.py --k 1 4 16 64 --n 200
-  .venv/bin/python3 probes/157_p11_concurrent_bench.py --k 1 4 16 64 --n 200 \
-      --pg-dsn "postgresql://USER:PASS@localhost:5432/postgres"
-  ... --smoke [--stock-only]        # k=2, n=3 mechanics check
-
-Trust a run only if: pins_ok true, have_remit true (unless --stock-only),
-and every cell in every arm has eo_per_protocol_exactly_once true with an
-empty protocols_with_duplicate_effect list.
-"""
 import argparse, json, os, socket, sqlite3, statistics, sys, tempfile, threading, time
 from concurrent.futures import ThreadPoolExecutor
 from typing import TypedDict
@@ -61,8 +35,8 @@ LEDGER, LLOCK = {}, threading.Lock()
 
 def build(saver):
     def gate(state: S):
-        pid = state["val"]              # protocol id, carried in state:
-        ans = interrupt("decision?")    # survives the interrupt/resume boundary
+        pid = state["val"]
+        ans = interrupt("decision?")
         with LLOCK:
             LEDGER[pid] = LEDGER.get(pid, 0) + 1
         return {"val": str(ans)}
@@ -79,7 +53,6 @@ def protocol(app, i):
     app.invoke(Command(resume=True), cfg)
     return time.perf_counter() - t0
 
-# ---- saver factories: each returns (saver, cleanup_fn) ----------------------
 def sqlite_factory(wrap):
     def make(tag):
         db = tempfile.mktemp(suffix=f"_{tag}.sqlite")
@@ -91,10 +64,10 @@ def sqlite_factory(wrap):
     return make
 
 def pg_factory(dsn, wrap):
-    import psycopg                                   # lazy: only when --pg-dsn
+    import psycopg
     from langgraph.checkpoint.postgres import PostgresSaver
     def make(tag):
-        dbname = f"bench157_{tag}"                   # probe-130 pattern
+        dbname = f"bench157_{tag}"
         admin = psycopg.connect(dsn, autocommit=True)
         admin.execute(f"DROP DATABASE IF EXISTS {dbname}")
         admin.execute(f"CREATE DATABASE {dbname}")
@@ -164,7 +137,7 @@ if __name__ == "__main__":
     if HAVE_REMIT:
         R["remit"] = run_arm("remit", sqlite_factory(wrap=True), a.k, a.n)
     if a.pg_dsn:
-        from langgraph.checkpoint import postgres as _pgmod  # version record
+        from langgraph.checkpoint import postgres as _pgmod
         R["langgraph_checkpoint_postgres"] = version("langgraph-checkpoint-postgres")
         R["stock_pg"] = run_arm("stockpg", pg_factory(a.pg_dsn, wrap=False), a.k, a.n)
         if HAVE_REMIT:

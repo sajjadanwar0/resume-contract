@@ -21,7 +21,7 @@ fn n3_recover_matches_verified_core_contract_exhaustively() {
     let mut cases = 0usize;
     
     for len in 0..=4usize {
-        let combos = 8usize.pow(len as u32); // 4 task values x 2 branch flags
+        let combos = 8usize.pow(len as u32);
         for c in 0..combos {
             let mut code = c;
             let mut log: Vec<CheckpointRecord> = Vec::new();

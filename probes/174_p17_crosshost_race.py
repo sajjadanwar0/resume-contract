@@ -1,117 +1,4 @@
 #!/usr/bin/env python3
-"""
-174_p17_crosshost_race.py  (campaign p17)
-
-Cross-HOST evidence for the one residual probes 159/165/168 name and
-Sec. 9 states plainly: "racers distributed across hosts are unmeasured."
-Two OS processes on TWO machines share one networked PostgreSQL server
-(checkpointer schema + coordination tables + effect ledger, all in
-Postgres, so no filesystem is shared). Arms:
-
-  stock  -- both racers resume the same parked interrupt through the
-            stock PostgresSaver.  Discovery cell at gate duration D:
-            with D >> release skew, does every racer that arrives
-            within the window consume, as it does within one host?
-  gate   -- same race through the packaged REMIT shim with
-            cross_process_gate=True on BOTH hosts (probe 165's read-path
-            claim, v0.1.2 packaging, now across a network boundary).
-
-Registered predictions (the probe-171 discipline: committed before the
-first cross-host run; the run may falsify them):
-
-  P1 stock, D=2000 ms : gated effect fires 2 in every repetition
-                        (barrier-release skew over LAN/WAN is tens to a
-                        few hundred ms; the window is D).
-  P2 gate,  D=2000 ms : distribution {1:reps}; the loser refused with
-                        RemitConsumeConflict before any node executes.
-  P3 stock, D=0       : NO prediction registered -- exploratory: the
-                        outcome depends on network RTT vs. the bare
-                        node's execution time; reported as an observed
-                        frequency only.
-
-Run provenance (2026-07-31, receipts 174_crosshost_matrix.json of that
-date): at per-query ~451 ms tunnel latency the remote racer paid
-connect + saver.setup() inside the timed window; its read arrived
-2.5-3.5 s after release, past the winner's ~2.07 s superstep join, so
-every remote delivery took the post-completion inert path -- stock
-{1:10} with zero duplication, gate vacuous (nothing to refuse). P1 was
-FALSIFIED at that arrival offset, consistent with the dose-response
-edge (offset > D => miss), and the within-host smoke {2:2}/{1:2} is the
-differential showing the machinery detects the race when offset ~ 0.
-v2 therefore: (a) builds the saver BEFORE announcing readiness, so the
-post-release path is read + invoke only; (b) stamps a server-clock
-arrive_at per racer pre-invoke, and serve reports per-round
-arrival_offsets_ms + max_offset_ms, so every receipt self-evidences
-whether a race occurred; (c) classifies racer outcomes as
-fired / inert / refused / errored via a node-execution flag, with
-fired_by re-derived from the ledger as ground truth. Re-registered
-predictions, valid only when max_offset_ms < D:
-
-  P1' stock, max_offset_ms < D : fires 2 in every repetition.
-  P2' gate,  max_offset_ms < D : {1:reps}; the losing racer refused
-                                 with RemitConsumeConflict.
-  A receipt whose max_offset_ms >= D decides neither prediction and
-  must trigger a rerun at D > 2x max_offset_ms, not a paper claim.
-
-Scope, stated the way Sec. 9 states scope: this measures cross-host
-DISTRIBUTION of the racers over one networked store. It does not
-measure partitions, packet loss, or multi-store topologies; those
-remain named exclusions.
-
-Saver construction and shim wrap are copied VERBATIM from probe 159's
-make_saver() at the pins (verified against the committed file,
-2026-07-31): psycopg Connection.connect(dsn, autocommit=True,
-prepare_threshold=0, row_factory=dict_row); _rls.wrap(PostgresSaver,
-conn, cross_process_gate=True) for the gate arm; saver.setup() at every
-construction (the probe-165 UndefinedTable finding). This file is
-py_compile-checked, not yet executed against a live server: run the
-single-host --smoke pre-flight before the cross-host campaign.
-
-Topology / usage (three shells; A = the host nearer the DB; interpreter
-is the durable env's, per the pin guard):
-
-  PY=envs/langgraph-durable/.venv/bin/python3
-
-  # once (host A): create coordination tables + checkpointer schema
-  $PY probes/174_p17_crosshost_race.py init  --dsn "$PG_DSN"
-
-  # between attempts (host A): drop xh174_* coordination/ledger tables
-  $PY probes/174_p17_crosshost_race.py reset --dsn "$PG_DSN"
-
-  # ONE racer per host, BACKGROUNDED (racers loop forever and are
-  # kill-safe: the racer receipt is rewritten after every round):
-  #   host A: nohup $PY probes/174_p17_crosshost_race.py race \
-  #             --dsn "$PG_DSN" --host-tag hostA \
-  #             > /tmp/racer174.log 2>&1 & echo $! > /tmp/racer174.pid
-  #   host B: same with --host-tag hostB and host B's DSN
-  # then, foreground on host A:
-  $PY probes/174_p17_crosshost_race.py serve --dsn "$PG_DSN" \
-      --reps 10 --arms stock,gate --gate-ms 2000
-  # after the receipt prints: kill $(cat /tmp/racer174.pid) on both
-  # hosts. Racers are resilient to starting BEFORE init and to reset
-  # under their feet (missing tables / deleted rounds -> retry), so
-  # start order is genuinely arbitrary.
-
-Pre-flight (single host, two local racers with distinct tags, remote or
-local DSN): serve --smoke.  The coordinator records the two racers'
-hostnames per round; a same-hostname round sets cross_host_attested
-false in the receipt, so a pre-flight can never be silently promoted to
-a cross-host cell.
-
-Oracle: the effect IS the ledger append -- one autocommitted INSERT
-into xh174_effects inside the gated node, after the instrumented
-sleep, durable before the node returns (the probe-163 ordering
-discipline, transplanted to Postgres). The coordinator parks each run
-through a STOCK saver in every arm: the gate under test acts on the
-racers' resume-path read, and the parked-thread inspection hazard the
-paper names (Sec. 7.2) is exactly why the parking process must not
-carry the gate.
-
-Receipts: results/multiproc/174_crosshost_matrix.json (coordinator) +
-results/multiproc/174_crosshost_racer_<tag>.json (each racer, local to
-that host -- scp host B's back). Stable fields: per-cell fire
-distribution, loser exception types, cross_host_attested.
-"""
 import argparse
 import json
 import os
@@ -125,45 +12,40 @@ from pathlib import Path
 
 REQUIRED_LANGGRAPH = "1.2.9"
 
-
 def _fail(msg):
     print(json.dumps({"probe_refused": msg,
                       "interpreter": sys.executable}), file=sys.stderr)
     sys.exit(3)
-
 
 _lg = version("langgraph")
 if _lg != REQUIRED_LANGGRAPH and not os.environ.get("PROBE_ALLOW_OFFPIN"):
     _fail(f"langgraph=={_lg} but the paper pin is {REQUIRED_LANGGRAPH}. "
           f"Launch with envs/langgraph-durable or set PROBE_ALLOW_OFFPIN=1.")
 
-import psycopg                                          # noqa: E402
-from psycopg import Connection                          # noqa: E402
-from psycopg.rows import dict_row                       # noqa: E402
-from typing import TypedDict                            # noqa: E402
-from langgraph.graph import StateGraph, START, END      # noqa: E402
-from langgraph.types import interrupt, Command          # noqa: E402
-from langgraph.checkpoint.postgres import PostgresSaver # noqa: E402
+import psycopg
+from psycopg import Connection
+from psycopg.rows import dict_row
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import interrupt, Command
+from langgraph.checkpoint.postgres import PostgresSaver
 
 try:
     from remit import langgraph_shim as _rls
     HAVE_REMIT = True
-except Exception as _e:                                 # pragma: no cover
+except Exception as _e:
     HAVE_REMIT = False
     _REMIT_ERR = f"{type(_e).__name__}: {_e}"
 
 HOSTNAME = socket.gethostname()
-POLL_S = 0.002          # barrier poll on a PERSISTENT connection
-IDLE_S = 0.05           # racer idle poll between rounds
+POLL_S = 0.002
+IDLE_S = 0.05
 ROUND_TIMEOUT_S = 180
 TABLES = ("xh174_rounds", "xh174_ready", "xh174_effects", "xh174_results")
 
-
-# ------------------------------------------------------------ pg helpers
 def _coord(dsn):
     """One persistent autocommit connection for coordination polling."""
     return psycopg.connect(dsn, autocommit=True)
-
 
 def _init_tables(dsn):
     with _coord(dsn) as c:
@@ -181,16 +63,11 @@ def _init_tables(dsn):
             t_invoke_ms DOUBLE PRECISION, arrive_at TIMESTAMPTZ,
             PRIMARY KEY (round, host))""")
 
-
 def _ledger_write(dsn, rnd, host, thread, task):
-    # The effect: one autocommitted INSERT on its own short-lived
-    # connection, durable before the node returns (probe-163 ordering).
     with psycopg.connect(dsn, autocommit=True) as c:
         c.execute("INSERT INTO xh174_effects (round, host, thread, task) "
                   "VALUES (%s, %s, %s, %s)", (rnd, host, thread, task))
 
-
-# --------------------------------------------------- saver (159-verbatim)
 def _make_saver(dsn, gated):
     """(saver, closer) -- construction copied from probe 159 make_saver()."""
     conn = Connection.connect(dsn, autocommit=True,
@@ -201,13 +78,11 @@ def _make_saver(dsn, gated):
         saver = _rls.wrap(PostgresSaver, conn, cross_process_gate=True)
     else:
         saver = PostgresSaver(conn)
-    saver.setup()    # Postgres does not create the checkpointer schema
-                     # lazily (probe 165 finding); idempotent thereafter
+    saver.setup()
     return saver, conn.close
 
-
 def _build_graph(dsn, saver, rnd, host_tag, gate_ms, thread):
-    flag = {"fired": False}   # set only when THIS process's node runs
+    flag = {"fired": False}
 
     class S(TypedDict, total=False):
         pre_out: str
@@ -219,9 +94,7 @@ def _build_graph(dsn, saver, rnd, host_tag, gate_ms, thread):
     def gate(state):
         decision = interrupt({"q": "approve?"})
         if gate_ms:
-            time.sleep(gate_ms / 1000.0)   # instrumented duration D: the
-                                           # model-call / payment stand-in
-                                           # (probe 168's dose axis)
+            time.sleep(gate_ms / 1000.0)
         _ledger_write(dsn, rnd, host_tag, thread, "gate")
         flag["fired"] = True
         return {"decision": bool(decision)}
@@ -234,14 +107,11 @@ def _build_graph(dsn, saver, rnd, host_tag, gate_ms, thread):
     g.add_edge("gate", END)
     return g.compile(checkpointer=saver), flag
 
-
-# ---------------------------------------------------------------- roles
 def role_init(a):
     _init_tables(a.dsn)
     saver, close = _make_saver(a.dsn, gated=False)
     close()
     print(json.dumps({"init": "ok", "host": HOSTNAME, "langgraph": _lg}))
-
 
 def role_reset(a):
     with _coord(a.dsn) as c:
@@ -251,14 +121,13 @@ def role_reset(a):
                       "note": "checkpointer tables untouched; stale "
                               "parked threads are inert (unique ids)"}))
 
-
 def role_serve(a):
     _init_tables(a.dsn)
     arms = a.arms.split(",")
     reps = 2 if a.smoke else a.reps
     outdir = Path(a.out); outdir.mkdir(parents=True, exist_ok=True)
     cells = []
-    rnd = int(time.time()) * 100        # monotonic across attempts
+    rnd = int(time.time()) * 100
     coord = _coord(a.dsn)
     try:
         for arm in arms:
@@ -269,7 +138,6 @@ def role_serve(a):
             for rep in range(reps):
                 rnd += 1
                 thread = f"xh174-{uuid.uuid4().hex[:8]}"
-                # Park through a STOCK saver in every arm (see docstring).
                 saver, close = _make_saver(a.dsn, gated=False)
                 try:
                     graph, _ = _build_graph(a.dsn, saver, rnd,
@@ -284,7 +152,7 @@ def role_serve(a):
                               "VALUES (%s, %s, %s, %s)",
                               (rnd, thread, arm, a.gate_ms))
                 t0 = time.time()
-                while True:                      # wait for two hosts
+                while True:
                     rows = coord.execute(
                         "SELECT host, hostname FROM xh174_ready "
                         "WHERE round=%s", (rnd,)).fetchall()
@@ -297,7 +165,7 @@ def role_serve(a):
                 coord.execute("UPDATE xh174_rounds SET released=TRUE "
                               "WHERE round=%s", (rnd,))
                 t0 = time.time()
-                while True:                      # wait for two verdicts
+                while True:
                     done = coord.execute(
                         "SELECT host, outcome, error, arrive_at "
                         "FROM xh174_results WHERE round=%s",
@@ -361,7 +229,6 @@ def role_serve(a):
     p.write_text(json.dumps(receipt, indent=2))
     print(json.dumps({"receipt": str(p)}))
 
-
 def role_race(a):
     outdir = Path(a.out); outdir.mkdir(parents=True, exist_ok=True)
     log = []
@@ -389,19 +256,15 @@ def role_race(a):
                     " AND y.host=%s) ORDER BY r.round LIMIT 1",
                     (a.host_tag,)).fetchone()
             except psycopg.errors.UndefinedTable:
-                time.sleep(0.5)          # pre-init, or reset in flight
+                time.sleep(0.5)
                 continue
             except psycopg.OperationalError:
-                _reconnect()             # tunnel blip / server restart
+                _reconnect()
                 continue
             if row is None:
                 time.sleep(IDLE_S)
                 continue
             rnd, thread, arm, gate_ms = row
-            # Build saver + graph BEFORE announcing readiness: a deployed
-            # worker holds a long-lived saver, so connect + setup() is
-            # probe overhead, not delivery latency, and must not sit
-            # inside the timed window (run-1 finding, 2026-07-31).
             close = None
             try:
                 saver, close = _make_saver(a.dsn, gated=(arm == "gate"))
@@ -427,18 +290,18 @@ def role_race(a):
                 close(); _reconnect()
                 continue
             aborted = False
-            while True:                  # spin on the barrier
+            while True:
                 try:
                     rel = coord.execute(
                         "SELECT released FROM xh174_rounds "
                         "WHERE round=%s", (rnd,)).fetchone()
                 except psycopg.errors.UndefinedTable:
-                    aborted = True       # reset dropped the tables
+                    aborted = True
                     break
                 except psycopg.OperationalError:
                     _reconnect()
                     continue
-                if rel is None:          # round deleted by a reset
+                if rel is None:
                     aborted = True
                     break
                 if rel[0]:
@@ -447,8 +310,8 @@ def role_race(a):
             if aborted:
                 close(); time.sleep(0.5)
                 continue
-            arrive_at = None             # server-clock arrival marker,
-            try:                         # host-neutral by construction
+            arrive_at = None
+            try:
                 arrive_at = coord.execute("SELECT now()").fetchone()[0]
             except (psycopg.errors.UndefinedTable,
                     psycopg.OperationalError):
@@ -458,9 +321,7 @@ def role_race(a):
                 graph.invoke(Command(resume=True),
                              {"configurable": {"thread_id": thread}})
                 if flag["fired"]:
-                    outcome = "fired"    # THIS node executed; "inert"
-                                         # means invoke returned without
-                                         # it (post-completion swallow)
+                    outcome = "fired"
             except Exception as e:
                 err = type(e).__name__
                 outcome = ("refused" if "RemitConsume" in err
@@ -503,7 +364,6 @@ def main():
     a = ap.parse_args()
     {"init": role_init, "reset": role_reset,
      "serve": role_serve, "race": role_race}[a.role](a)
-
 
 if __name__ == "__main__":
     main()

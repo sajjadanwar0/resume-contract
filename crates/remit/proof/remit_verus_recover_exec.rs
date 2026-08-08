@@ -1,40 +1,9 @@
-// remit_verus_recover_exec.rs
-// ===========================
-// N3 (part a) -- the shipped recovery decision as a VERIFIED EXECUTABLE
-// function. This is the first proof that attaches to code that runs, not to
-// a model beside it.
-//
-// crates/remit/src/lib.rs::recover() computes SkipTo(frontier+1) where
-// frontier is the max root-branch task in the durable log. After the N3
-// adoption (n3_adopt.py), lib.rs delegates to a private `recover_core`
-// whose body is LINE-IDENTICAL (modulo the VERUS-ONLY blocks below;
-// CI-enforced by n3_sync_check.sh) to the exec function verified here:
-//
-//   recover_core(tasks) == spec_max(tasks) + 1        -- proved, executable
-//
-// plus the RD bridge: spec_max is invariant under adjacent transposition of
-// the durable records (the #8039 window) and, being order-free, under any
-// permutation reachable by such swaps -- connecting the SHIPPED decision
-// function to the order-independence theorems of remit_verus_rd_interp.rs.
-//
-// Verify:  verus remit_verus_recover_exec.rs
-// Expect:  "verification results:: N verified, 0 errors" (N ~ 6 incl. main).
-// If an assert fails on your toolchain: SMT-trigger nudge -- report the
-// exact line. The two OPTIONAL-BRIDGE lemmas at the bottom are isolable:
-// if (and only if) one of THEM fails, comment them out, re-verify to get
-// the clean exec-contract tally, and paste me the failing line -- the
-// executable contract does not depend on them.
-//
-// Toolchain: the paper's pin, Verus 0.2026.05.03.8b81855.
 
 use vstd::prelude::*;
 use vstd::seq::*;
 
 verus! {
 
-/// The durable frontier: max task id in the (root-projected) log; 0 if empty.
-/// Recursion by drop_last so the exec loop's left-to-right scan matches
-/// subrange growth one unfold at a time.
 pub open spec fn spec_max(s: Seq<u32>) -> int
     decreases s.len()
 {
@@ -46,14 +15,11 @@ pub open spec fn spec_max(s: Seq<u32>) -> int
     }
 }
 
-/// Adjacent transposition at i -- the #8039 window, u32-typed.
 pub open spec fn adjacent_swap(a: Seq<u32>, b: Seq<u32>, i: int) -> bool {
     0 <= i && i + 1 < a.len()
         && b =~= a.update(i, a[i + 1]).update(i + 1, a[i])
 }
 
-/// THE verified executable core. lib.rs's `recover_core` body must be
-/// line-identical to this body outside the VERUS-ONLY blocks.
 pub fn recover_core(tasks: &Vec<u32>) -> (next: u32)
     requires
         forall|k: int| 0 <= k < tasks@.len() ==> tasks@[k] < 0xFFFF_FFFFu32,
@@ -99,14 +65,6 @@ pub fn recover_core(tasks: &Vec<u32>) -> (next: u32)
     f + 1
     // N3-CORE-BODY-END
 }
-
-// ---------------------------------------------------------------------------
-// OPTIONAL-BRIDGE: RD order-independence of the shipped decision function.
-// spec_max characterized (upper bound + witness), then adjacent-swap
-// invariance by witness transport -- the same #8039-window obligation
-// remit_verus_rd_interp.rs proves for the skip-set decision, here for the
-// frontier the shipped recover() actually computes.
-// ---------------------------------------------------------------------------
 
 proof fn lemma_max_is_ub(s: Seq<u32>)
     ensures
@@ -154,8 +112,6 @@ proof fn lemma_max_witness(s: Seq<u32>)
     }
 }
 
-/// The shipped decision is invariant under the #8039 window: transposing two
-/// adjacent durable records leaves the recovered frontier unchanged.
 proof fn lemma_recover_adjacent_swap(a: Seq<u32>, b: Seq<u32>, i: int)
     requires
         adjacent_swap(a, b, i),
@@ -194,4 +150,4 @@ proof fn lemma_recover_adjacent_swap(a: Seq<u32>, b: Seq<u32>, i: int)
 
 fn main() {}
 
-} // verus!
+}

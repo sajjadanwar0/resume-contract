@@ -1,24 +1,4 @@
 #!/usr/bin/env python3
-"""
-158c_p14_pydantic_graph_park_kill.py  (campaign p14: park-kill matrix)
-
-pydantic-graph arm of the park-kill location.  Probe 119 established that a
-crash INSIDE a node leaves FileStatePersistence unrestorable
-(GraphRuntimeError at iter_from_persistence).  This probe kills at the OTHER
-location: the run is stepped with graph.iter to the clean point BETWEEN nodes
--- NodeA completed and snapshotted, NodeB created but not started -- the
-process parks there and is SIGKILLed.  A fresh interpreter then attempts
-iter_from_persistence.
-
-Question (discovery cell, either answer is a paper datum): is the
-unrecoverability of 119 specific to mid-node crash state, or does the plane
-fail to restore even a clean between-node snapshot after process death?
-
-Oracle: on-disk SQLite effect ledger written by the node bodies.
-
-Usage:  .venv/bin/python3 probes/158c_p14_pydantic_graph_park_kill.py
-Modes (argv[1]): parent (default) | park | resume
-"""
 import asyncio
 import json
 import os
@@ -36,12 +16,10 @@ from pathlib import Path
 
 REQUIRED_PG = "1.107.1"
 
-
 def _fail(msg):
     print(json.dumps({"probe_refused": msg, "interpreter": sys.executable}),
           file=sys.stderr)
     sys.exit(3)
-
 
 _pgv = version("pydantic-graph")
 if _pgv != REQUIRED_PG and not os.environ.get("PROBE_ALLOW_OFFPIN"):
@@ -49,12 +27,11 @@ if _pgv != REQUIRED_PG and not os.environ.get("PROBE_ALLOW_OFFPIN"):
           f"Interpreter: {sys.executable}. Launch with envs/pydantic-graph, "
           f"or set PROBE_ALLOW_OFFPIN=1.")
 
-from pydantic_graph import BaseNode, End, Graph, GraphRunContext   # noqa: E402
-from pydantic_graph.persistence.file import FileStatePersistence   # noqa: E402
-from pydantic import BaseModel                                     # noqa: E402
+from pydantic_graph import BaseNode, End, Graph, GraphRunContext
+from pydantic_graph.persistence.file import FileStatePersistence
+from pydantic import BaseModel
 
 LEDGER = {"path": None}
-
 
 def ledger_init(path):
     c = sqlite3.connect(path, timeout=30)
@@ -63,13 +40,11 @@ def ledger_init(path):
     c.commit()
     c.close()
 
-
 def ledger_write(task):
     c = sqlite3.connect(LEDGER["path"], timeout=30)
     c.execute("INSERT INTO effects (task) VALUES (?)", (task,))
     c.commit()
     c.close()
-
 
 def ledger_counts(path):
     c = sqlite3.connect(path, timeout=30)
@@ -78,10 +53,8 @@ def ledger_counts(path):
     c.close()
     return dict(rows)
 
-
 class StateX(BaseModel):
     total: int = 0
-
 
 @dataclass
 class NodeA(BaseNode[StateX]):
@@ -90,7 +63,6 @@ class NodeA(BaseNode[StateX]):
         ctx.state.total += 1
         return NodeB()
 
-
 @dataclass
 class NodeB(BaseNode[StateX, None, int]):
     async def run(self, ctx: GraphRunContext[StateX]) -> End[int]:
@@ -98,22 +70,18 @@ class NodeB(BaseNode[StateX, None, int]):
         ctx.state.total += 10
         return End(ctx.state.total)
 
-
 graph = Graph(nodes=(NodeA, NodeB))
 
-
-# ------------------------------------------------------------------ lives
 async def _park(d):
     LEDGER["path"] = d["ledger"]
     ledger_init(d["ledger"])
     persistence = FileStatePersistence(Path(d["snap"]))
     async with graph.iter(NodeA(), state=StateX(),
                           persistence=persistence) as run:
-        node = await run.next()          # NodeA executed; NodeB created
+        node = await run.next()
         Path(d["ready"]).write_text(json.dumps(
             {"pid": os.getpid(), "parked_before": type(node).__name__}))
-        await asyncio.sleep(600)         # parked between nodes; SIGKILL here
-
+        await asyncio.sleep(600)
 
 async def _resume(d):
     LEDGER["path"] = d["ledger"]
@@ -130,7 +98,6 @@ async def _resume(d):
         err = f"{type(e).__name__}: {e}"
     print(json.dumps({"outcome": outcome, "resume_error": err}))
 
-
 def _run_mode(mode, env, timeout=120):
     p = subprocess.run([sys.executable, os.path.abspath(__file__), mode],
                        env=env, capture_output=True, text=True,
@@ -145,8 +112,6 @@ def _run_mode(mode, env, timeout=120):
                            if p.stderr.strip() else None)
     return out
 
-
-# ------------------------------------------------------------------ parent
 def parent_main(out_dir):
     d0 = tempfile.mkdtemp(prefix="probe158c_")
     d = {"ledger": f"{d0}/ledger.sqlite", "snap": f"{d0}/state.json",
@@ -221,7 +186,6 @@ def parent_main(out_dir):
                         "stable": result["stable"]}, indent=2) + "\n")
         print(f"\nwrote {out}/158c_results.json and 158c_stable.json",
               file=sys.stderr)
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

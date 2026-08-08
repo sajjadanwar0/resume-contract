@@ -8,7 +8,6 @@ formal/tla/states/
 formal/tla/tla2tools.jar
 .idea/
 crates/remit/proof/.pre_adoption_backup/
-crates/remit/proof/.pre_adoption_backup/
 formal/tla/*.pre_finalize.bak
 formal/tla/*_TTrace_*
 /remit_verus
@@ -41,9 +40,8 @@ resume-contract.blg
 resume-contract.toc
 resume-contract.synctex.gz
 
-# TLC run scratch (receipts live in results/tla/)
+# TLC run scratch (the audited receipts in formal/tla/independence_ref_rerun/ are tracked)
 formal/tla/indcheck/
-formal/tla/independence_ref_rerun/
 # heavy per-rep sweep output (canonical 168 receipts are committed separately)
 results/multiproc/window_100/
 # compiled verus binaries
@@ -52,3 +50,4 @@ remit_verus_cv_rd
 remit-contract/python/remit/_core.abi3.so
 remit-contract/dist-local/
 remit-contract/dist-release/
+formal/tla/parked/meta_*

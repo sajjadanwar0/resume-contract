@@ -1,36 +1,3 @@
-// remit_verus_ledger_exec.rs
-// ==========================
-// N3 (part b) -- EO admission and the PC commit gate as VERIFIED EXECUTABLE
-// functions, mirroring the decision logic of lib.rs::begin_effect and
-// lib.rs::commit_checkpoint over primitive keys ((u64 branch, u32 task);
-// the String-keyed BranchKey translation is the unverified veneer).
-//
-// FUNCTIONAL FORM, deliberately: state in, state out, no `&mut` anywhere in
-// a contract -- portable across Verus versions' &mut-postcondition rules.
-// The shipped &mut methods are this logic's direct imperative
-// transcription, bridged by the exhaustive differential tests
-// (tests/n3_differential.rs).
-//
-// What is proved, executable:
-//   admit:  fresh iff (branch, task) absent; on fresh the returned ledger
-//           view is exactly input.push(key); otherwise unchanged. Derived
-//           corollaries: a fresh admission's key counts exactly one
-//           afterward, and admission preserves ledger uniqueness -- the
-//           exec-level EO/CO lemmas.
-//   commit: succeeds iff task == frontier+1 AND the validity bit holds; on
-//           success the frontier becomes task and the log view is exactly
-//           input.push(task); on failure both are unchanged -- PC's
-//           strict-next advance and CV's validate-before-append, executable.
-//
-// Verify:  verus remit_verus_ledger_exec.rs
-// Expect:  "verification results:: N verified, 0 errors" (N ~ 9 incl. main).
-// Exec tuple comparison is component-wise (x.0/x.1): this Verus pin's vstd
-// has no exec PartialEq spec for tuples, and an assume_specification would
-// violate the crate's no-assume discipline. Spec-level tuple equality is
-// builtin and used in the proof blocks.
-// Assert failure = SMT-trigger nudge: report the exact line.
-//
-// Toolchain: the paper's pin, Verus 0.2026.05.03.8b81855.
 
 use vstd::prelude::*;
 use vstd::seq::*;
@@ -39,7 +6,6 @@ verus! {
 
 pub type Key = (u64, u32);
 
-// ---- write-set count, drop_last recursion so push unfolds in one step ----
 pub open spec fn count_key(s: Seq<Key>, k: Key) -> nat
     decreases s.len()
 {
@@ -124,10 +90,6 @@ proof fn lemma_unique_push(s: Seq<Key>, x: Key)
     }
 }
 
-// ---------------------------------------------------------------------------
-// EO admission: the executable decision core of begin_effect (functional).
-// ---------------------------------------------------------------------------
-
 pub fn admit(entries: Vec<Key>, branch: u64, task: u32) -> (r: (bool, Vec<Key>))
     ensures
         r.0 == !contains_key(entries@, (branch, task)),
@@ -172,9 +134,6 @@ pub fn admit(entries: Vec<Key>, branch: u64, task: u32) -> (r: (bool, Vec<Key>))
     (true, e)
 }
 
-/// Exec-level EO corollary: a fresh admission's key counts exactly one
-/// afterward, and uniqueness is preserved -- the shipped-form of
-/// remit_verus.rs's ledger lemmas.
 proof fn lemma_admit_fresh_counts_one(s: Seq<Key>, k: Key)
     requires
         !contains_key(s, k),
@@ -194,13 +153,6 @@ proof fn lemma_admit_preserves_unique(s: Seq<Key>, k: Key)
 {
     lemma_unique_push(s, k);
 }
-
-// ---------------------------------------------------------------------------
-// PC + CV gate: the executable decision core of commit_checkpoint
-// (functional). `valid` is the CheckpointValidator's answer, computed by
-// the caller BEFORE this gate -- validation precedes any append, by
-// signature.
-// ---------------------------------------------------------------------------
 
 pub fn commit(frontier: u32, log: Vec<u32>, task: u32, valid: bool)
     -> (r: (bool, u32, Vec<u32>))
@@ -222,8 +174,6 @@ pub fn commit(frontier: u32, log: Vec<u32>, task: u32, valid: bool)
     (true, task, l)
 }
 
-/// PC, executable form: a successful commit strictly advances the frontier
-/// and never re-enters the durable prefix.
 proof fn lemma_commit_strictly_advances(f_old: u32, task: u32)
     requires
         task == f_old + 1,
@@ -234,4 +184,4 @@ proof fn lemma_commit_strictly_advances(f_old: u32, task: u32)
 
 fn main() {}
 
-} // verus!
+}

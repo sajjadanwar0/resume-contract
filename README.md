@@ -79,12 +79,7 @@ sweep_nonlg.sh             release sweep of the non-LangGraph headline
                            release-date dump into results/sweep/)
 n3_sync_check.sh           byte-level gate: verified exec recover body ==
                            shipped lib.rs body
-prefreeze_check.sh         one-shot pre-submission battery (includes the
-                           paper<->probes inventory gate)
 reproduce.sh               single-command audit (stages [1]..[4])
-Makefile                   setup / pilot / tlc / rust / audit
-archaeology/               issue-archaeology protocol and seed set
-docs/decisions/            decision records
 ```
 
 Design note -- why per-framework env projects instead of one lockfile: the

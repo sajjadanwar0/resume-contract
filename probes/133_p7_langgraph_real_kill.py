@@ -1,23 +1,4 @@
 #!/usr/bin/env python3
-"""
-133_p7_langgraph_real_kill.py
-Answers the "your crashes are fake" reviewer attack head-on: the crash here
-is a real, unhandled SIGKILL (kill -9) of the OS process executing the
-workflow, not a raised exception. Determinism is preserved by a barrier, not
-timing: the victim parks inside task s2 AFTER s1's result is durably
-recorded, signals readiness via a flag file, and is killed while parked.
-A FRESH process then resumes from the durable SQLite checkpoint.
-
-Question: with s1's result durably recorded via put_writes, does resume in a
-new process re-execute s1?  (The exception-based probes 118/126/130 say yes;
-this probe tests whether a real process death changes the verdict.)
-
-Oracles: (1) on-disk SQLite effect ledger written by the victim process and
-read by the parent + resumer (cross-process, survives the kill); (2) the
-checkpointer database itself, inspected at kill time.
-
-Modes (argv[1]): parent (default) | child | resume
-"""
 import json
 import os
 import signal
@@ -30,14 +11,11 @@ from importlib.metadata import version
 
 WORKDIR = os.environ.get("PROBE133_DIR")
 
-
 def ledger_conn(path):
-    # Tasks run on worker threads; use thread-safe, per-call-friendly conns.
     c = sqlite3.connect(path, timeout=30, check_same_thread=False)
     c.execute("CREATE TABLE IF NOT EXISTS effects (n INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT)")
     c.commit()
     return c
-
 
 def ledger_write(path, task_name):
     c = sqlite3.connect(path, timeout=30)
@@ -45,14 +23,13 @@ def ledger_write(path, task_name):
     c.commit()
     c.close()
 
-
 def build_wf(ckpt_path, ledger_path, ready_flag, crashed_flag):
     from langgraph.checkpoint.sqlite import SqliteSaver
     from langgraph.func import entrypoint, task
 
     conn = sqlite3.connect(ckpt_path, check_same_thread=False)
     saver = SqliteSaver(conn)
-    ledger_conn(ledger_path).close()  # ensure table exists
+    ledger_conn(ledger_path).close()
 
     @task
     def s1(x: int) -> int:
@@ -62,9 +39,6 @@ def build_wf(ckpt_path, ledger_path, ready_flag, crashed_flag):
     @task
     def s2(x: int) -> int:
         if not os.path.exists(crashed_flag):
-            # First life: park here until SIGKILLed. s1's write is already
-            # durable (functional API persists task results as they finish
-            # under durability='sync').
             open(ready_flag, "w").write("parked")
             time.sleep(600)
         ledger_write(ledger_path, "s2")
@@ -76,17 +50,14 @@ def build_wf(ckpt_path, ledger_path, ready_flag, crashed_flag):
 
     return wf
 
-
 def child_main(d):
     wf = build_wf(d["ckpt"], d["ledger"], d["ready"], d["crashed"])
     wf.invoke(1, {"configurable": {"thread_id": "kill"}}, durability="sync")
-
 
 def resume_main(d):
     wf = build_wf(d["ckpt"], d["ledger"], d["ready"], d["crashed"])
     r = wf.invoke(1, {"configurable": {"thread_id": "kill"}}, durability="sync")
     print(json.dumps({"resume_result": r}))
-
 
 def count_writes(ckpt_path):
     c = sqlite3.connect(ckpt_path)
@@ -99,7 +70,6 @@ def count_writes(ckpt_path):
     c.close()
     return out
 
-
 def parent_main():
     d0 = tempfile.mkdtemp(prefix="probe133_")
     d = {"ckpt": f"{d0}/ckpt.sqlite", "ledger": f"{d0}/ledger.sqlite",
@@ -108,7 +78,6 @@ def parent_main():
     child = subprocess.Popen([sys.executable, os.path.abspath(__file__), "child"],
                              env=env, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL)
-    # Barrier: wait until the victim is parked inside s2 (=> s1 finished).
     deadline = time.time() + 120
     while not os.path.exists(d["ready"]):
         if time.time() > deadline:
@@ -123,12 +92,12 @@ def parent_main():
         "SELECT COUNT(*) FROM effects WHERE task='s1'").fetchone()[0]
     writes_at_kill = count_writes(d["ckpt"])
 
-    os.kill(child.pid, signal.SIGKILL)          # the real crash
+    os.kill(child.pid, signal.SIGKILL)
     child.wait()
     exit_desc = ("SIGKILL" if child.returncode == -signal.SIGKILL
                  else str(child.returncode))
 
-    open(d["crashed"], "w").write("1")          # second life: s2 completes
+    open(d["crashed"], "w").write("1")
     res = subprocess.run([sys.executable, os.path.abspath(__file__), "resume"],
                          env=env, capture_output=True, text=True, timeout=180)
     resume_out = {}
@@ -157,7 +126,6 @@ def parent_main():
         "violation_completed_durable_task_reexecuted_after_real_kill":
             s1_total > s1_at_kill,
     }, indent=2))
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

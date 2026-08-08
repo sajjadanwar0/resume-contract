@@ -1,13 +1,13 @@
 TLC2 Version 2026.04.09.014118 (rev: 389440f)
-Running breadth-first search Model-Checking with fp 119 and seed 3757523653710911084 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 61905] (Linux 6.8.0-137-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 52 and seed -3013724602600848090 with 1 worker on 16 cores with 6857MB heap and 64MB offheap memory [pid: 155513] (Linux 6.8.0-137-generic amd64, Ubuntu 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/neo/RustroverProjects/resume-contract/formal/tla/R10_Separations.tla
-Parsing file /tmp/tlc-11575752530120352929/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-11575752530120352929/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-11575752530120352929/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-11575752530120352929/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-11575752530120352929/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
-Parsing file /tmp/tlc-11575752530120352929/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-11575752530120352929/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-7224098889201975653/Naturals.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-7224098889201975653/Sequences.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-7224098889201975653/_TLCTrace.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-7224098889201975653/TLC.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-7224098889201975653/TLCExt.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-7224098889201975653/FiniteSets.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-7224098889201975653/Integers.tla (jar:file:/home/neo/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
@@ -19,9 +19,9 @@ Semantic processing of module R10_Separations
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module R10_Separations
-Starting... (2026-08-06 23:32:04)
+Starting... (2026-08-08 11:00:52)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-08-06 23:32:04.
+Finished computing initial states: 1 distinct state generated at 2026-08-08 11:00:52.
 Error: Invariant RecoveryDeterminism is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -40,7 +40,7 @@ State 1: <Initial predicate>
 /\ ckpts = <<>>
 /\ recHist = <<>>
 
-State 2: <ExecTask line 108, col 3 to line 118, col 71 of module R10_Separations>
+State 2: <ExecTask line 54, col 3 to line 64, col 71 of module R10_Separations>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -56,7 +56,7 @@ State 2: <ExecTask line 108, col 3 to line 118, col 71 of module R10_Separations
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 3: <EmitInterrupt line 133, col 3 to line 140, col 39 of module R10_Separations>
+State 3: <EmitInterrupt line 76, col 3 to line 83, col 39 of module R10_Separations>
 /\ pcRegress = FALSE
 /\ effects = <<1, 0, 0>>
 /\ consumedVal = NoVal
@@ -72,7 +72,7 @@ State 3: <EmitInterrupt line 133, col 3 to line 140, col 39 of module R10_Separa
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 4: <Consume(va) line 147, col 3 to line 161, col 39 of module R10_Separations>
+State 4: <Consume(va) line 86, col 3 to line 100, col 39 of module R10_Separations>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -88,7 +88,7 @@ State 4: <Consume(va) line 147, col 3 to line 161, col 39 of module R10_Separati
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
 /\ recHist = <<>>
 
-State 5: <CrashRecover line 222, col 3 to line 232, col 44 of module R10_Separations>
+State 5: <CrashRecover line 154, col 3 to line 164, col 44 of module R10_Separations>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -104,7 +104,7 @@ State 5: <CrashRecover line 222, col 3 to line 232, col 44 of module R10_Separat
 /\ ckpts = <<[idx |-> 1, valid |-> TRUE], [idx |-> 2, valid |-> TRUE]>>
 /\ recHist = <<[dur |-> 2, dec |-> "skip"]>>
 
-State 6: <CrashRecover line 222, col 3 to line 232, col 44 of module R10_Separations>
+State 6: <CrashRecover line 154, col 3 to line 164, col 44 of module R10_Separations>
 /\ pcRegress = FALSE
 /\ effects = <<1, 1, 0>>
 /\ consumedVal = va
@@ -122,5 +122,5 @@ State 6: <CrashRecover line 222, col 3 to line 232, col 44 of module R10_Separat
 
 35 states generated, 31 distinct states found, 18 states left on queue.
 The depth of the complete state graph search is 6.
-Finished in 00s at (2026-08-06 23:32:04)
-Trace exploration spec path: ./R10_Separations_TTrace_1786041124.tla
+Finished in 00s at (2026-08-08 11:00:52)
+Trace exploration spec path: ./R10_Separations_TTrace_1786168852.tla

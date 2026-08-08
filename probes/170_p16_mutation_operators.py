@@ -1,68 +1,4 @@
 #!/usr/bin/env python3
-"""
-170_p16_mutation_operators.py  (campaign p16)
-
-The eight operators probe 169 predicts kill sets for. This module APPLIES
-them; 169 diffs the resulting verdicts against the committed baseline.
-
-Why operators and not patch files. A .patch breaks on any drift in the
-surrounding lines and fails loudly, which is fine. A regex rewrite that
-matches NOTHING succeeds silently and yields a "mutant" identical to the
-original -- which then trivially fails to kill anything, and the study
-reports a surviving mutant that was never applied. That is the one
-failure mode this study cannot tolerate, because a surviving mutant is
-supposed to be a FINDING about the harness. Every operator below
-therefore asserts its site count and refuses to write a file whose
-content did not change.
-
-Operators mutate the HARNESS (oracle, protocol, classification), never
-the framework. This is the exact inverse of probe 156, whose mutants sit
-in the vendored framework source at sites the harness already watches --
-a causal-coupling check, not an answer to "is the harness tuned to the
-known bugs."
-
-  M1  effect_undercount    ledger append becomes conditional on the tag
-                           not already being present: a second fire is
-                           silently dropped.
-                           PREDICTS kills: LG.EO.crash, LG.EO.sigkill,
-                           LG.CO.concurrent, CA.restore.dup, LG.killsweep
-  M2  effect_overcount     every append writes twice.
-                           PREDICTS kills: every conformant EO/CO cell
-                           (LG.CO.sequential, AG.restore.EO,
-                           AG.doublerestore)
-  M3  crash_noop           SIGKILL is replaced by a wait; exception
-                           crashes become pass.
-                           PREDICTS kills: LG.EO.crash, LG.EO.sigkill,
-                           LG.killsweep, PG.parkkill.ok, CA.restore.dup
-  M4  fork_value_ignore    FD compares outcome to outcome instead of
-                           outcome to the value supplied.
-                           PREDICTS kills: LG.FD.6663
-  M5  label_rule_invert    U/X classification inverted in the plan.
-                           PREDICTS kills: NONE. This is Table 5 note b's
-                           sensitivity claim, currently asserted in prose.
-                           M5 discharges it mechanically or refutes it.
-  M6  state_only_oracle    verdicts read framework-visible state instead
-                           of the external ledger.
-                           PREDICTS kills: CA.restore.dup,
-                           LG.CO.concurrent -- both are reported as
-                           invisible in framework state, so if they
-                           SURVIVE M6 the external oracle bought nothing
-                           and Sec. 5.1 overstates.
-  M7  barrier_removed      filesystem barrier replaced by a fixed sleep.
-                           PREDICTS kills: NONE, with degraded rep-to-rep
-                           stability. The mechanical form of the
-                           timing-free claim.
-  M8  pin_drift            a framework pin is relaxed to a floating spec.
-                           PREDICTS: reproduce.sh REFUSES the run rather
-                           than reporting a verdict from a different
-                           resolution.
-
-Usage:
-  probes/170_p16_mutation_operators.py --list
-  probes/170_p16_mutation_operators.py --apply M4 --into /tmp/mut_M4
-  probes/170_p16_mutation_operators.py --apply-all --into /tmp/mut
-  probes/170_p16_mutation_operators.py --verify        # dry run, all sites
-"""
 import argparse
 import json
 import os
@@ -72,11 +8,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 class SiteError(RuntimeError):
     """An operator's site was not found, or was found the wrong number of
     times. Always fatal: a silently unapplied mutant is worse than none."""
-
 
 def edit(root, relpath, pattern, replacement, expect, flags=0):
     """Rewrite `pattern` -> `replacement` in one file, asserting the match
@@ -95,22 +29,9 @@ def edit(root, relpath, pattern, replacement, expect, flags=0):
     p.write_text(out)
     return hits
 
-
-# --------------------------------------------------------------------------
-# Operators. Each returns a list of (relpath, sites_touched).
-# --------------------------------------------------------------------------
 def m1_effect_undercount(root):
     """Drop a second append for the same tag: the oracle undercounts."""
     touched = []
-    # Keyed on THREAD ONLY, deliberately. An earlier revision guarded on
-    # (thread, task) and killed nothing: probe 159's ledger records the
-    # gated effect under a per-value task key (gate:True / gate:False),
-    # and the race arm the cross-process cell reads supplies DIFFERENT
-    # values to each racer, so the two fires land under different task
-    # keys and a (thread, task) guard never triggers. That operator was a
-    # "dedup identical effects" mutation, which is a strictly weaker
-    # thing than an undercount and cannot suppress this duplicate. The
-    # thread-only guard drops the second fire whatever value it carried.
     for rel, pat, rep, n in [
         ("probes/159_p14_multiproc_saver.py",
          r'(\s+)c\.execute\("INSERT INTO effects \(thread, task\) VALUES \(\?, \?\)",',
@@ -126,7 +47,6 @@ def m1_effect_undercount(root):
         touched.append((rel, edit(root, rel, pat, rep, n)))
     return touched
 
-
 def m2_effect_overcount(root):
     """Every append writes twice: the oracle overcounts."""
     touched = []
@@ -140,7 +60,6 @@ def m2_effect_overcount(root):
     ]:
         touched.append((rel, edit(root, rel, pat, rep, n)))
     return touched
-
 
 def m3_crash_noop(root):
     """Kills become no-ops. Any crash-path verdict that survives this
@@ -164,20 +83,14 @@ def m3_crash_noop(root):
                         "the operator has no site and cannot be evaluated")
     return touched
 
-
 def m4_fork_value_ignore(root):
     """FD compares outcome to outcome rather than outcome to the value
     supplied. #6663 should flip to conformant."""
     rel = "probes/125_p4_shim_fd_langgraph.py"
-    # The FD predicate is: served(True)==1 AND served(False)==0. Mutating
-    # the second conjunct to compare the FALSE branch against the TRUE
-    # branch's expected value makes the oracle self-consistent instead of
-    # value-checking -- exactly the blind spot an FD oracle could have.
     return [(rel, edit(root, rel,
                        r'r_false\.get\("value"\) == 0',
                        r'r_false.get("value") == r_false.get("value")  # M4',
                        1))]
-
 
 def m5_label_rule_invert(root):
     """NOT MECHANIZABLE, and reported as such rather than faked.
@@ -207,7 +120,6 @@ def m5_label_rule_invert(root):
         "discharged by recomputing the matrix under the alternative rule, "
         "not by mutation. Reported as a scope limit, not a passing mutant.")
 
-
 def m6_state_only_oracle(root):
     """Read framework state instead of the external ledger. Cells the
     paper calls invisible-in-state must die here; survivors mean the
@@ -216,7 +128,6 @@ def m6_state_only_oracle(root):
     return [(rel, edit(root, rel,
                        r'"gate_fires_total": sum\(gate_rows\.values\(\)\)',
                        r'"gate_fires_total": 1', 1))]
-
 
 def m7_barrier_removed(root):
     """Barrier -> fixed sleep. Predicts no verdict flips, degraded
@@ -231,7 +142,6 @@ def m7_barrier_removed(root):
     p.write_text(out)
     return [(rel, 1)]
 
-
 def m8_pin_drift(root):
     """Relax a pin. reproduce.sh's lockfile audit must REFUSE."""
     for rel in ["envs/langgraph/pyproject.toml", "pyproject.toml"]:
@@ -245,26 +155,9 @@ def m8_pin_drift(root):
             return [(rel, 1)]
     raise SiteError("M8: no pinned langgraph spec found to relax")
 
-
 OPERATORS = {
-    # A prediction may only name cells the operator can REACH -- cells
-    # whose backing probe it actually mutates. An earlier revision
-    # predicted kills in cells backed by probes these operators never
-    # touch (118, 133, 160, 115, 158c), which is unsatisfiable by
-    # construction and would have been misread as the harness failing to
-    # detect the mutation. Probe 172 now refuses to score an incoherent
-    # prediction. M1-M3 and M6-M7 mutate only 159/126, so their sole
-    # reachable cell is LG.CO.concurrent.
     "M1": ("effect_undercount", m1_effect_undercount,
            ["LG.CO.concurrent"]),
-    # M2 reaches only LG.CO.concurrent, and that cell CANNOT be flipped
-    # by overcounting: its verdict is the boolean
-    # co_concurrent_double_resume_inert_all_reps, already False because
-    # duplicates are seen. Doubling every append produces more
-    # duplicates, which keeps it False. An overcount operator can only
-    # kill a cell that is currently CONFORMANT, and M2 reaches none.
-    # Predicting a kill here was a reasoning error, not a harness defect;
-    # the empty prediction is the correct one.
     "M2": ("effect_overcount", m2_effect_overcount, []),
     "M3": ("crash_noop", m3_crash_noop,
            ["LG.CO.concurrent"]),
@@ -273,12 +166,8 @@ OPERATORS = {
     "M6": ("state_only_oracle", m6_state_only_oracle,
            ["LG.CO.concurrent"]),
     "M7": ("barrier_removed", m7_barrier_removed, []),
-    # M8 reaches no conformance cell: its subject is reproduce.sh's
-    # lockfile audit, which must REFUSE the run. Probe 172 cannot test
-    # that and reports M8 as out of its scope rather than as a survivor.
     "M8": ("pin_drift", m8_pin_drift, ["__REFUSAL__"]),
 }
-
 
 def apply_one(mid, src_root, into):
     name, fn, predicted = OPERATORS[mid]
@@ -297,7 +186,6 @@ def apply_one(mid, src_root, into):
     except SiteError as e:
         return {"operator": name, "applied": False, "tree": str(dest),
                 "sites": [], "predicted_kills": predicted, "error": str(e)}
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -352,7 +240,6 @@ def main():
     if a.verify:
         shutil.rmtree(into, ignore_errors=True)
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

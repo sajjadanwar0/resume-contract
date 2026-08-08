@@ -1,5 +1,3 @@
-# Conformance matrix plan: probe -> env (one env = one framework@version cell).
-# Extend for scripts/117+: add an env under envs/ and a [[probe]] row here.
 [[probe]]
 id = "113"
 env = "langgraph"
@@ -77,32 +75,8 @@ script = "probes/152_p13_live_pc_cv.py"
 baseline = "results/live"
 requires_env = ["ANTHROPIC_API_KEY"]
 
-# probe 171 is NOT a row here, for the same reason the p14 probes below are
-# not: it writes its own results/matrix/171_stable.json in a receipt wrapper
-# ({backend, host, pins, probe, stable, utc}), whereas the runner writes
-# stable_view(stdout). The two shapes can never compare equal, so listing it
-# makes the audit fail on a format mismatch rather than on a verdict. It is
-# gated on its committed receipt by reproduce.sh step [2b] instead.
-
 [[probe]]
 id = "140"
 env = "autogen"
 script = "probes/140_p8_autogen_state_column.py"
 baseline = "results/revision"
-# ---- campaign p14: park-kill matrix + multi-process saver ----
-# Deliberately NOT rows in this plan. The conformance runner re-executes every
-# listed probe and diffs stable_view(stdout) against <id>_stable.json in the
-# baseline directory; these five write a receipt of their own under that exact
-# name, and re-executing them costs minutes and SIGKILLs child processes, so
-# they are gated on their committed receipts by reproduce.sh step [2] instead
-# of by re-execution here. Run them directly when a release changes:
-#
-#   envs/langgraph-durable/.venv/bin/python probes/158_p14_langgraph_park_kill.py
-#   envs/llamaindex/.venv/bin/python        probes/158b_p14_llamaindex_park_kill.py
-#   envs/pydantic-graph/.venv/bin/python    probes/158c_p14_pydantic_graph_park_kill.py
-#   envs/langgraph-durable/.venv/bin/python probes/160_p14_kill_point_sweep.py
-#   envs/langgraph-durable/.venv/bin/python probes/159_p14_multiproc_saver.py \
-#       --reps 10 --k 4 [--pg-dsn ...]
-#
-# Receipts: results/parkkill/{158,158b,158c,160}_stable.json,
-#           results/multiproc/159_stable{,_pg}.json

@@ -1,0 +1,82 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 102 and seed -3655186561049267078 with 1 worker on 1 cores with 889MB heap and 64MB offheap memory [pid: 2320] (Linux 6.18.5-fc-v20 amd64, Ubuntu 21.0.10 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/claude/work/repo/resume-contract/formal/tla/ResumeContractParked.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module ResumeContractParked
+Starting... (2026-08-08 04:48:25)
+Implied-temporal checking--satisfiability problem has 1 branches.
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-08-08 04:48:27.
+Progress(8) at 2026-08-08 04:48:27: 88 states generated, 60 distinct states found, 0 states left on queue.
+Checking temporal properties for the complete state space with 60 total distinct states at (2026-08-08 04:48:27)
+Error: Temporal properties were violated.
+
+Error: The following behavior constitutes a counter-example:
+
+State 1: <Initial predicate>
+/\ pcRegress = FALSE
+/\ effects = <<0, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 0
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 1
+/\ ckpts = <<>>
+/\ recHist = <<>>
+
+State 2: <ExecTask line 68, col 3 to line 80, col 60 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = FALSE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 3: <EmitInterrupt line 83, col 3 to line 90, col 72 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = TRUE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 0
+/\ waiting = TRUE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<>>
+
+State 4: <CrashWhileParked line 136, col 3 to line 154, col 73 of module ResumeContractParked>
+/\ pcRegress = FALSE
+/\ effects = <<1, 0, 0>>
+/\ consumedVal = NoVal
+/\ emitted = TRUE
+/\ extraResumes = 0
+/\ frontier = 1
+/\ crashes = 1
+/\ waiting = FALSE
+/\ forkVals = <<>>
+/\ forkOuts = <<>>
+/\ pc = 2
+/\ ckpts = <<[idx |-> 1, valid |-> TRUE]>>
+/\ recHist = <<[dur |-> 1, dec |-> "skip"]>>
+
+State 5: Stuttering
+Finished checking temporal properties in 00s at 2026-08-08 04:48:27
+88 states generated, 60 distinct states found, 0 states left on queue.
+Finished in 05s at (2026-08-08 04:48:27)

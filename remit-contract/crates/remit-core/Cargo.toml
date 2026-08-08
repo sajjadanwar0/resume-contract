@@ -7,13 +7,8 @@ repository.workspace = true
 description = "Production core of REMIT: resume sequencer, append-only effect ledger, fork-intent resolution, validity gate, and pure recovery for the Resume Contract (PC/EO/FD/CV/CO/RD). Mirrors, function for function, the Verus-verified abstract model."
 
 [dependencies]
-# Exact pins keep the crate buildable on rustc/cargo >= 1.83 (Ubuntu 24.04
-# distribution toolchain) without requiring rustup; loosen at will on newer
-# toolchains.
+
 serde = { version = "=1.0.210", features = ["derive"] }
 serde_json = "=1.0.132"
 
 [dev-dependencies]
-# Intentionally empty: the model-conformance harness ships its own seeded
-# xorshift PRNG so the test suite has zero external dependencies and one
-# fewer moving part between the paper's numbers and a replication host.

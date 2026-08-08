@@ -1,25 +1,4 @@
 #!/usr/bin/env python3
-"""
-137_p8_sigkill_matrix.py
-Answers "the SIGKILL validation is a single point." Real process death
-(kill -9) at THREE distinct, barrier-synchronized kill points, three
-repetitions each, resumed in a fresh interpreter every time:
-
-  A  post-durable:      s1's result committed via put_writes; victim parked
-                        inside s2 (probe 133's point).
-  B  mid-persistence:   inside the superstep seam -- AFTER s1's put_writes
-                        committed, BEFORE the following put; the durable
-                        state is writes-present / checkpoint-not-advanced.
-  C  mid-effect:        inside s1 itself -- external effect (ledger row)
-                        committed, task result not yet returned; durable
-                        state has neither writes nor advanced checkpoint.
-
-No timing windows: each kill point is a filesystem barrier at a fixed
-program point. Reported per point: durable DB shape at kill, victim exit
-signal, fresh-process resume result, and effect totals; plus a
-stability field asserting all three repetitions agree.
-Modes (argv): parent (default) | child | resume
-"""
 import json
 import os
 import signal
@@ -32,7 +11,6 @@ from importlib.metadata import version
 
 REPS = 3
 
-
 def ledger(path, add=None):
     c = sqlite3.connect(path, timeout=30)
     c.execute("CREATE TABLE IF NOT EXISTS effects (n INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT)")
@@ -43,11 +21,9 @@ def ledger(path, add=None):
     c.close()
     return rows
 
-
 def park(ready_flag):
     open(ready_flag, "w").write("parked")
     time.sleep(600)
-
 
 def build(d, for_resume):
     from langgraph.checkpoint.sqlite import SqliteSaver
@@ -79,13 +55,13 @@ def build(d, for_resume):
     def s1(x: int) -> int:
         ledger(d["ledger"], add="s1")
         if point == "C" and not for_resume and not os.path.exists(d["crashed"]):
-            park(d["ready"])          # effect durable, result not returned
+            park(d["ready"])
         return x + 1
 
     @task
     def s2(x: int) -> int:
         if point == "A" and not for_resume and not os.path.exists(d["crashed"]):
-            park(d["ready"])          # s1 durable, parked inside s2
+            park(d["ready"])
         ledger(d["ledger"], add="s2")
         return x + 10
 
@@ -95,14 +71,12 @@ def build(d, for_resume):
 
     return wf
 
-
 def db_shape(ckpt):
     c = sqlite3.connect(ckpt)
     w = c.execute("SELECT COUNT(*) FROM writes").fetchone()[0]
     k = c.execute("SELECT COUNT(*) FROM checkpoints").fetchone()[0]
     c.close()
     return {"writes_rows": w, "checkpoint_rows": k}
-
 
 def one_rep(point):
     d0 = tempfile.mkdtemp(prefix=f"probe137_{point}_")
@@ -144,7 +118,6 @@ def one_rep(point):
         "s2_effects_total": rows.count("s2"),
     }
 
-
 def main():
     out = {"langgraph_version": version("langgraph"),
            "langgraph_checkpoint_sqlite_version": version("langgraph-checkpoint-sqlite"),
@@ -157,7 +130,6 @@ def main():
     out["completed_durable_task_reexecutes_at_A"] = (
             out["points"]["A"]["reps"][0].get("s1_effects_total") == 2)
     print(json.dumps(out, indent=2))
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

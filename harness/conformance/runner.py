@@ -44,7 +44,6 @@ STABLE_EXACT = {
     "first_run",
 }
 
-
 def is_stable_key(key: str) -> bool:
     return (
         key.startswith("violation")
@@ -64,7 +63,6 @@ def is_stable_key(key: str) -> bool:
         or key in STABLE_EXACT
     )
 
-
 def stable_view(obj):
     if isinstance(obj, dict):
         out = {}
@@ -77,7 +75,6 @@ def stable_view(obj):
                 out[k] = v
         return out
     return obj
-
 
 def run_probe(env: str, script: str) -> dict:
     cmd = [
@@ -110,7 +107,6 @@ def run_probe(env: str, script: str) -> dict:
         f"stderr tail: {proc.stderr[-500:]}"
     )
 
-
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--plan", default="matrix.toml")
@@ -123,12 +119,13 @@ def main() -> int:
     basedir = ROOT / args.baseline
     basedir.mkdir(parents=True, exist_ok=True)
 
-
     malformed = []
+
     for i, probe in enumerate(plan["probe"]):
         gaps = [k for k in ("id", "env", "script") if k not in probe]
         if gaps:
             malformed.append((i, probe.get("script", "<no script>"), gaps))
+
     if malformed:
         print(f"FATAL: {args.plan} has {len(malformed)} malformed entr"
               f"{'y' if len(malformed) == 1 else 'ies'}:")
@@ -136,27 +133,24 @@ def main() -> int:
             print(f"  [[probe]] #{i} ({script}) missing: {', '.join(gaps)}")
         return 2
 
-    # A probe that writes its own <id>_stable.json cannot be a plan row. The
-    # runner compares stable_view(stdout) against that filename, but a
-    # self-writing probe puts a receipt wrapper there ({backend, host, pins,
-    # probe, stable, utc}) rather than a stable view, so the comparison fails
-    # on SHAPE and reports every field as run=None -- which reads like a
-    # verdict regression and is not one. This was previously enforced only by
-    # a comment in the plan; enforce it here.
     selfwriters = []
+
     for probe in plan["probe"]:
         src = ROOT / probe["script"]
         if src.exists() and "_stable.json" in src.read_text():
             selfwriters.append((probe["id"], probe["script"]))
+
     if selfwriters:
         print(f"FATAL: {args.plan} lists {len(selfwriters)} self-writing probe(s);")
         print("       these are gated on committed receipts, not re-executed here:")
+
         for pid, script in selfwriters:
             print(f"  [[probe]] id={pid} ({script}) writes its own <id>_stable.json")
         return 2
 
     failures = 0
     manifests = {}
+
     for probe in plan["probe"]:
         pid, env, script = probe["id"], probe["env"], probe["script"]
         pdir = ROOT / probe.get("baseline", args.baseline)
@@ -173,18 +167,21 @@ def main() -> int:
             continue
 
         result = run_probe(env, script)
+
         if isinstance(result, dict) and set(result) == {"skipped"}:
             print(f"   SKIPPED by probe: {result['skipped']}")
             manifests.setdefault(pdir, []).append(
                 {"id": pid, "env": env, "script": script,
                  "status": f"skipped ({result['skipped']})"})
             continue
+
         got = stable_view(result)
         manifests.setdefault(pdir, []).append(
             {"id": pid, "env": env, "script": script, "status": "run"})
 
         raw_path = pdir / f"{pid}_results.json"
         stable_path = pdir / f"{pid}_stable.json"
+
         if args.update or not stable_path.exists():
             raw_path.write_text(json.dumps(result, indent=2, default=str) + "\n")
             stable_path.write_text(json.dumps(got, indent=2, sort_keys=True) + "\n")
@@ -192,6 +189,7 @@ def main() -> int:
             continue
 
         want = json.loads(stable_path.read_text())
+
         if got == want:
             print("   OK: stable fields match committed baseline")
         else:
@@ -204,9 +202,8 @@ def main() -> int:
     if args.update:
         for pdir, entries in manifests.items():
             all_skipped = all(e["status"].startswith("skipped") for e in entries)
+
             if all_skipped and (pdir / "MANIFEST.json").exists():
-                # Preserve run provenance (e.g. live cells recorded on a keyed
-                # host) when this update could not execute any probe here.
                 print(f"   manifest preserved (all probes skipped): "
                       f"{(pdir / 'MANIFEST.json').relative_to(ROOT)}")
                 continue
@@ -222,7 +219,6 @@ def main() -> int:
         return 1
     print("AUDIT CLEAN: all stable verdict fields match committed baselines")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

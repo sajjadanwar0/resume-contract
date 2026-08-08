@@ -1,58 +1,4 @@
 #!/usr/bin/env python3
-"""
-148_p10_live_replication_matrix.py
-Closes the live-ecology scope stated in Sec. "Live ecological cells": the
-r2 replications are same-model, same-host; this probe produces the
-multi-model, multi-host matrix. It does NOT reimplement any cell -- it
-drives probe 135 (which re-executes the byte-identical live probes 121,
-122, 131 and aggregates only the audited counter verdicts), adds a host
-manifest, writes a per-host result file, and merges files from several
-hosts into one cross-model x cross-host table with per-cell and pooled
-Wilson intervals.
-
-KEY-GATED, HOST-RUN. Nothing here executes without ANTHROPIC_API_KEY /
-OPENAI_API_KEY; run it on each host you want in the matrix.
-
-One-time, before first collection (no keys needed):
-    python3 probes/148_p10_live_replication_matrix.py --patch-probes
-    # Makes probes 121/122/131 genuinely honor PROBE_MODEL (121 passes it
-    # to Agent; 122 to ChatAnthropic; 131 to init_chat_model -- 131
-    # previously RECORDED the env var while using the hardcoded model,
-    # which would have mislabeled multi-model data). Idempotent; with
-    # PROBE_MODEL unset every probe behaves exactly as before, so the
-    # paper's N=40 receipts are unaffected. Collection refuses to run on
-    # unpatched probes.
-
-Collect (per host, provider-consistent batches -- a model list is applied
-to every target probe, so keep Anthropic and OpenAI targets in separate
-invocations; use a distinct P148_HOSTTAG per batch, since one file is
-written per (hosttag, UTC day) and a same-day rerun overwrites it):
-    P148_N=20 P148_TARGETS="122,131" \
-        P148_MODELS="claude-haiku-4-5,claude-sonnet-4-6" \
-        P148_HOSTTAG="$(hostname)-anthropic" \
-        python3 probes/148_p10_live_replication_matrix.py
-    P148_N=20 P148_TARGETS="121" \
-        P148_MODELS="gpt-4o-mini,gpt-4.1-mini" \
-        P148_HOSTTAG="$(hostname)-openai" \
-        python3 probes/148_p10_live_replication_matrix.py
-    # -> results/live/148_<hosttag>_<utcdate>.json (one per batch)
-
-Merge (any machine, no keys needed):
-    python3 probes/148_p10_live_replication_matrix.py --merge results/live/
-    # -> results/live/148_matrix.json + a markdown table on stdout
-
-Env:
-    P148_N        repetitions per (probe, model) on this host (default 20)
-    P148_MODELS   comma list of models (REQUIRED for collection; each is
-                  exported as ANTHROPIC_MODEL / PROBE_MODEL via probe 135)
-    P148_TARGETS  probe prefixes (default "121,122,131", as probe 135)
-    P148_HOSTTAG  override the host label (default: hostname)
-
-Paper wiring: pooled per-cell proportions with Wilson intervals replace the
-same-model N=40 figures; per-(model, host) rows go to the artifact. The
-existence/stability framing is unchanged -- this widens the replication
-axes, it does not create a prevalence claim.
-"""
 import json
 import math
 import os
@@ -61,13 +7,13 @@ import socket
 import subprocess
 import sys
 import time
+from importlib.metadata import version
 from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 OUTDIR = REPO / "results" / "live"
-
 
 def wilson(k, n, z=1.96):
     if n == 0:
@@ -78,13 +24,11 @@ def wilson(k, n, z=1.96):
     h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
     return [round(max(0.0, c - h), 4), round(min(1.0, c + h), 4)]
 
-
 def host_manifest():
     vers = {}
     for pkg in ("langgraph", "langgraph-checkpoint", "anthropic", "openai",
                 "openai-agents", "remit-contract"):
         try:
-            from importlib.metadata import version
             vers[pkg] = version(pkg)
         except Exception:
             pass
@@ -95,7 +39,6 @@ def host_manifest():
         "utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "versions": vers,
     }
-
 
 PROBE_PATCHES = [
     ("121_p5_live_openai_agents_session.py", [
@@ -123,7 +66,6 @@ PROBE_PATCHES = [
     ]),
 ]
 
-
 def patch_probes():
     changed = 0
     for fname, pairs in PROBE_PATCHES:
@@ -141,7 +83,6 @@ def patch_probes():
     print(f"probes patched ({changed} edits applied; 0 means already patched). "
           f"With PROBE_MODEL unset, behavior is unchanged.")
 
-
 def ensure_patched():
     stale = []
     for fname, pairs in PROBE_PATCHES:
@@ -154,7 +95,6 @@ def ensure_patched():
         sys.exit("Probes not model-patched (would silently mislabel multi-model "
                  f"runs): {', '.join(stale)}.\n"
                  "Run once first:  python3 probes/148_p10_live_replication_matrix.py --patch-probes")
-
 
 def collect():
     models = [m for m in os.environ.get("P148_MODELS", "").split(",") if m]
@@ -177,9 +117,6 @@ def collect():
           f"= {n_runs} live runs; per-run progress follows on stderr:",
           flush=True)
     t0 = time.time()
-    # stderr is INHERITED (not captured) so probe 135's "[135] ... run i/N"
-    # progress lines stream to the terminal live; only stdout (the final
-    # JSON aggregate) is captured.
     proc = subprocess.Popen([sys.executable, str(p135)], env=env,
                             stdout=subprocess.PIPE, stderr=None, text=True)
     out, _ = proc.communicate()
@@ -204,7 +141,6 @@ def collect():
     print(json.dumps({"host": tag, "models": models,
                       "n_per_cell": out["n_per_cell"]}, indent=2))
 
-
 def iter_verdicts(p135doc):
     """Yield (probe, model, field, k, n) from a probe-135 aggregate:
     cells["<script>::<model>"] -> {"runs", "errors", "verdict_fields":
@@ -215,7 +151,6 @@ def iter_verdicts(p135doc):
         probe, _, model = cell_key.partition("::")
         for field, stat in cell["verdict_fields"].items():
             yield probe, model or "default", field, stat["true"], stat["of"]
-
 
 def merge(dirpath):
     files = sorted(Path(dirpath).glob("148_*_*.json"))
@@ -253,7 +188,6 @@ def merge(dirpath):
         print(f"| {t['probe']} | {t['model']} | {t['field']} | "
               f"{t['pooled_k']}/{t['pooled_n']} | {t['pooled_wilson']} | "
               f"{len(t['per_host'])} |")
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--merge":

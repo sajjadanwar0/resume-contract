@@ -1,27 +1,4 @@
 #!/usr/bin/env python3
-"""
-136_p8_rd_adversarial_order.py
-Answers "RD is untested / the divergence is undemonstrated" without a timing
-race. #8039's hazard is an unbarriered adjacency: task-result put_writes and
-the superstep put are submitted without an ordering barrier, so a crash in
-the window can leave either durable order. Instead of racing the pool
-(scheduler luck), we PERMUTE: an adversarial-but-legal saver defers every
-put_writes until after the next put lands -- exactly the durable order the
-losing schedule would produce -- realized through the framework's own
-BaseCheckpointSaver API, deterministically. A crash (raised at a fixed
-point) is injected in the window; recovery then runs from each durable
-order and the recovery decisions are compared.
-
-Cells:
-  A  normal order (stock SqliteSaver), crash in s2, resume  -> baseline
-  B  adversarial order (DeferredWritesSaver), same protocol -> divergent DB
-Verdict fields:
-  durable_orders_differ_at_crash: the two DBs genuinely diverge (writes row
-      present in A, absent in B at the crash point)
-  rd_holds_recovery_agrees: resumed results and s1 re-execution counts
-      agree across both orders (recovery is a function of durable state,
-      and on 1.2.9 both legal states recover identically)
-"""
 import json
 import sqlite3
 import tempfile
@@ -29,7 +6,6 @@ from importlib.metadata import version
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.func import entrypoint, task
-
 
 def ledger(path, add=None):
     c = sqlite3.connect(path, timeout=30)
@@ -40,7 +16,6 @@ def ledger(path, add=None):
     rows = [r[0] for r in c.execute("SELECT task FROM effects ORDER BY n")]
     c.close()
     return rows
-
 
 class DeferredWritesSaver(SqliteSaver):
     """Adversarial-but-legal scheduler realized at the saver interface:
@@ -63,10 +38,8 @@ class DeferredWritesSaver(SqliteSaver):
         self._pending = []
         return out
 
-
 class Crash(Exception):
     pass
-
 
 def run_cell(tag, adversarial):
     d = tempfile.mkdtemp(prefix=f"probe136_{tag}_")
@@ -118,7 +91,6 @@ def run_cell(tag, adversarial):
         "ledger": rows,
     }
 
-
 def main():
     a = run_cell("normal", adversarial=False)
     b = run_cell("advers", adversarial=True)
@@ -135,7 +107,6 @@ def main():
             and a["s2_effects_total"] == b["s2_effects_total"],
     }
     print(json.dumps(out, indent=2))
-
 
 if __name__ == "__main__":
     main()

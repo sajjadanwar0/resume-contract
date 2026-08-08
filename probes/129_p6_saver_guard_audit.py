@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
-"""
-129_p6_saver_guard_audit.py
-P6 - Source audit: locate the resume-write dedup guard in each installed
-checkpointer implementation. The paper's mechanism account for #6663 quotes
-InMemorySaver.put_writes's `if inner_key in outer_writes_: continue`. This
-probe answers whether the durable savers share the semantics: it prints the
-put_writes implementation region of each saver with file path and line
-numbers, and greps for the dedup idiom (Python-guard or SQL conflict-clause
-form). Static evidence; probes 126/127 provide the behavioral confirmation.
-"""
 import inspect
 import json
 import re
 from importlib.metadata import version
 
 RESULTS = {}
-
 
 def audit(modname, clsname, key):
     try:
@@ -48,7 +37,6 @@ def audit(modname, clsname, key):
     except Exception as e:
         RESULTS[key] = {"error": f"{type(e).__name__}: {e}"}
 
-
 def main():
     for pkg in ("langgraph-checkpoint", "langgraph-checkpoint-sqlite",
                 "langgraph-checkpoint-postgres"):
@@ -60,7 +48,6 @@ def main():
     audit("langgraph.checkpoint.sqlite", "SqliteSaver", "SqliteSaver")
     audit("langgraph.checkpoint.postgres", "PostgresSaver", "PostgresSaver")
     print(json.dumps(RESULTS, indent=2, default=str))
-
 
 if __name__ == "__main__":
     main()

@@ -1,25 +1,9 @@
-#!/usr/bin/env python3
-"""
-115_p2_conformance_crewai.py
-Resume-contract conformance probe: CrewAI Flows (@persist / SQLiteFlowPersistence).
-
-CrewAI has no interrupt/approval primitive; its resume model is
-"restore persisted state, re-run the flow methods". This probe measures what
-that means for the contract:
-
-  R1  restore-after-success : kickoff(id=...) on a COMPLETED flow ->
-        do s1/s2 re-execute (EO)? does restored state compound (PC)?
-  R2  crash-resume          : s2 raises on first run; re-kickoff with same id ->
-        does completed s1 re-execute (EO)? final counter value vs expected?
-No LLM calls involved; steps are pure-Python with effect counters.
-"""
 import json
 import os
 import traceback
 
 os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
 os.environ["OTEL_SDK_DISABLED"] = "true"
-
 from importlib.metadata import version
 from pydantic import BaseModel
 from crewai.flow.flow import Flow, listen, start
@@ -29,11 +13,9 @@ RESULTS = {"crewai_version": version("crewai")}
 EFF = {"s1": 0, "s2": 0}
 FAIL_FLAG = {"armed": False, "fired": False}
 
-
 class St(BaseModel):
     id: str = ""
     counter: int = 0
-
 
 @persist()
 class F(Flow[St]):
@@ -50,7 +32,6 @@ class F(Flow[St]):
         EFF["s2"] += 1
         self.state.counter += 10
 
-
 def r1_restore_after_success():
     EFF["s1"] = EFF["s2"] = 0
     f1 = F()
@@ -61,6 +42,7 @@ def r1_restore_after_success():
 
     f2 = F()
     f2.kickoff(inputs={"id": fid})
+
     return {
         "flow_id": fid,
         "counter_after_first_run": c_after_first,
@@ -71,7 +53,6 @@ def r1_restore_after_success():
         "violation_PC_state_compounded": f2.state.counter != c_after_first,
     }
 
-
 def r2_crash_resume():
     EFF["s1"] = EFF["s2"] = 0
     FAIL_FLAG["armed"] = True
@@ -79,6 +60,7 @@ def r2_crash_resume():
 
     f1 = F()
     crash = None
+
     try:
         f1.kickoff()
     except Exception as e:
@@ -87,9 +69,10 @@ def r2_crash_resume():
     c_after_crash = f1.state.counter
     s1_before_resume = EFF["s1"]
 
-    FAIL_FLAG["armed"] = False  # "bug fixed", now resume
+    FAIL_FLAG["armed"] = False
     f2 = F()
     resume_error = None
+
     try:
         f2.kickoff(inputs={"id": fid})
     except Exception as e:
@@ -106,7 +89,6 @@ def r2_crash_resume():
         "violation_EO_completed_step_reexecuted": EFF["s1"] > s1_before_resume,
         "note_expected_counter_if_exactly_once": 11,
     }
-
 
 for name, fn in {"R1_restore_after_success": r1_restore_after_success,
                  "R2_crash_resume": r2_crash_resume}.items():

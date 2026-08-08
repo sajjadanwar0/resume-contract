@@ -1,26 +1,4 @@
 #!/usr/bin/env python3
-"""
-138_p8_multi_interrupt.py
-Answers "everything is one interrupt." A two-gate workflow: g1 and g2 each
-interrupt for a human decision and each carries its own non-idempotent
-effect. Protocol per cell (durable SqliteSaver on disk):
-
-  interrupt at g1 -> resume True (e1 fires) -> interrupt at g2
-  -> SESSION RESTART (graph and saver rebuilt from the durable DB,
-     fresh objects, same file -- the restore path)
-  -> resume True (e2 fires) -> complete
-
-Verdicts:
-  eo_across_restart_between_gates: e1 fired exactly once despite the
-      restart between the two interrupts
-  co_stray_inert_after_completion: a stray resume at the ordinary address
-      after completion changes nothing and re-fires nothing
-  fd_gate2_control_violates: a fork at g2's checkpoint with a different
-      value, stock saver, is served the first decision (the single-gate
-      violation reproduces on the second of two gates)
-  fd_gate2_shim_repairs: the read-path fork-intent saver (probe 134)
-      repairs the same cell
-"""
 import json
 import sqlite3
 import tempfile
@@ -33,7 +11,6 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 
 RESUME_CHANNEL = "__resume__"
 
-
 class ForkIntentSqliteSaver(SqliteSaver):
     def get_tuple(self, config):
         t = super().get_tuple(config)
@@ -43,7 +20,6 @@ class ForkIntentSqliteSaver(SqliteSaver):
             t = t._replace(pending_writes=[w for w in t.pending_writes
                                            if w[1] != RESUME_CHANNEL])
         return t
-
 
 def ledger(path, add=None):
     c = sqlite3.connect(path, timeout=30)
@@ -55,11 +31,9 @@ def ledger(path, add=None):
     c.close()
     return rows
 
-
 class S(TypedDict):
     v1: int
     v2: int
-
 
 def build(ckpt_path, ledger_path, shim=False):
     conn = sqlite3.connect(ckpt_path, check_same_thread=False)
@@ -82,7 +56,6 @@ def build(ckpt_path, ledger_path, shim=False):
             .add_edge(START, "g1").add_edge("g1", "g2").add_edge("g2", END)
             .compile(checkpointer=saver))
 
-
 def run_thread(tag, shim_for_fork):
     d = tempfile.mkdtemp(prefix=f"probe138_{tag}_")
     ckpt, led = f"{d}/ckpt.sqlite", f"{d}/ledger.sqlite"
@@ -90,23 +63,22 @@ def run_thread(tag, shim_for_fork):
     cfg = {"configurable": {"thread_id": tag}}
 
     app1 = build(ckpt, led)
-    app1.invoke({"v1": -1, "v2": -1}, cfg)                 # interrupt at g1
-    app1.invoke(Command(resume=True), cfg)                 # e1; interrupt at g2
+    app1.invoke({"v1": -1, "v2": -1}, cfg)
+    app1.invoke(Command(resume=True), cfg)
     ckpt_g2 = app1.get_state(cfg).config["configurable"]["checkpoint_id"]
     e1_before_restart = [r for r in ledger(led) if r[0] == "e1"]
 
-    # SESSION RESTART: fresh objects, same durable file
     app2 = build(ckpt, led, shim=shim_for_fork)
-    done = app2.invoke(Command(resume=True), cfg)          # e2; complete
+    done = app2.invoke(Command(resume=True), cfg)
     rows = ledger(led)
     e1_total = [r for r in rows if r[0] == "e1"]
     e2_total = [r for r in rows if r[0] == "e2"]
 
-    stray = app2.invoke(Command(resume=False), cfg)        # stray at head
+    stray = app2.invoke(Command(resume=False), cfg)
     rows_after_stray = ledger(led)
 
     fork_cfg = {"configurable": {"thread_id": tag, "checkpoint_id": ckpt_g2}}
-    forked = app2.invoke(Command(resume=False), fork_cfg)  # different decision
+    forked = app2.invoke(Command(resume=False), fork_cfg)
     rows_after_fork = ledger(led)
     e2_after_fork = [r for r in rows_after_fork if r[0] == "e2"]
 
@@ -126,7 +98,6 @@ def run_thread(tag, shim_for_fork):
         "fd_gate2_second_decision_honored":
             forked.get("v2") == 0 and e2_after_fork[-1] == ("e2", 0),
     }
-
 
 def main():
     control = run_thread("ctrl", shim_for_fork=False)
@@ -150,7 +121,6 @@ def main():
         },
     }
     print(json.dumps(out, indent=2))
-
 
 if __name__ == "__main__":
     main()

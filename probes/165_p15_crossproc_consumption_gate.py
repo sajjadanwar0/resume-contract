@@ -1,95 +1,4 @@
 #!/usr/bin/env python3
-"""
-165_p15_crossproc_consumption_gate.py  (campaign p15)
-
-Closes the loop on probe 159's design implication.  159 measured the
-cross-process CO failure (two OS processes resuming one parked interrupt
-fire the gated effect twice, 10/10 on both durable backends) and stated the
-implication: "a cross-process repair must put the consumption record in the
-shared store under a compare-and-swap rather than in the interposition
-layer."  This probe is that repair, as a saver-level demonstrator -- and its
-development produced a mechanism finding of its own:
-
-  DESIGN v1 (falsified in this campaign, kept here as provenance): the CAS
-  claim interposed at BaseCheckpointSaver.put_writes on the __resume__
-  channel.  Measured at the pins: the race still duplicates in every rep
-  WITH the gate active, and the loser is rejected loudly -- after its
-  effect fired.  An instrumented trace shows why: the null-task __resume__
-  journal write is submitted to a background executor thread and is
-  CONCURRENT with gated execution on the main thread, not ordered before
-  it, so an exception raised there is observed only at superstep join.
-  The write path is powerless for cross-process CO exactly as it was for
-  FD (probe 125): interposition below the decision point cannot veto the
-  decision.
-
-  DESIGN v2 (this file): the claim binds at the durable-state READ the
-  loop performs before gated execution -- get_tuple returning the parked
-  checkpoint with a pending __interrupt__ write.  Both racers demonstrably
-  load the same checkpoint there (measured: identical checkpoint ids); the
-  gate claims <thread, that checkpoint id> in a shared durable claims
-  table with ONE INSERT under a uniqueness constraint (SQLite primary key
-  / Postgres ON CONFLICT) -- the compare-and-swap named in the paper.
-  Exactly one process can win; the loser's invocation raises
-  ConsumptionClaimRejected inside get_tuple, before any node executes.
-  The put_writes claim is retained as a secondary latch (same key, no-op
-  for the winner) for any path that reaches the journal without the read.
-
-Arms (SQLite default; --pg-dsn replicates the race arms on PostgresSaver
-with the claims table created in the same Postgres database):
-
-  A. seq_control_gate   -- park; ONE resume under the gate.  Must complete
-                           with the gated effect firing exactly once: the
-                           gate must not false-positive on the legitimate
-                           first consumption.
-  B. race_same_gate     -- 159's two-racer byte-identical race, both racers
-                           under the gate.  Expected: gate fires 1/rep in
-                           every rep; exactly one racer rejected loudly.
-  C. race_diff_gate     -- values True vs False under the gate.  Expected:
-                           exactly one value fires; the loser is rejected,
-                           not served the other branch.
-  D. race_same_stock    -- differential control (reps//2, min 3): the
-                           stock saver on the identical protocol.
-                           Expected: reproduces 159's duplicate.
-  E. stray_after_completion_gate -- park; resume to completion; then a
-                           stray resume under the gate.  Measures the
-                           disposition: the completed thread's checkpoint
-                           carries no pending __interrupt__, so the gate
-                           does not engage and the stock silent-swallow
-                           inertness (probe 126) is preserved unchanged.
-
-Scope, stated plainly (mirrors the POST-RUN paper text):
-  * The gate keys the ORDINARY address only -- it serializes all resume
-    deliveries addressed to one checkpoint.  A fork-flagged delivery
-    carries the FI discriminator and would claim a fresh <checkpoint,
-    ordinal> key; that composition is the shim's flag-keyed configuration
-    (probe 155), not this demonstrator.
-  * Residual interface gap, named rather than hidden: get_tuple carries no
-    read-intent discriminator, so any reader of a parked checkpoint takes
-    the claim -- state INSPECTION during a park would consume it and a
-    later resume from another process would be rejected.  The probed
-    protocols do not inspect; a production composition needs read intent
-    in the invocation config, information the BaseCheckpointSaver surface
-    does not carry.  This is the CO analogue, at the read path, of the FI
-    gap the paper documents at the write path.
-
-Oracle: on-disk SQLite effect ledger, identical to probe 159's.
-
-Usage:
-  .venv/bin/python3 probes/165_p15_crossproc_consumption_gate.py            # reps=10
-  .venv/bin/python3 probes/165_p15_crossproc_consumption_gate.py --smoke    # reps=3
-  .venv/bin/python3 probes/165_p15_crossproc_consumption_gate.py --pg-dsn "postgresql://..."
-      --pg-dsn requires langgraph-checkpoint-postgres and psycopg in the
-      interpreter and a reachable Postgres.  The probe calls
-      PostgresSaver.setup() itself: Postgres, unlike SQLite, does not
-      create the checkpointer schema lazily (first-run finding, host
-      2026-07-27: every arm failed UndefinedTable before this call was
-      added).  Thread ids carry a per-invocation nonce so repeated runs
-      against one shared database cannot collide.
-  GATE_DEBUG=1 ... : children also log the pending channels seen at
-                     get_tuple and the write channels seen at put_writes
-                     (VERIFY aid for the channel constants at a new pin).
-Child modes (argv[1], internal): park | racer | single
-"""
 import argparse
 import json
 import os
@@ -106,12 +15,10 @@ from pathlib import Path
 
 REQUIRED_LANGGRAPH = "1.2.9"
 
-
 def _fail(msg):
     print(json.dumps({"probe_refused": msg, "interpreter": sys.executable}),
           file=sys.stderr)
     sys.exit(3)
-
 
 _lg = version("langgraph")
 if _lg != REQUIRED_LANGGRAPH and not os.environ.get("PROBE_ALLOW_OFFPIN"):
@@ -119,33 +26,27 @@ if _lg != REQUIRED_LANGGRAPH and not os.environ.get("PROBE_ALLOW_OFFPIN"):
           f"Interpreter: {sys.executable}. Launch with envs/langgraph-durable "
           f"or set PROBE_ALLOW_OFFPIN=1.")
 
-from typing import TypedDict                          # noqa: E402
-from langgraph.graph import StateGraph, START, END    # noqa: E402
-from langgraph.types import interrupt, Command        # noqa: E402
-from langgraph.checkpoint.sqlite import SqliteSaver   # noqa: E402
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import interrupt, Command
+from langgraph.checkpoint.sqlite import SqliteSaver
 
-RESUME_CHANNEL = "__resume__"        # LangGraph 1.2.9 pending-write channels
-INTERRUPT_CHANNEL = "__interrupt__"  # (paper Sec. 4.3).  GATE_DEBUG=1 dumps
-                                     # observed channels if these drift at a
-                                     # future pin.
-
+RESUME_CHANNEL = "__resume__"
+INTERRUPT_CHANNEL = "__interrupt__"
 
 class S(TypedDict, total=False):
     x: int
     pre_out: str
     decision: bool
 
-
 class ConsumptionClaimRejected(RuntimeError):
     """A second process attempted to consume an already-claimed interrupt."""
-
 
 def _optional_version(dist):
     try:
         return version(dist)
     except PackageNotFoundError:
         return "not-installed"
-
 
 def _pins(pg_dsn):
     pins = {
@@ -159,12 +60,8 @@ def _pins(pg_dsn):
         pins["psycopg"] = _optional_version("psycopg")
     return pins
 
+RUN_NONCE = uuid.uuid4().hex[:6]
 
-RUN_NONCE = uuid.uuid4().hex[:6]    # isolates thread ids across invocations
-                                    # that share one Postgres database
-
-
-# ------------------------------------------------------------------ ledger
 def ledger_init(path):
     c = sqlite3.connect(path, timeout=60)
     c.execute("CREATE TABLE IF NOT EXISTS effects "
@@ -172,14 +69,12 @@ def ledger_init(path):
     c.commit()
     c.close()
 
-
 def ledger_write(path, thread, task):
     c = sqlite3.connect(path, timeout=60)
     c.execute("INSERT INTO effects (thread, task) VALUES (?, ?)",
               (thread, task))
     c.commit()
     c.close()
-
 
 def ledger_thread(path, thread):
     c = sqlite3.connect(path, timeout=60)
@@ -189,8 +84,6 @@ def ledger_thread(path, thread):
     c.close()
     return dict(rows)
 
-
-# --------------------------------------------------------- consumption gate
 class ConsumptionGate:
     """Shared-store CAS on <thread, checkpoint>: SQLite file or Postgres
     table.  claim() is idempotent per process (in-process latch) and raises
@@ -242,20 +135,13 @@ class ConsumptionGate:
                 f"already claimed by another process")
         self._held.add(key)
 
-
 def _thread_of(config):
     return str(((config or {}).get("configurable", {}) or {}).get("thread_id"))
 
-
 def gated_saver_cls(base_cls):
     class GatedSaver(base_cls):
-        _gate = None       # set post-construction
+        _gate = None
 
-        # PRIMARY interposition: the durable-state read that precedes gated
-        # execution.  A returned tuple carrying a pending __interrupt__
-        # write is the consumable parked state; claim it here, in the
-        # calling (main) thread, so a losing process aborts before any node
-        # runs.
         def get_tuple(self, config):
             t = super().get_tuple(config)
             if t is None or self._gate is None:
@@ -264,7 +150,7 @@ def gated_saver_cls(base_cls):
             chans = []
             for w in pend:
                 try:
-                    chans.append(str(w[1]))   # (task_id, channel, value)
+                    chans.append(str(w[1]))
                 except Exception:
                     chans.append(repr(w))
             if os.environ.get("GATE_DEBUG"):
@@ -276,10 +162,6 @@ def gated_saver_cls(base_cls):
                 self._gate.claim(_thread_of(config), ckpt)
             return t
 
-        # SECONDARY latch: same key at the resume journal write.  A winner
-        # re-claims idempotently; a path that somehow reaches the journal
-        # without the read is still caught (at join, i.e. late -- the v1
-        # measurement -- which is why this is secondary, not primary).
         def put_writes(self, config, writes, task_id, *a, **kw):
             channels = []
             resume_seen = False
@@ -302,8 +184,6 @@ def gated_saver_cls(base_cls):
             return super().put_writes(config, writes, task_id, *a, **kw)
     return GatedSaver
 
-
-# ------------------------------------------------------------------ savers
 def make_saver(ctx):
     """Return (saver, closer) for this process, per ctx backend/gate."""
     if ctx.get("pg_dsn"):
@@ -314,8 +194,7 @@ def make_saver(ctx):
                                   prepare_threshold=0, row_factory=dict_row)
         cls = gated_saver_cls(PostgresSaver) if ctx.get("gate") else PostgresSaver
         saver = cls(conn)
-        saver.setup()    # Postgres does not create its schema lazily; without
-                         # this every call fails UndefinedTable ("checkpoints")
+        saver.setup()
         if ctx.get("gate"):
             saver._gate = ConsumptionGate(pg_dsn=ctx["pg_dsn"])
         return saver, conn.close
@@ -325,7 +204,6 @@ def make_saver(ctx):
     if ctx.get("gate"):
         saver._gate = ConsumptionGate(sqlite_path=ctx["claims"])
     return saver, conn.close
-
 
 def build(ctx, thread):
     saver, closer = make_saver(ctx)
@@ -348,10 +226,8 @@ def build(ctx, thread):
     g.add_edge("gate", END)
     return g.compile(checkpointer=saver), closer
 
-
 def _cfg(thread):
     return {"configurable": {"thread_id": thread}}
-
 
 def _invoke(app, payload, thread):
     try:
@@ -359,14 +235,11 @@ def _invoke(app, payload, thread):
     except TypeError:
         return app.invoke(payload, _cfg(thread))
 
-
-# ------------------------------------------------------------ child modes
 def park_main(ctx):
     app, closer = build(ctx, ctx["thread"])
     res = _invoke(app, {"x": 1}, ctx["thread"])
     closer()
     print(json.dumps({"interrupted": "__interrupt__" in res}))
-
 
 def racer_main(ctx):
     app, closer = build(ctx, ctx["thread"])
@@ -385,7 +258,6 @@ def racer_main(ctx):
                       "result": res, "error": err, "error_type": err_type,
                       "dt_ms": round(dt, 1)}, default=str))
 
-
 def single_main(ctx):
     """One resume delivery (used by the sequential and stray arms)."""
     app, closer = build(ctx, ctx["thread"])
@@ -398,14 +270,12 @@ def single_main(ctx):
     print(json.dumps({"result": res, "error": err, "error_type": err_type},
                      default=str))
 
-
 def _spawn(mode, ctx, capture=True):
     env = dict(os.environ, PROBE165_CTX=json.dumps(ctx))
     return subprocess.Popen(
         [sys.executable, os.path.abspath(__file__), mode], env=env,
         stdout=subprocess.PIPE if capture else subprocess.DEVNULL,
         stderr=subprocess.PIPE if capture else subprocess.DEVNULL, text=True)
-
 
 def _last_json(proc, timeout):
     try:
@@ -424,15 +294,12 @@ def _last_json(proc, timeout):
         parsed["_stderr_tail"] = err.strip().splitlines()[-1][:300]
     return parsed
 
-
-# ------------------------------------------------------------ parent arms
 def _fresh_ctx(base, tag, i, gate, pg_dsn):
     d0 = tempfile.mkdtemp(prefix=f"p165_{tag}_{i}_", dir=base)
     thread = f"{RUN_NONCE}-{tag}{i}"
     return {"db": f"{d0}/ckpt.sqlite", "claims": f"{d0}/claims.sqlite",
             "ledger": f"{base}/ledger.sqlite", "thread": thread,
             "gate": gate, "pg_dsn": pg_dsn, "_dir": d0}
-
 
 def run_race(base, tag, value_a, value_b, reps, gate, pg_dsn):
     reps_out = []
@@ -484,7 +351,6 @@ def run_race(base, tag, value_a, value_b, reps, gate, pg_dsn):
         "per_rep": reps_out,
     }
 
-
 def run_single_then(base, tag, gate, pg_dsn, stray_after=False):
     ctx0 = _fresh_ctx(base, tag, 0, gate, pg_dsn)
     thread = ctx0["thread"]
@@ -500,7 +366,6 @@ def run_single_then(base, tag, gate, pg_dsn, stray_after=False):
                 "gate_fires_total": sum(gate_rows.values()),
                 "gate_values_fired": sorted(gate_rows)})
     return out
-
 
 def parent_main(args):
     base = tempfile.mkdtemp(prefix="probe165_")
@@ -589,7 +454,6 @@ def parent_main(args):
          "stable": result["stable"]}, indent=2) + "\n")
     print(f"\nwrote {out}/165_results{suffix}.json and 165_stable{suffix}.json",
           file=sys.stderr)
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

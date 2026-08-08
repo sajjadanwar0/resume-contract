@@ -1,19 +1,4 @@
 #!/usr/bin/env bash
-# Full local validation of the remit-contract package.
-#
-# uv-native. The previous version mixed `python3 -m pip install --user` with a
-# bare `pip install`, which (a) fails outright inside a uv-created venv, since
-# uv omits pip by design, and (b) when it does not fail, installs into system
-# dist-packages rather than the environment under test.
-#
-# The object under test is the WHEEL, not a develop-mode install. That is what
-# the paper claims to evaluate ("one abi3 wheel ships the core with no
-# toolchain on the user's machine"), so `maturin develop` is deliberately not
-# used here -- it produces a different artifact from the one that ships.
-#
-# The venv is dedicated and deliberately NOT the artifact repository's .venv:
-# reproduce.sh resolves probe environments against that tree, and installing
-# LangGraph pins into it would couple two things that must stay independent.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -38,13 +23,7 @@ REMIT_EXH_FORKS=3 REMIT_EXH_CRASHES=2 REMIT_EXH_EXTRAS=2 REMIT_EXH_INVALIDS=2 \
   cargo test -p remit-core --release --test exhaustive_conformance -- --nocapture
 
 echo '== 4/6 build wheel'
-# NOTE: builds into dist-local/, never dist/.
-# dist/ is NOT scratch: envs/langgraph-durable/uv.lock pins
-#   remit_contract-0.1.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-# by path AND sha256 (2aed2cbf...). Deleting or shadowing it breaks
-# reproduce.sh step [3]. That wheel is gitignored, so it is recovered from
-# PyPI -- where it is byte-identical -- not rebuilt:
-#   pip download remit-contract==0.1.0 --no-deps --only-binary=:all: -d dist/
+
 PINNED="dist/remit_contract-0.1.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 if [[ ! -f "$PINNED" ]]; then
   echo "   WARNING: pinned wheel absent -- reproduce.sh step [3] will fail."

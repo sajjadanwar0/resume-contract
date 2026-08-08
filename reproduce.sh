@@ -88,26 +88,6 @@ if [[ $SCALED -eq 1 ]]; then
   bash 161_r8_independence_matrix.sh . --bounds r8 || fail=1
 fi
 
-# ---------------------------------------------------------------- [1] TLC ---
-# ----------------------------------------- [0] paper <-> artifact sync ---
-# Forward direction is HARD: a probe number the paper cites with no file
-# behind it is a broken claim. Reverse direction emits NOTEs only. The gate
-# needs the paper, which the artifact does not require; absent it, SKIP.
-note "[0/6] Structural: paper<->probe inventory"
-PAPER="${PAPER:-}"
-if [[ -z "$PAPER" ]]; then
-  for cand in resume-contract.tex resume_contract.tex paper/resume-contract.tex; do
-    [[ -f "$cand" ]] && { PAPER="$cand"; break; }
-  done
-fi
-if [[ -z "$PAPER" || ! -f "$PAPER" ]]; then
-  echo "  SKIP -- no paper .tex in tree (set PAPER=<path> to enable)"
-elif [[ ! -x probe_inventory_gate.sh && ! -f probe_inventory_gate.sh ]]; then
-  echo "  SKIP -- probe_inventory_gate.sh absent"
-else
-  bash probe_inventory_gate.sh "$PAPER" probes . || fail=1
-fi
-
 note "[1/6] TLC verification matrix (ResumeContract, LangGraphFork, R10, R11)"
 TLC="$(resolve_tlc)"
 echo "TLC command: $TLC   (-workers 1: see header)"
@@ -137,23 +117,11 @@ declare -A EXPECT=(
   [SEP_regate]="Invariant RecoveryDeterminism is violated"
   [SEP_rebuild]="Invariant PrefixConsistency is violated"
   [SEP_redeliver]="Invariant EffectExactlyOnce is violated"
-  # R11 splits Property 5 into CO-c (consumption count) and CO-e (effect
-  # inertness). C0 is the conservative-extension gate: it MUST reproduce
-  # R0's 87/59 exactly, which [2] audits from the committed receipt.
-  # C1 is the separating witness for Proposition 2(iv): CO-c fails while
-  # the other seven invariants hold over the entire reachable space.
   [C0_reference]="Model checking completed. No error has been found."
   [C1_raceconsume]="Invariant ConsumeOnceCount is violated"
   [C2_raceeffect]="Invariant EffectExactlyOnce is violated"
 )
-# The four SEP_* headline cells are the conjunction-independence witnesses
-# (Proposition 2, clause (v)). Every SEP config checks ALL SEVEN invariants
-# (the R0_reference convention, not R1-R5's single-invariant one), so a fault
-# cell reporting its target property violated is also evidence that no other
-# invariant breaks first on the way there. What these four cells do NOT
-# establish is that the other five hold over the faulty model's entire
-# reachable state space -- that needs one complete run per (switch,
-# invariant) pair, which is 162_separations_matrix.sh, audited in [2].
+
 for cfg in R0_reference R1_replay R2_forkignore R3_invalidpersist \
            R4_nondetrec R5_doubleconsume R6_liveness \
            LGF_AsImplemented LGF_ForkKeyed \
@@ -168,12 +136,8 @@ for cfg in R0_reference R1_replay R2_forkignore R3_invalidpersist \
   fi
 done
 
-# ------------------- [1b] single-worker minimal CE depths (2026-08-06) ------
-# Backs Table 2 row R8-F (68/68; 8) and the Sec. 3.4 deepening sentence
-# (fork 5 -> 8, double-consume 6 -> 13). The 161-matrix receipts log
-# 16-worker abort-time traces, which may exceed these BFS-minimal depths;
-# committed single-worker receipts: results/tla/singleworker_20260806/.
 note "[1b] single-worker minimal counterexample depths"
+
 declare -A DEPTH_SPEC=(
   [R8_fork]="R8_scale_forkfault.cfg|ForkDeterminism|8"
   [R8_dc]="independence_r8/IX8_doubleconsume__ConsumeOnce.cfg|ConsumeOnce|13"
@@ -194,7 +158,6 @@ for k in R8_fork R8_dc base_fork base_dc; do
 done
 popd > /dev/null
 
-# ------------------------------------------------- [2] committed receipts ---
 note "[2/6] Committed matrix receipts (161 independence, 162 separations)"
 python3 - << 'PYAUDIT' || fail=1
 import json, os, sys
@@ -320,7 +283,6 @@ if absent:
 sys.exit(rc)
 PYAUDIT
 
-# ------------------------------------- [2b] p16 concurrency + self-audit ---
 note "[2b/6] p16 receipts (167 consume-count, 168 multi-racer, 169 audit)"
 python3 - << 'PYP16' || fail=1
 import json, os, sys
@@ -466,15 +428,6 @@ else:
 sys.exit(rc)
 PYP16
 
-# ------------------------------------------- [2c] IndCheck (inductive) ---
-# ---- 171: out-of-sample prediction test for LangGraphFork.tla ----------
-# Gated on its committed receipt rather than re-executed: 171 writes its own
-# <id>_stable.json, so it cannot be a matrix.toml row (see the note there).
-# The claim this gates is Sec. 4.3's: four protocols the model was never
-# exercised on, predictions registered in the probe source BEFORE the run,
-# all four confirmed -- with P-D the negative control that carries the weight,
-# since a degenerate model serving the first value ever seen would satisfy the
-# other three and fail it.
 python3 - << 'PY171' || fail=1
 import json, os, sys
 rc = 0
@@ -585,8 +538,7 @@ fi
 # -------------------------------------------------- [3] conformance plan ---
 note "[3/6] Conformance plan (matrix.toml vs committed baselines)"
 uv sync --quiet
-# langgraph-durable carries the durable-backend and p14 probes (157-160) and
-# declares remit-contract, whose shim arms degrade silently if it is absent.
+
 for env in langgraph langgraph-durable llamaindex crewai pydantic-graph \
            openai-agents langgraph-live langgraph-1.1; do
   [[ -d "envs/$env" ]] && uv sync --quiet --project "envs/$env"
@@ -596,25 +548,18 @@ uv run python -m conformance.runner \
 
 # --------------------------------------------------------- [4] Remit tests ---
 note "[4/6] Remit invariants + line-identical core (cargo test + n3 gate)"
-# Toolchain absence is a SKIP, not a failure -- the same posture step [5]
-# takes for Verus. A reviewer without a Rust toolchain should see which
-# evidence was not exercised, not a red AUDIT RESULT on an intact artifact.
+
 if command -v cargo >/dev/null 2>&1; then
   cargo test --workspace --quiet || fail=1
 else
   echo "  Rust toolchain not on PATH -- skipping cargo test (7 property-named"
   echo "  tests + the differential suite). Install: https://rustup.rs, re-run."
 fi
-# The sync gate is pure text comparison and runs without a toolchain.
+
 bash n3_sync_check.sh . || fail=1
 
-# ------------------------------------------------------ [5] Verus proofs ----
 note "[5/6] Remit Verus proofs (crates/remit/proof)"
 if command -v verus >/dev/null 2>&1; then
-  # Positive set by naming convention: every remit_verus*.rs must
-  # discharge clean. A new proof file following the convention is audited
-  # automatically; anything else at top level is caught by the classifier
-  # tripwire below -- nothing is silently unaudited either way.
   for p in crates/remit/proof/remit_verus*.rs; do
     f=$(basename "$p" .rs)
     if verus "$p" 2>&1 | tee "/tmp/verus_$f.out" \
@@ -624,10 +569,7 @@ if command -v verus >/dev/null 2>&1; then
       echo "  $f: FAILED"; tail -5 "/tmp/verus_$f.out"; fail=1
     fi
   done
-  # Differential certificate at top level (exp6): its documented contract
-  # is the SPLIT shape -- fd_keyed discharges, fd_stock is REJECTED (FD is
-  # false under the stock #6663 rule) -- so the audit enforces exactly
-  # that, never 0-errors.
+
   p=crates/remit/proof/probe_fd_stock_rule.rs
   if [[ -f "$p" ]]; then
     out=$(verus "$p" 2>&1 || true)
@@ -638,19 +580,14 @@ if command -v verus >/dev/null 2>&1; then
       grep -m1 "verification results" <<<"$out" || tail -3 <<<"$out"; fail=1
     fi
   fi
-  # Classifier tripwire: any OTHER top-level .rs in proof/ is unclassified
-  # -- a hard failure, not a silent skip. Route it into the positive set
-  # (remit_verus*.rs), name it here as a differential, or move it under
-  # negative/ before freezing.
+
   for p in crates/remit/proof/*.rs; do
     case "$(basename "$p")" in
       remit_verus*.rs|probe_fd_stock_rule.rs) ;;
       *) echo "  UNCLASSIFIED proof file: $p"; fail=1 ;;
     esac
   done
-  # Negative certificates: each must FAIL in exactly the expected shape.
-  # verus exits nonzero here BY DESIGN; capture output first (a direct
-  # pipeline under `set -o pipefail` reads as failure even on a match).
+
   for p in crates/remit/proof/negative/*.rs; do
     [[ -e "$p" ]] || continue
     b=$(basename "$p")

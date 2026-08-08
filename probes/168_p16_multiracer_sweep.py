@@ -1,51 +1,6 @@
 #!/usr/bin/env python3
-"""
-168_p16_multiracer_sweep.py  (campaign p16)
-
-Closes the gap Section 9 currently names as open: "the shape of the window
-under more than two racers is open."  Probe 159 establishes that sequential
-consume-once inertness does not compose across processes, at exactly one
-concurrency shape (two racers, spin-barrier start, zero arrival jitter).
-That is an existence result.  A reviewer asked to believe CO "fails under
-concurrency" is entitled to the shape of the failure, not one point on it.
-
-PRE-REGISTERED PREDICTIONS (write these down before running; the mechanism
-account in Sec. 6.6 -- read-decide-write of interrupt consumption with no
-compare-and-swap on either backend -- entails them):
-
-  P1  Duplicate count scales with k.  With k racers and no CAS, the number
-      of gated effect fires should approach k as jitter -> 0, not saturate
-      at 2.  If fires plateau at 2 for k in {4, 8, 16}, the mechanism
-      account is WRONG and something else serializes the third racer:
-      report that, do not bury it.
-  P2  Duplicates fall monotonically as arrival jitter grows past the
-      window width.  The window is the span between a racer's get_tuple
-      read and its consumption write; jitter beyond it should drive fires
-      toward 1.
-  P3  The k=2, jitter=0 cell reproduces probe 159 exactly (fires=2 in every
-      repetition).  This is the internal consistency gate.  If it fails,
-      the harness differs from 159 and no other cell is interpretable.
-
-FALSIFICATION: if P1 fails, the paper must retract "CO fails under
-concurrency" in favor of "CO fails under two-process concurrent delivery"
-and say why the third racer is excluded.
-
-Arms:
-  k in {2, 3, 4, 8, 16} x jitter_ms in {0, 1, 5, 25} x backend in
-  {sqlite, postgres}, N repetitions each (default 10).
-
-Oracle: the same on-disk SQLite effect ledger probe 159 uses -- external to
-the checkpointer database and to every racer's process memory, so a fire is
-counted even if the racer that fired it is killed.
-
-Usage:
-  .venv/bin/python3 probes/168_p16_multiracer_sweep.py
-  .venv/bin/python3 probes/168_p16_multiracer_sweep.py --smoke
-  .venv/bin/python3 probes/168_p16_multiracer_sweep.py \
-      --pg-dsn "postgresql://user@localhost/resume_contract"
-Child modes (argv[1], internal): park | racer
-"""
 import argparse
+from typing import TypedDict
 import json
 import os
 import random
@@ -61,12 +16,10 @@ from pathlib import Path
 REQUIRED_LANGGRAPH = "1.2.9"
 LEDGER_SCHEMA = "CREATE TABLE IF NOT EXISTS fx (id INTEGER PRIMARY KEY, tag TEXT, ts REAL)"
 
-
 def _fail(msg):
     print(json.dumps({"probe_refused": msg, "interpreter": sys.executable}),
           file=sys.stderr)
     sys.exit(3)
-
 
 def _pins():
     pins = {}
@@ -80,7 +33,6 @@ def _pins():
         _fail(f"langgraph {pins.get('langgraph')} != pinned {REQUIRED_LANGGRAPH}")
     return pins
 
-
 def ledger_append(ledger_path, tag):
     """The effect IS the ledger append: one autocommitted INSERT, durable
     before the node returns.  Sec. 5.1's ordering argument, and probe 163's
@@ -91,7 +43,6 @@ def ledger_append(ledger_path, tag):
     con.commit()
     con.close()
 
-
 def ledger_counts(ledger_path):
     con = sqlite3.connect(ledger_path, timeout=30)
     con.execute(LEDGER_SCHEMA)
@@ -99,11 +50,9 @@ def ledger_counts(ledger_path):
     con.close()
     return {t: c for t, c in rows}
 
-
 def build_graph(saver, ledger_path, gate_ms=0):
     from langgraph.graph import StateGraph, START, END
     from langgraph.types import interrupt
-    from typing import TypedDict
 
     class S(TypedDict, total=False):
         x: int
@@ -115,10 +64,6 @@ def build_graph(saver, ledger_path, gate_ms=0):
 
     def gate(state: S) -> S:
         d = interrupt({"approve?": True})
-        # Work the gated node performs before its effect. In deployment this
-        # is the model call or the payment API. The consumption record is not
-        # durable until the superstep joins (probe 165), so this duration is
-        # the hypothesis for the window width: sweep jitter past it.
         if gate_ms:
             time.sleep(gate_ms / 1000.0)
         ledger_append(ledger_path, f"gate:{d}")
@@ -131,7 +76,6 @@ def build_graph(saver, ledger_path, gate_ms=0):
     g.add_edge("pre", "gate")
     g.add_edge("gate", END)
     return g.compile(checkpointer=saver)
-
 
 def open_saver(backend, db, dsn, setup=False):
     """Open a saver. `setup` runs the Postgres schema migration and is done
@@ -151,8 +95,6 @@ def open_saver(backend, db, dsn, setup=False):
         saver.setup()
     return saver, cm
 
-
-# ---------------------------------------------------------------- children
 def child_park(backend, db, dsn, ledger, thread, gate_ms=0):
     saver, cm = open_saver(backend, db, dsn, setup=True)
     try:
@@ -162,7 +104,6 @@ def child_park(backend, db, dsn, ledger, thread, gate_ms=0):
         print(json.dumps({"interrupted": "__interrupt__" in out}))
     finally:
         cm.__exit__(None, None, None)
-
 
 def child_racer(backend, db, dsn, ledger, thread, barrier, jitter_ms, seed,
                 ready=None, gate_ms=0):
@@ -177,8 +118,6 @@ def child_racer(backend, db, dsn, ledger, thread, barrier, jitter_ms, seed,
     single fire and a spurious P3 gate failure.  The parent now waits for
     every racer to announce."""
     from langgraph.types import Command
-    # Expensive setup FIRST: connection establishment and graph compilation
-    # must not sit inside the measured window.
     saver, cm = open_saver(backend, db, dsn, setup=False)
     err = None
     try:
@@ -192,14 +131,12 @@ def child_racer(backend, db, dsn, ledger, thread, barrier, jitter_ms, seed,
             random.seed(seed)
             time.sleep(random.uniform(0, jitter_ms) / 1000.0)
         app.invoke(Command(resume=True), cfg)
-    except Exception as e:                                   # noqa: BLE001
+    except Exception as e:
         err = f"{type(e).__name__}: {e}"
     finally:
         cm.__exit__(None, None, None)
     print(json.dumps({"error": err}))
 
-
-# ------------------------------------------------------------------ parent
 def run_cell(backend, dsn, k, jitter_ms, reps, py, gate_ms=0):
     fires, errors, per_rep = [], 0, []
     for rep in range(reps):
@@ -224,7 +161,6 @@ def run_cell(backend, dsn, k, jitter_ms, reps, py, gate_ms=0):
              os.path.join(tmp, f"ready.{i}"), str(gate_ms)],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in range(k)]
 
-        # Wait for every racer to announce readiness, not a fixed sleep.
         deadline = time.time() + 60
         while time.time() < deadline:
             if all(Path(os.path.join(tmp, f"ready.{i}")).exists()
@@ -256,7 +192,6 @@ def run_cell(backend, dsn, k, jitter_ms, reps, py, gate_ms=0):
             "mean_fires": round(sum(fires) / len(fires), 3),
             "reps_with_duplicate": sum(1 for f in fires if f > 1),
             "racer_errors_total": errors, "per_rep": per_rep}
-
 
 def main():
     if len(sys.argv) > 1 and sys.argv[1] in ("park", "racer"):
@@ -293,7 +228,7 @@ def main():
             import psycopg
             with psycopg.connect(args.pg_dsn, connect_timeout=5) as c:
                 c.execute("SELECT 1")
-        except Exception as e:                                # noqa: BLE001
+        except Exception as e:
             _fail(f"--pg-dsn preflight failed: {type(e).__name__}: {e}. "
                   f"Check, in order: the database exists (createdb "
                   f"resume_contract); the DSN carries credentials your "
@@ -318,25 +253,13 @@ def main():
                       f"dup_reps={cell['reps_with_duplicate']}/{reps}",
                       file=sys.stderr)
 
-    # ---- pre-registered predictions, evaluated mechanically -------------
     by = {(c["backend"], c["k"], c["jitter_ms"]): c for c in cells}
     zero_jitter = [c for c in cells if c["jitter_ms"] == 0]
     p1 = None
     if zero_jitter:
-        # evaluate against every k actually run above 2, not a hardcoded floor,
-        # so --smoke (which caps at k=3) reports a real verdict rather than a
-        # vacuous false.
         big = [c for c in zero_jitter if c["k"] > 2]
         p1 = bool(big) and max(c["max_fires"] for c in big) > 2
         p1_detail = {str(c["k"]): c["max_fires"] for c in zero_jitter}
-    # P2, stated so a FLAT response cannot masquerade as a confirmation.
-    # An earlier revision tested monotone non-increasing (b <= a), which a
-    # perfectly flat line satisfies -- so "jitter had no effect at all"
-    # was being reported as "jitter reduces duplicates". Each k is now
-    # classified declining / flat / rising against a 10% relative band,
-    # and P2 passes only if EVERY k declines. A flat classification at the
-    # widest jitter is the informative outcome: it means the consumption
-    # window is wider than that jitter.
     BAND = 0.10
     p2_by_k, saturation = {}, {}
     for backend in backends:
@@ -357,21 +280,12 @@ def main():
                         c["mean_fires"] / k, 3)
     p2 = (all(v == "declining" for v in p2_by_k.values())
           if p2_by_k else None)
-    # If the response is flat or rising at the widest jitter tested, the
-    # window is at least that wide. This is the load-bearing number.
     flat_or_rising = [k for k, v in p2_by_k.items() if v != "declining"]
     window_lower_bound = max(jitters) if flat_or_rising else None
-    # When the response DOES decline, the sweep has found the edge rather
-    # than a lower bound: report the widest jitter still saturating, which
-    # is the measured window. Reporting null there (an earlier revision)
-    # threw away the only number the sweep exists to produce.
     saturating = [c["jitter_ms"] for c in cells
                   if c["k"] > 1 and c["mean_fires"] / c["k"] >= 0.95]
     window_edge_ms = max(saturating) if saturating else None
 
-    # The P3 consistency gate is only meaningful when the k=2 / jitter=0 cell
-    # was actually run. On a targeted sweep (--ks 16) it is absent, and an
-    # earlier revision reported a spurious GATE FAILED for that.
     gate159 = by.get((backends[0], 2, 0))
     p3 = (bool(gate159["reps_with_duplicate"] == gate159["reps"])
           if gate159 else None)
@@ -417,7 +331,6 @@ def main():
         print("GATE FAILED: k=2 jitter=0 did not reproduce probe 159. "
               "No other cell in this run is interpretable.", file=sys.stderr)
         sys.exit(4)
-
 
 if __name__ == "__main__":
     main()

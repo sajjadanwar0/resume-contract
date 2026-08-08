@@ -1,19 +1,3 @@
-#!/usr/bin/env python3
-"""
-127_p6_langgraph_resume_map.py
-P6 - Alternative-invocation control for #6663: LangGraph's documented
-re-answer pattern is a resume MAP keyed by interrupt id,
-Command(resume={interrupt_id: value}). A sharp reviewer asks whether that
-form escapes the dedup guard that produces the fork violation for the bare
-Command(resume=value) form. This probe answers it on both backends.
-
-  T1  interrupt; resume map {id: True}; then second invocation with resume
-      map {id: False} addressed to the SAME (thread_id, checkpoint_id).
-  T2  same, bare-value control (the pilot's original protocol) for
-      side-by-side comparison in one output.
-
-Backends: InMemorySaver and SqliteSaver.
-"""
 import json
 import os
 import sqlite3
@@ -21,7 +5,6 @@ import tempfile
 import traceback
 from typing import TypedDict
 from importlib.metadata import version
-
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import interrupt, Command
 from langgraph.checkpoint.memory import InMemorySaver
@@ -31,8 +14,8 @@ RESULTS = {
     "langgraph_version": version("langgraph"),
     "langgraph_checkpoint_version": version("langgraph-checkpoint"),
 }
-WORKDIR = tempfile.mkdtemp(prefix="probe127_")
 
+WORKDIR = tempfile.mkdtemp(prefix="probe127_")
 
 def build(saver):
     class S(TypedDict):
@@ -52,7 +35,6 @@ def build(saver):
         .compile(checkpointer=saver)
     )
 
-
 def extract_interrupt_id(r):
     intr = r.get("__interrupt__")
     if not intr:
@@ -62,12 +44,11 @@ def extract_interrupt_id(r):
         v = getattr(item, attr, None)
         if v:
             return v, None
-    # namespace-based fallback (older API shapes)
     ns = getattr(item, "ns", None)
+
     if ns:
         return ns[0] if isinstance(ns, (list, tuple)) else ns, None
     return None, f"interrupt object has no id field: {item!r}"
-
 
 def scenario(saver, tag, use_map):
     app = build(saver)
@@ -100,7 +81,6 @@ def scenario(saver, tag, use_map):
         "violation_second_resume_ignored": not (tv == 1 and fv == 0),
     }
 
-
 def main():
     for backend, mk_saver in [
         ("InMemorySaver", lambda t: InMemorySaver()),
@@ -122,7 +102,6 @@ def main():
             except Exception:
                 RESULTS[key] = {"probe_error": traceback.format_exc()}
     print(json.dumps(RESULTS, indent=2, default=str))
-
 
 if __name__ == "__main__":
     main()

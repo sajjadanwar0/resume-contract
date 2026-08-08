@@ -1,40 +1,4 @@
 #!/usr/bin/env python3
-"""
-158_p14_langgraph_park_kill.py  (campaign p14: park-kill matrix)
-
-Kill location no prior probe covers: SIGKILL of the process while the run is
-PARKED AT THE INTERRUPT awaiting the human -- the canonical durable-HITL crash
-(server dies overnight while an approval is pending).  Probe 133 kills DURING
-execution (inside a task, after a durable write); this probe kills a process
-whose invoke() has already RETURNED with the interrupt, the thread durably
-parked.  The TLA+ module's CrashRecover carries the precondition ~waiting, so
-this location is outside the model's transition relation; the harness must
-therefore cover it empirically (reviewer item F9/M2).
-
-Protocol (all cross-process, fresh interpreter per life):
-  life 1 (mode=park):   invoke to the interrupt on SqliteSaver; write barrier;
-                        sleep; parent SIGKILLs while parked.
-  life 2 (mode=resume): fresh process; get_state (is the interrupt visible?);
-                        invoke(Command(resume=True)).
-  life 3 (mode=stray):  fresh process; Command(resume=False) at the ordinary
-                        address of the now-completed thread (CO).
-
-Oracles: on-disk SQLite effect ledger (survives the kill, read by every life
-and by the parent) + the checkpointer database inspected at kill time.
-
-Verdict fields (stable):
-  interrupt_survives_process_death   park durability: pending interrupt visible
-                                     to a fresh process before any resume
-  eo_prefix_across_park_kill         pre-interrupt effect fired exactly once
-                                     across the kill (ledger total == 1)
-  gate_effect_exactly_once_supplied  gate fired once, with the resumed value
-  pc_prefix_state_preserved          prefix-computed channel visible after
-                                     resume (not rebuilt from initial values)
-  co_stray_inert                     post-completion stray resume adds nothing
-
-Usage:  .venv/bin/python3 probes/158_p14_langgraph_park_kill.py
-Modes (argv[1]): parent (default) | park | resume | stray
-"""
 import json
 import os
 import signal
@@ -52,12 +16,10 @@ REQUIRED_LANGGRAPH = "1.2.9"
 THREAD = "parkkill"
 CFG = {"configurable": {"thread_id": THREAD}}
 
-
 def _fail(msg):
     print(json.dumps({"probe_refused": msg, "interpreter": sys.executable}),
           file=sys.stderr)
     sys.exit(3)
-
 
 _lg = version("langgraph")
 if _lg != REQUIRED_LANGGRAPH and not os.environ.get("PROBE_ALLOW_OFFPIN"):
@@ -66,26 +28,22 @@ if _lg != REQUIRED_LANGGRAPH and not os.environ.get("PROBE_ALLOW_OFFPIN"):
           f"(envs/langgraph-durable), or set PROBE_ALLOW_OFFPIN=1 for a "
           f"non-paper exploratory run.")
 
-from typing import TypedDict                      # noqa: E402
-from langgraph.graph import StateGraph, START, END  # noqa: E402
-from langgraph.types import interrupt, Command      # noqa: E402
-from langgraph.checkpoint.sqlite import SqliteSaver  # noqa: E402
-
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import interrupt, Command
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 class S(TypedDict, total=False):
     x: int
     pre_out: str
     decision: bool
 
-
-# ------------------------------------------------------------------ ledger
 def ledger_init(path):
     c = sqlite3.connect(path, timeout=30)
     c.execute("CREATE TABLE IF NOT EXISTS effects "
               "(n INTEGER PRIMARY KEY AUTOINCREMENT, thread TEXT, task TEXT)")
     c.commit()
     c.close()
-
 
 def ledger_write(path, thread, task):
     c = sqlite3.connect(path, timeout=30)
@@ -94,7 +52,6 @@ def ledger_write(path, thread, task):
     c.commit()
     c.close()
 
-
 def ledger_counts(path):
     c = sqlite3.connect(path, timeout=30)
     rows = c.execute(
@@ -102,7 +59,6 @@ def ledger_counts(path):
         (THREAD,)).fetchall()
     c.close()
     return dict(rows)
-
 
 def checkpoint_rows(ckpt_path):
     c = sqlite3.connect(ckpt_path, timeout=30)
@@ -116,8 +72,6 @@ def checkpoint_rows(ckpt_path):
     c.close()
     return out
 
-
-# ------------------------------------------------------------------ graph
 def build(d):
     conn = sqlite3.connect(d["ckpt"], check_same_thread=False, timeout=30)
     saver = SqliteSaver(conn)
@@ -140,7 +94,6 @@ def build(d):
     g.add_edge("gate", END)
     return g.compile(checkpointer=saver)
 
-
 def _invoke(app, payload):
     """invoke with durability='sync' where supported; record which."""
     try:
@@ -148,16 +101,13 @@ def _invoke(app, payload):
     except TypeError:
         return app.invoke(payload, CFG), "default"
 
-
-# ------------------------------------------------------------------ lives
 def park_main(d):
     app = build(d)
     res, dur = _invoke(app, {"x": 1})
     interrupted = "__interrupt__" in res
     Path(d["ready"]).write_text(json.dumps(
         {"pid": os.getpid(), "interrupted": interrupted, "durability": dur}))
-    time.sleep(600)                      # parked; parent SIGKILLs here
-
+    time.sleep(600)
 
 def resume_main(d):
     app = build(d)
@@ -175,7 +125,6 @@ def resume_main(d):
         "resume_result": res,
     }, default=str))
 
-
 def stray_main(d):
     app = build(d)
     err = None
@@ -185,7 +134,6 @@ def stray_main(d):
     except Exception as e:
         err = f"{type(e).__name__}: {e}"
     print(json.dumps({"stray_result": res, "stray_error": err}, default=str))
-
 
 def _run_mode(mode, env, timeout=180):
     p = subprocess.run([sys.executable, os.path.abspath(__file__), mode],
@@ -201,8 +149,6 @@ def _run_mode(mode, env, timeout=180):
                            if p.stderr.strip() else None)
     return out
 
-
-# ------------------------------------------------------------------ parent
 def parent_main(out_dir):
     d0 = tempfile.mkdtemp(prefix="probe158_")
     d = {"ckpt": f"{d0}/ckpt.sqlite", "ledger": f"{d0}/ledger.sqlite",
@@ -225,7 +171,7 @@ def parent_main(out_dir):
     counts_at_kill = ledger_counts(d["ledger"])
     ckpt_at_kill = checkpoint_rows(d["ckpt"])
 
-    os.kill(victim.pid, signal.SIGKILL)          # the crash: parked, not mid-task
+    os.kill(victim.pid, signal.SIGKILL)
     victim.wait()
     exit_desc = ("SIGKILL" if victim.returncode == -signal.SIGKILL
                  else str(victim.returncode))
@@ -291,7 +237,6 @@ def parent_main(out_dir):
                         "stable": result["stable"]}, indent=2) + "\n")
         print(f"\nwrote {out}/158_results.json and 158_stable.json",
               file=sys.stderr)
-
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "parent"

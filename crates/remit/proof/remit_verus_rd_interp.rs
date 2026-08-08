@@ -1,9 +1,3 @@
-// n2_rd_interp.rs -- NEW EXPERIMENT N2 (part c): RD with an INTERPRETED
-// recovery decision and real inductive proofs. Replaces the shipped
-// congruence pair (both verified with EMPTY bodies in your exp6 run).
-// Verify:  verus n2_rd_interp.rs      Expect: N verified, 0 errors.
-// If an ASSERT fails on your toolchain: SMT-trigger nudge -- report the line.
-// Toolchain: Verus 0.2026.05.03.8b81855 (the paper's pin).
 
 use vstd::prelude::*;
 use vstd::seq::*;
@@ -14,7 +8,6 @@ pub struct DurableLog {
     pub records: Seq<int>,
 }
 
-// Write-set count, in the exact style of your verified count_effect.
 pub open spec fn count_rec(s: Seq<int>, t: int) -> nat
     decreases s.len()
 {
@@ -30,19 +23,15 @@ pub open spec fn contains_rec(s: Seq<int>, t: int) -> bool {
     exists|j: int| #![auto] 0 <= j < s.len() && s[j] == t
 }
 
-/// THE interpreted recovery decision: skip task t iff t is durably recorded.
 pub open spec fn decides_skip(log: DurableLog, t: int) -> bool {
     contains_rec(log.records, t)
 }
 
-/// Adjacent transposition at i -- the #8039 window: the put_writes/put pair
-/// landing in either order.
 pub open spec fn adjacent_swap(a: Seq<int>, b: Seq<int>, i: int) -> bool {
     0 <= i && i + 1 < a.len()
         && b =~= a.update(i, a[i + 1]).update(i + 1, a[i])
 }
 
-// Bridge: positive count iff contained (structural induction).
 proof fn lemma_count_pos_iff_contains(s: Seq<int>, t: int)
     ensures
         count_rec(s, t) > 0 <==> contains_rec(s, t),
@@ -78,7 +67,6 @@ proof fn lemma_count_pos_iff_contains(s: Seq<int>, t: int)
     }
 }
 
-// RD-functional: same log, same decision (now over an interpretation).
 proof fn lemma_rd_functional_interp(a: DurableLog, b: DurableLog)
     requires
         a.records =~= b.records,
@@ -88,7 +76,6 @@ proof fn lemma_rd_functional_interp(a: DurableLog, b: DurableLog)
     assert(a.records == b.records);
 }
 
-// RD-#8039: adjacent transposition invariance, by witness transport.
 proof fn lemma_rd_adjacent_swap(a: DurableLog, b: DurableLog, i: int)
     requires
         adjacent_swap(a.records, b.records, i),
@@ -131,7 +118,6 @@ proof fn lemma_rd_adjacent_swap(a: DurableLog, b: DurableLog, i: int)
     }
 }
 
-// RD-general: equal write-set counts => identical decisions.
 pub open spec fn same_writeset_counts(a: Seq<int>, b: Seq<int>) -> bool {
     forall|t: int| count_rec(a, t) == count_rec(b, t)
 }
@@ -151,4 +137,4 @@ proof fn lemma_rd_writeset(a: DurableLog, b: DurableLog)
 
 fn main() {}
 
-} // verus!
+}
